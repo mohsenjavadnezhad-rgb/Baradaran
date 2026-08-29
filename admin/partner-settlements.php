@@ -11,6 +11,21 @@ if (!isLoggedIn()) { header('Location: login.php'); exit; }
 $payOn     = paymentReady();
 $hasPnrCol = dbHasColumn('customers', 'customer_type');
 
+/* وضعیتِ پیگیریِ هر روشِ تسویه (نقدی/اول ماه/چک) — جدا از payment_status خودِ
+   سفارش‌ها؛ این یک یادداشتِ ساده برای خودِ ادمین است: «این روش را همین الان
+   پیگیری کردم / تمام شد» یا «هنوز در حالِ پیگیری‌ام»، تا هر روش کلیدِ سبزِ
+   خودش را داشته باشد. در settings ذخیره می‌شود، کلیدهای pset_status_<method>؛
+   مقدارِ 'done' یعنی سبز، هرچیزِ دیگر یعنی «در حال پیگیری». */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_toggle_method'])) {
+    $pmKey = preg_replace('/[^a-z_]/', '', (string)$_POST['pset_toggle_method']);
+    if ($pmKey !== '') {
+        $cur = getSettingRaw('pset_status_' . $pmKey, 'progress');
+        setSetting('pset_status_' . $pmKey, $cur === 'done' ? 'progress' : 'done');
+    }
+    header('Location: partner-settlements.php#tsviyeh');
+    exit;
+}
+
 $groups = [];      // customer_id => ['customer' => row, 'orders' => [...], 'debt' => int]
 $grandDebt = 0;
 $methodTotals = []; // payment_method => ['count'=>n, 'debt'=>n]
@@ -90,14 +105,35 @@ require_once __DIR__ . '/layout-top.php';
 </div>
 
 <?php if ($methodTotals): ?>
-<div class="dg-box" style="margin-bottom:1.5rem;">
+<div class="dg-box" id="tsviyeh" style="margin-bottom:1.5rem;">
     <div class="dg-box-hd"><h3><?= icon('credit-card', 'ic-sm') ?> تفکیک بر اساس روشِ تسویه</h3></div>
     <div class="dg-box-bd" style="padding:0.75rem 1rem;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.6rem;">
-            <?php foreach ($methodTotals as $pm => $mt): ?>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:0.55rem 0.75rem;">
-                <span style="display:flex;align-items:center;gap:0.35rem;font-size:0.82rem;color:var(--text-secondary);"><?= icon(paymentIcon($pm), 'ic-sm') ?> <?= h(paymentLabel($pm)) ?> <span style="color:var(--text-muted);font-size:0.72rem;">(<?= $mt['count'] ?>)</span></span>
-                <b style="font-size:0.82rem;color:var(--text-primary);"><?= formatPrice($mt['debt']) ?></b>
+        <?php /* زیرِ هم، نه کنارِ هم (خواستهٔ کاربر) — هر روش ردیفِ مستقلِ خودش را
+                دارد؛ وضعیتِ «در حال پیگیری»/«تسویه شد» یک یادداشتِ دستیِ ادمین
+                است (pset_status_<method> در settings)، جدا از payment_status
+                خودِ سفارش‌ها — چون هدف یادآوریِ «همین الان این روش را پیگیری
+                کردم» است، نه بازتابِ خودکارِ وضعیتِ تک‌تکِ فاکتورها. */ ?>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+            <?php foreach ($methodTotals as $pm => $mt):
+                $pmDone = getSettingRaw('pset_status_' . $pm, 'progress') === 'done';
+            ?>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;<?= $pmDone ? 'border-color:rgba(34,197,94,0.35);' : '' ?>">
+                <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--text-secondary);flex:1 1 auto;">
+                    <?= icon(paymentIcon($pm), 'ic-sm') ?> <b style="color:var(--text-primary);"><?= h(paymentLabel($pm)) ?></b>
+                    <span style="color:var(--text-muted);font-size:0.72rem;">(<?= $mt['count'] ?> فاکتور)</span>
+                    <b style="margin-inline-start:0.5rem;"><?= formatPrice($mt['debt']) ?></b>
+                </span>
+                <span style="display:flex;align-items:center;gap:0.5rem;">
+                    <span class="pay-badge <?= $pmDone ? 'pay-paid' : 'pay-pending' ?>">
+                        <?= icon($pmDone ? 'check-circle' : 'clock', 'ic-sm') ?> <?= $pmDone ? 'تسویه شد' : 'در حال پیگیری' ?>
+                    </span>
+                    <form method="POST" action="partner-settlements.php#tsviyeh">
+                        <input type="hidden" name="pset_toggle_method" value="<?= h($pm) ?>">
+                        <button type="submit" class="btn <?= $pmDone ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
+                            <?= $pmDone ? 'بازگرداندن به در حال پیگیری' : 'ثبتِ تسویه‌شدن' ?>
+                        </button>
+                    </form>
+                </span>
             </div>
             <?php endforeach; ?>
         </div>
