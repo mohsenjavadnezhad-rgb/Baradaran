@@ -210,7 +210,7 @@ $statusLabels = [
                         <?php endif; ?>
                         <?php if ($chqOn && paymentChequeAwaiting($o)): ?>
                         <?php if (empty($o['cheque_received_at'])): ?>
-                        <div style="color:#FBBF24;font-size:0.7rem;margin-top:2px;"><?= icon('receipt', 'ic-sm') ?> چک ثبت شد — بررسی کنید</div>
+                        <div style="color:#FBBF24;font-size:0.7rem;margin-top:2px;"><?= icon('receipt', 'ic-sm') ?> در انتظار دریافت چک</div>
                         <?php else: ?>
                         <div style="color:#4ADE80;font-size:0.7rem;margin-top:2px;"><?= icon('check-circle', 'ic-sm') ?> چک دریافت شد</div>
                         <?php endif; ?>
@@ -242,7 +242,14 @@ $statusLabels = [
                             <input type="hidden" name="cheque_receive_id" value="<?= (int)$o['id'] ?>">
                             <button type="submit" class="btn btn-primary btn-sm">دریافت چک</button>
                         </form>
-                        <?php elseif ($payOn && ($o['payment_status'] ?? '') !== 'paid'): ?>
+                        <?php elseif ($payOn && ($o['payment_status'] ?? '') !== 'paid'
+                                   && !in_array((string)($o['payment_method'] ?? ''), ['cheque', 'partner_month'], true)): ?>
+                        <?php /* چک و پرداختِ اول‌ماه عمداً از این دکمه بیرون‌اند: تسویهٔ واقعی‌شان
+                                (وصول‌شدنِ چک، حساب‌کتابِ ماهانه) در admin/partner-settlements.php
+                                پیگیری می‌شود، نه با یک کلیکِ «پرداخت شد» روی تک‌تک سفارش‌ها اینجا —
+                                خواستهٔ کاربر: خریدِ همکار نباید منتظرِ این تأییدِ اضافه بماند و باید
+                                جلو برود؛ اگر روزی واقعاً لازم شد، «تغییرِ دستیِ وضعیتِ پرداخت» در
+                                admin/order-detail.php هنوز در دسترس است. */ ?>
                         <form method="POST" onsubmit="return confirm('سفارش #<?= (int)$o['id'] ?> به‌عنوان پرداخت‌شده ثبت شود؟');">
                             <input type="hidden" name="pay_order_id" value="<?= (int)$o['id'] ?>">
                             <input type="hidden" name="pay_new_status" value="paid">

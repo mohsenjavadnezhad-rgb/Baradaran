@@ -1128,13 +1128,20 @@ function renderCustomerOrderCard($order) {
             /* چک: همان الگوی کارت‌به‌کارت — راه رسیدن به فرم «ثبت اطلاعات چک»،
                و اگر مدیر «دریافت چک» را زده باشد، نشان سبزِ جداگانه (که با
                payment_status یکی نیست — چک رسیده بودن یعنی وصول‌شدنش، نه). */
-            $lbl = trim((string)($order['cheque_number'] ?? '')) !== '' ? 'پیگیری چک' : 'ثبت اطلاعات چک';
+            $chqRegistered = trim((string)($order['cheque_number'] ?? '')) !== '';
+            $lbl = $chqRegistered ? 'پیگیری چک' : 'ثبت اطلاعات چک';
             $out .= '<div class="account-order-row" style="justify-content:flex-end;">'
                   . '<a href="order-success.php?id=' . $id . '" class="btn btn-secondary btn-sm">'
                   . icon('receipt', 'ic-sm') . ' ' . $lbl . '</a></div>';
             if (!empty($order['cheque_received_at'])) {
                 $out .= '<div class="account-order-row"><span style="color:#4ADE80;font-size:0.78rem;">'
                       . icon('check-circle', 'ic-sm') . ' چک دریافت شد</span></div>';
+            } elseif ($chqRegistered) {
+                /* مشخصات آنلاین ثبت شده ولی اصلِ چک هنوز نرسیده — یادآوریِ صریح، نه
+                   فقط یک وضعیتِ خنثی؛ همان چیزی که کاربر خواسته: «همکار ببیند باید
+                   چک را ارسال کند». */
+                $out .= '<div class="account-order-row"><span style="color:#FBBF24;font-size:0.78rem;">'
+                      . icon('alert', 'ic-sm') . ' باید اصلِ چک را برایمان ارسال/تحویل دهید</span></div>';
             }
         }
     }
