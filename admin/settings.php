@@ -191,6 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
        همین بخش ذخیره شده باشد، پس نبودِ کلید = خاموش. */
     if ($sec === 'pchk') {
         setSetting('partcheck_enabled', isset($_POST['partcheck_enabled']) ? '1' : '0');
+        setSetting('partcheck_require_stock', isset($_POST['partcheck_require_stock']) ? '1' : '0');
         $mp = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['partcheck_min_photos'] ?? '3')));
         setSetting('partcheck_min_photos', (string)max(1, min(8, $mp ?: 3)));
     }
@@ -1335,19 +1336,33 @@ require_once __DIR__ . '/layout-top.php';
 
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
       مشتری پس از سبد خرید به صفحهٔ <b>بررسی عکس قطعه</b> می‌رود و چند عکس از زوایای مختلفِ قطعهٔ
-      خودش می‌فرستد. شما در بخش <a href="part-checks.php">بررسی عکس قطعه</a> عکس‌ها را با کالای سبد
-      مقایسه می‌کنید و همان‌جا موجودی را هم تأیید می‌کنید؛ بعد کلیدِ «ثبت سفارش و پرداخت» برای مشتری
-      باز می‌شود. مشتری همیشه می‌تواند این مرحله را <b>رد کند</b> و مستقیم سفارش بدهد.
+      خودش می‌فرستد (یا این مرحله را رد می‌کند). شما در بخش <a href="part-checks.php">بررسی عکس قطعه</a>
+      عکس‌ها را با کالای سبد مقایسه می‌کنید و همان‌جا موجودی را هم تأیید می‌کنید؛ تا تأیید نکنید، مشتری
+      در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند و کلیدِ «ثبت سفارش و پرداخت» برایش باز نمی‌شود —
+      حتی اگر مرحلهٔ عکس را رد کرده باشد.
     </p>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
       <input type="checkbox" name="partcheck_enabled" id="partcheck_enabled" value="1"
              <?= getSettingRaw('partcheck_enabled', '1') === '1' ? 'checked' : '' ?>
              style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-      <label for="partcheck_enabled" style="margin:0;cursor:pointer;">این مرحله فعال باشد</label>
+      <label for="partcheck_enabled" style="margin:0;cursor:pointer;">این مرحله فعال باشد (بررسی عکس + بررسی موجودی)</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      با برداشتن تیک، صفحهٔ بررسی عکس کنار گذاشته می‌شود و کلیدِ سبد خرید مثل قبل مستقیم به ثبت سفارش می‌رود.
+      با برداشتن تیک، <b>هر دو صفحه</b> (بررسی عکس و در انتظار بررسی موجودی) کاملاً کنار گذاشته می‌شوند و
+      کلیدِ سبد خرید مثل قبل مستقیم به ثبت سفارش و پرداخت می‌رود.
+    </div>
+
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="partcheck_require_stock" id="partcheck_require_stock" value="1"
+             <?= getSettingRaw('partcheck_require_stock', '1') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأییدِ موجودی برای ادامه الزامی باشد</label>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
+      اگر مرحلهٔ بالا فعال بماند ولی این تیک برداشته شود: فقط تأییدِ مطابقتِ عکس کافی است و
+      «در انتظار بررسی موجودی» دیگر مشتری را معطل نمی‌کند — یعنی می‌توانید صفحهٔ بررسی عکس را نگه دارید
+      ولی فقط صفحهٔ در-انتظار-موجودی را بردارید.
     </div>
 
     <div class="form-group ff-cap">

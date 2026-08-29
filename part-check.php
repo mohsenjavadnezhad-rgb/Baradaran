@@ -116,9 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $row      = partCheckCurrent((int)$c['id']);
 $sameCart = $row && ((string)$row['cart_sig'] === $sigNow || (string)$row['cart_sig'] === '');
 $state    = 'form';                                   /* form | pending | approved | rejected */
+$stockReq = partCheckStockRequired();
 if ($row && $sameCart) {
     $state = (string)$row['status'];
-    if ($state === 'approved' && empty($row['stock_ok'])) $state = 'pending';
+    if ($stockReq && $state === 'approved' && empty($row['stock_ok'])) $state = 'pending';
 }
 $imgs     = ($state !== 'form') ? partCheckImages((int)$row['id']) : [];
 $rowProd  = null;

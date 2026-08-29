@@ -797,20 +797,32 @@ function partCheckStatusLabel($status) {
     return $m[(string)$status] ?? (string)$status;
 }
 
+/* آیا الزامِ «تأییدِ موجودی» (نه فقط مطابقتِ عکس) برای رد‌شدن از این مرحله
+   فعال است؟ کلیدِ مستقل از خودِ partCheckOn() — ادمین می‌تواند کلِ مرحله را
+   نگه دارد ولی این الزام را خاموش کند (برگشت به رفتارِ پیش‌از ۲۰۲۶-۰۸-۳۰:
+   تأییدِ مطابقتِ عکس به‌تنهایی کافی بود). پیش‌فرض روشن. */
+function partCheckStockRequired() {
+    return getSettingRaw('partcheck_require_stock', '1') === '1';
+}
+
 /* آیا مشتری می‌تواند از این مرحله بگذرد؟
-   «آری» یعنی درخواستش برای همین سبد هم مطابقتش تأیید شده هم موجودی‌اش —
-   یعنی status='approved' و stock_ok=1، هر دو با هم (خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰:
-   «در انتظار بررسی موجودی» یک گیتِ کاملاً مسدودکننده باشد، بدون راهِ فرار).
+   «آری» یعنی درخواستش برای همین سبد مطابقتش تأیید شده، و — اگر
+   partCheckStockRequired() روشن باشد (پیش‌فرض) — موجودی‌اش هم، یعنی
+   status='approved' و stock_ok=1 با هم (خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰: «در
+   انتظار بررسی موجودی» یک گیتِ کاملاً مسدودکننده باشد، بدون راهِ فرار).
    پیش از این تاریخ، «رد کردنِ مرحله» با یک پرچمِ session بی‌درنگ رد می‌شد —
    آن مسیر حذف شد: حالا رد کردن هم یک ردیفِ part_checks (بدون عکس) می‌سازد و
-   وارد همین صف/گیت می‌شود، پس دیگر بایپس ندارد. */
+   وارد همین صف/گیت می‌شود، پس دیگر بایپس ندارد — مگر اینکه ادمین کلِ مرحله
+   را از partCheckOn() خاموش کند (آن‌وقت این تابع بی‌درنگ true برمی‌گرداند و
+   مشتری از سبد مستقیم به تسویه‌حساب می‌رود). */
 function partCheckPassed($cartItems, $customer = null) {
     if (!partCheckOn()) return true;
     $sig = partCheckCartSig($cartItems);
     $cid = (int)($customer['id'] ?? ($_SESSION['customer_id'] ?? 0));
     $row = partCheckCurrent($cid);
     if (!$row) return false;
-    if ($row['status'] !== 'approved' || empty($row['stock_ok'])) return false;
+    if ($row['status'] !== 'approved') return false;
+    if (partCheckStockRequired() && empty($row['stock_ok'])) return false;
     /* تأییدِ قطعهٔ دیگری به این سبد منتقل نمی‌شود */
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
 }
