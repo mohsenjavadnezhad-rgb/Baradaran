@@ -1,11 +1,12 @@
 <?php
 /* گامِ ۲ از ۴ (سبد → بررسی عکس → بررسی موجودی → ثبت سفارش): «ارسال عکس
-   نمونهٔ قطعه». این صفحه فقط اقدامِ مشتری را می‌گیرد — آپلود یا رد کردن — و
-   نتیجه/انتظار را دیگر خودش نشان نمی‌دهد؛ بلافاصله به stock-check.php
-   می‌فرستد (گامِ ۳)، همان‌جا که مشتری منتظرِ تأییدِ ادمین می‌ماند. تنها
-   حالتی که همین‌جا می‌ماند «رد شد» است، چون باید دوباره عکس بفرستد.
-   ۲۰۲۶-۰۸-۳۰: «رد کردنِ مرحله» دیگر بایپس نیست — یک ردیفِ part_checks
-   (بدون عکس) می‌سازد و مثلِ آپلود وارد صفِ stock-check.php می‌شود.
+   نمونهٔ قطعه». مشتری اینجا آپلود می‌کند یا رد می‌کند و به stock-check.php
+   (گامِ ۳) می‌رود تا در نوبتِ ادمین بماند. اما این صفحه خودش را کاملاً بسته
+   نمی‌کند: تا وقتی نتیجه «approved» نشده، مشتری می‌تواند دوباره به همین‌جا
+   برگردد و نظرش را عوض کند (مثلاً بعد از «رد کردن»، بالأخره عکس بفرستد) —
+   ثبتِ دوبارهٔ عکس همان درخواستِ در-انتظار را جایگزین می‌کند، ردیفِ تازه‌ای
+   نمی‌سازد. فقط «approved» بی‌قیدوشرط از اینجا به stock-check.php می‌رود،
+   چون دیگر چیزی برای تغییر نمانده.
    POST پیش از include هدر انجام می‌شود تا ریدایرکتِ PRG ممکن باشد؛ نامِ فیلدها
    pc_* است تا با handleCartAction() سراسریِ هدر تلاقی نکند. */
 require_once __DIR__ . '/includes/config.php';
@@ -87,11 +88,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             try {
-                $pdo->prepare("INSERT INTO part_checks
-                        (customer_id, product_id, cart_sig, car_info, note, status)
-                        VALUES (?,?,?,?,?, 'pending')")
-                    ->execute([(int)$c['id'], $pid ?: null, $sigNow, mb_substr($car, 0, 160), $note]);
-                $cid = (int)$pdo->lastInsertId();
+                /* اگر همین الان یک ردیفِ «در انتظار» بدونِ نتیجه برای همین سبد هست
+                   (مثلاً قبلاً «رد کردن» زده بود و نظرش عوض شد)، همان را با عکس‌های
+                   تازه به‌روزرسانی می‌کنیم، نه یک ردیفِ تازهٔ جدا — وگرنه ادمین دو
+                   درخواستِ بازِ همزمان برای یک سبد می‌دید. */
+                $curRow = partCheckCurrent((int)$c['id']);
+                $reuse  = $curRow && (string)$curRow['status'] === 'pending'
+                        && ((string)$curRow['cart_sig'] === $sigNow || (string)$curRow['cart_sig'] === '');
+                if ($reuse) {
+                    $cid = (int)$curRow['id'];
+                    $pdo->prepare("UPDATE part_checks SET product_id=?, cart_sig=?, car_info=?, note=? WHERE id=?")
+                        ->execute([$pid ?: null, $sigNow, mb_substr($car, 0, 160), $note, $cid]);
+                    foreach (partCheckImages($cid) as $oi) {
+                        $op = __DIR__ . '/uploads/partchecks/' . basename((string)$oi['image']);
+                        if (is_file($op)) @unlink($op);
+                    }
+                    $pdo->prepare("DELETE FROM part_check_images WHERE check_id=?")->execute([$cid]);
+                } else {
+                    $pdo->prepare("INSERT INTO part_checks
+                            (customer_id, product_id, cart_sig, car_info, note, status)
+                            VALUES (?,?,?,?,?, 'pending')")
+                        ->execute([(int)$c['id'], $pid ?: null, $sigNow, mb_substr($car, 0, 160), $note]);
+                    $cid = (int)$pdo->lastInsertId();
+                }
                 $ins = $pdo->prepare("INSERT INTO part_check_images (check_id, image, sort_order) VALUES (?,?,?)");
                 foreach ($files as $i => $f) $ins->execute([$cid, $f, $i]);
                 redirect('stock-check.php?sent=1');
@@ -106,20 +125,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* وضعیت فعلی — این صفحه فقط دو حالت را خودش نشان می‌دهد: «form» (چیزی
-   نساخته یا سبد عوض شده) و «rejected» (باید دوباره بفرستد). هر ردیفِ
-   pending/approved (یعنی مشتری اقدامش را کرده و فقط منتظرِ ادمین است)
-   بلافاصله به stock-check.php می‌رود — آن صفحه اینها را نشان می‌دهد. */
+/* وضعیت فعلی. تنها حالتی که از این صفحه بی‌قیدوشرط بیرون می‌رود «approved»
+   است — آن‌جا دیگر واقعاً چیزی برای تغییر نمانده، نتیجه در stock-check.php
+   است. «pending» عمداً *نمی‌رود* — تجربهٔ واقعی نشان داد اگر مشتری یک‌بار
+   «رد کردن» زده باشد و بعد بخواهد نظرش را عوض کند و عکس بفرستد، دیگر هیچ
+   راهی به این صفحه نداشت (همیشه به stock-check.php پرت می‌شد؛ «چرا نمیاره،
+   میپره به بررسی موجودی»). حالا وقتی pending است هم فرمِ آپلود و هم جعبهٔ
+   ردکردن این‌جا می‌مانند؛ ثبتِ دوبارهٔ عکس همان ردیفِ در-انتظار را جایگزین
+   می‌کند (بالاتر)، نه یک ردیفِ تکراری. */
 $row      = partCheckCurrent((int)$c['id']);
 $sameCart = $row && ((string)$row['cart_sig'] === $sigNow || (string)$row['cart_sig'] === '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $row && $sameCart
-    && in_array((string)$row['status'], ['pending', 'approved'], true)) {
+    && (string)$row['status'] === 'approved') {
     redirect('stock-check.php');
 }
 
-$state = ($row && $sameCart) ? (string)$row['status'] : 'form'; /* form | rejected (فقط این دو اینجا رندر می‌شوند) */
-$imgs     = ($state === 'rejected') ? partCheckImages((int)$row['id']) : [];
+$state = ($row && $sameCart) ? (string)$row['status'] : 'form'; /* form | pending | rejected — approved از بالا رد شد */
+$imgs     = ($state !== 'form') ? partCheckImages((int)$row['id']) : [];
 $rowProd  = null;
 if ($row && !empty($row['product_id'])) {
     try {
@@ -131,8 +154,10 @@ if ($row && !empty($row['product_id'])) {
 
 /* فرمِ آپلود (و کنارش، کلیدِ ردکردنِ مرحله) فقط در همین حالت‌ها دیده می‌شود؛
    یک متغیر مشترک تا هم بالای صفحه (جعبهٔ ردکردن) هم پایین (خودِ فرم) از یک
-   شرط بخوانند و هیچ‌وقت با هم واگرا نشوند. */
-$showUploadForm = ($state === 'form' || $state === 'rejected' || ($row && !$sameCart));
+   شرط بخوانند و هیچ‌وقت با هم واگرا نشوند. «pending» هم اینجاست — مشتری اگر
+   نظرش عوض شود می‌تواند همین‌جا عکس بفرستد (یا دوباره) بدونِ گیرکردن در
+   stock-check.php. */
+$showUploadForm = ($state === 'form' || $state === 'pending' || $state === 'rejected' || ($row && !$sameCart));
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -194,8 +219,17 @@ require_once __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <?php /* pending/approved دیگر اینجا رندر نمی‌شوند — بالاتر، پیش از
-            require_once header.php، به stock-check.php ریدایرکت شده‌اند. */ ?>
+    <?php /* approved دیگر اینجا رندر نمی‌شود — بالاتر، پیش از require_once
+            header.php، به stock-check.php ریدایرکت شده. «pending» را اینجا
+            نگه داشتیم (بالا توضیح داده شد)، فقط یک یادآوریِ کوتاه که یک
+            درخواستِ باز دارد و می‌تواند صبر کند یا عکسِ تازه بفرستد. */ ?>
+    <?php if ($state === 'pending'): ?>
+    <div class="flash flash-success">
+        <?= icon('clock', 'ic-sm') ?> شما یک درخواستِ «در انتظار بررسی» برای همین سبد دارید.
+        می‌توانید صبر کنید (<a href="stock-check.php">پیگیریِ وضعیت</a>) یا اگر نظرتان عوض شده، همین‌جا عکسِ تازه بفرستید — جایگزینِ درخواستِ قبلی می‌شود.
+    </div>
+    <?php endif; ?>
+
     <?php if ($state === 'rejected'): ?>
     <div class="pchk-panel is-no">
         <div class="pchk-panel-head">
