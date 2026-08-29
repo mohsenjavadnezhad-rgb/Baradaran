@@ -1,0 +1,14 @@
+drwx--x---    9 1012       992              4096 Aug  8 12:32 .
+drwx--x---    9 1012       992              4096 Aug  8 12:32 ..
+-rw-r--r--    1 1012       yadaki             18 Apr 30  2024 .bash_logout
+-rw-r--r--    1 1012       yadaki            141 Apr 30  2024 .bash_profile
+-rw-r--r--    1 1012       yadaki            492 Apr 30  2024 .bashrc
+drwxrwx---    2 1012       991              4096 Aug  9 00:13 .php
+-rw-r-----    1 1012       12                106 Aug  8 12:31 .shadow
+drwxrwx--x    2 1012       12               4096 Aug  8 12:31 .spamassassin
+drwx------    4 1012       yadaki           4096 Aug  8 12:32 .trash
+drwxrwx---    3 1012       12               4096 Aug  8 12:31 Maildir
+drwx--x--x    3 1012       yadaki           4096 Aug  8 12:31 domains
+drwxrwx---    3 1012       12               4096 Aug  8 12:31 imap
+lrwxrwxrwx    1 1012       yadaki             32 Aug  8 12:31 public_html -> ./domains/yadakii.ir/public_html
+drwx------    2 1012       yadaki           4096 Aug  9 07:45 tmp

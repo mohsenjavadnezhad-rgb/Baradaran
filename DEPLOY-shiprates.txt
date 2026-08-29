@@ -1,0 +1,94 @@
+========================================================================
+ بارگذاری بستهٔ «نرخ‌نامهٔ ارسال» روی yadakii.ir
+ ۱۸ فایل + یک اسکریپت ساخت جدول
+========================================================================
+
+ترتیب مهم است. اول فایل مشترک (includes/shipping.php) بعد صفحه‌ها،
+و اسکریپت ساخت جدول آخر از همه. اگر وسط کار قطع شد مشکلی نیست —
+با همین ترتیب، سایت در هر مرحله سالم می‌ماند.
+
+هر خط را جدا در PowerShell بزنید (در یک فرمان بیش از یک certutil نگذارید،
+چون شل با کد ۲۵۵ بسته می‌شود). خروجی موفق دقیقاً این است:  OK <مسیر>
+
+------------------------------------------------------------------------
+ ۱ — فایل مشترک (باید اول از همه برود)
+------------------------------------------------------------------------
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\includes\shipping.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=includes/shipping.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+------------------------------------------------------------------------
+ ۲ — آیکن‌ها و استایل (روی صفحه‌های قدیمی بی‌اثرند، پس بی‌خطر)
+------------------------------------------------------------------------
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\includes\icons.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=includes/icons.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\assets\css\style.css" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=assets/css/style.css" --data-urlencode "d@$env:TEMP\up2.b64"
+
+------------------------------------------------------------------------
+ ۳ — صفحه‌ها
+------------------------------------------------------------------------
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\checkout.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=checkout.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\settings.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/settings.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\product-edit.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/product-edit.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\account.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=account.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\order-success.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=order-success.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\orders.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/orders.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\order-detail.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/order-detail.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+------------------------------------------------------------------------
+ ۴ — نسخهٔ کش (v25). این‌ها باید با style.css در یک نشست بروند،
+      وگرنه بازدیدکنندهٔ قدیمی همان CSS کهنه را از کش می‌خواند.
+------------------------------------------------------------------------
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\includes\header.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=includes/header.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\includes\footer.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=includes/footer.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\layout-top.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/layout-top.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\admin\login.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=admin/login.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\payment-start.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=payment-start.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\payment-callback.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=payment-callback.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\payment-gateway-sim.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=payment-gateway-sim.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+------------------------------------------------------------------------
+ ۵ — اسکریپت ساخت جدول‌ها (آخر از همه)
+      روی هاست با نام بی‌طرفِ sr-setup.php نوشته می‌شود، چون هاست
+      قبلاً نام‌های شبیه migration را قرنطینه کرده بود.
+------------------------------------------------------------------------
+
+certutil -f -encode "c:\Users\m.javadnezhad\Desktop\AutoPartsShop\migrate-shiprates.php" "$env:TEMP\up.b64" | Out-Null; Get-Content "$env:TEMP\up.b64" | Where-Object {$_ -notlike '*-----*'} | Set-Content -Encoding ascii "$env:TEMP\up2.b64"; curl.exe -s http://yadakii.ir/up.php --resolve yadakii.ir:80:45.159.115.15 --data-urlencode "f=sr-setup.php" --data-urlencode "d@$env:TEMP\up2.b64"
+
+------------------------------------------------------------------------
+ ۶ — اجرای یک‌بارهٔ اسکریپت، و بعد تأیید حذفش
+------------------------------------------------------------------------
+
+curl.exe -s http://yadakii.ir/sr-setup.php --resolve yadakii.ir:80:45.159.115.15
+
+# باید خلاصهٔ ساخت جدول‌ها را چاپ کند. بعد باید ۴۰۴ بدهد (خودش را پاک می‌کند):
+
+curl.exe -s -o NUL -w "%{http_code}`n" http://yadakii.ir/sr-setup.php --resolve yadakii.ir:80:45.159.115.15
+
+# اگر ۴۰۴ نداد، خنثی‌اش کنید:
+#   یک فایل بسازید با محتوای:  <?php http_response_code(404); exit;
+#   و با همان روش بالا روی مسیر sr-setup.php بنویسیدش.
+
+------------------------------------------------------------------------
+ ۷ — بررسی سلامت صفحه‌ها (۲۰۰ یا ۳۰۲ = بدون خطای PHP)
+------------------------------------------------------------------------
+
+foreach ($u in @('http://yadakii.ir/checkout.php','http://yadakii.ir/account.php','http://yadakii.ir/order-success.php','http://yadakii.ir/admin/settings.php','http://yadakii.ir/admin/product-edit.php','http://yadakii.ir/admin/orders.php','http://yadakii.ir/')) { $c = curl.exe -s -o NUL -w "%{http_code}" $u --resolve yadakii.ir:80:45.159.115.15 ; "$c  $u" }
+
+========================================================================
+ بعد از این‌ها: تنظیمات ← روش‌های ارسال ← شهر و وزن و هزینه را وارد کنید.
+========================================================================

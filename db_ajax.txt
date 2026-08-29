@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="vue-app">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Evolution | DirectAdmin</title>
+        <link
+            id="favicon"
+            rel="shortcut icon"
+            href="/evo/assets/favicon.CDLA4ANV.png"
+        />
+        <style>
+            @layer reset, legacy, elements, util, important;
+            
+            body.--preloader {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+                height: 100dvh;
+                display: grid;
+                place-content: center;
+            }
+            
+            #root[v-cloak] {
+                color: #0A6DAA;
+            }
+            
+            #root[v-cloak],
+            #root[v-cloak] div {
+                box-sizing: border-box;
+            }
+            
+            #root[v-cloak] {
+                display: inline-block;
+                position: relative;
+                width: 80px;
+                height: 80px;
+            }
+            
+            #root[v-cloak] div {
+                box-sizing: border-box;
+                display: block;
+                position: absolute;
+                width: 96px;
+                height: 96px;
+                margin: 8px;
+                border: 8px solid currentColor;
+                border-radius: 50%;
+                animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                border-color: currentColor transparent transparent transparent;
+            }
+            
+            #root[v-cloak] div:nth-child(1) {
+                animation-delay: -0.45s;
+            }
+            
+            #root[v-cloak] div:nth-child(2) {
+                animation-delay: -0.3s;
+            }
+            
+            #root[v-cloak] div:nth-child(3) {
+                animation-delay: -0.15s;
+            }
+            
+            @keyframes lds-ring {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            
+            :root[data-mode="dark"] body.--preloader {
+                    background-color: #18181b;
+                }
+        </style>
+      <script type="module" crossorigin src="/evo/index.CJHYw-6N.js"></script>
+      <link rel="stylesheet" crossorigin href="/evo/assets/index.BW9vsWXI.css">
+    </head>
+    <body class="--preloader">
+        <div id="root" v-cloak>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        
+        <div id="foot">
+            <div id="portal-targets">
+                <div id="dialog-host" class="dialog-host"></div>
+                <div id="overlay-host" class="overlay-host"></div>
+                <div id="tether-host" class="tether-host"></div>
+            </div>
+        </div>
+    </body>
+</html>

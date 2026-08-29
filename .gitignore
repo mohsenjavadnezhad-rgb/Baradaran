@@ -1,49 +1,9 @@
-# این ریپو با «فهرستِ سفید» ساخته شده: پیش‌فرض همه‌چیز نادیده گرفته می‌شود و
-# فقط فایل‌های واقعیِ سایت زیر آگاهانه دوباره اضافه می‌شوند. علتش: پوشهٔ کار
-# پر از اسکریپت‌های یک‌بارمصرفِ توسعه/مهاجرت/دیباگ بود (+۱۵۰ فایل) که چندتاشان
-# رمزِ واقعیِ دیتابیس یا رمزِ پنلِ ادمین را داخلشان داشتند (مثل server-config.php
-# و reset-admin.php) — لیست‌کردنِ تک‌تکشان با risk بالا همراه بود، پس رویکرد
-# برعکس شد: هیچ‌چیز پیش‌فرض داخل نمی‌رود مگر این‌که زیر صراحتاً اجازه داده شود.
-/*
-
-!.gitignore
-!.htaccess
-!database.sql
-!home.php
-!up.php
-
-!index.php
-!banners.php
-!shop.php
-!parts.php
-!category.php
-!product.php
-!cart.php
-!checkout.php
-!order-success.php
-!part-check.php
-!payment-start.php
-!payment-callback.php
-!payment-gateway-sim.php
-!preinvoice.php
-!terms.php
-!search.php
-!search-ajax.php
-!account.php
-!login.php
-!logout.php
-!orders-past.php
-!review-submit.php
-
-!admin/
-!assets/
-!includes/
-!uploads/
-
-# رمزِ واقعیِ دیتابیس اینجاست — includes/ بالا اجازه داده شد ولی همین یک فایل
-# دوباره نادیده گرفته می‌شود؛ نمونه‌اش در includes/config.example.php است.
-includes/config.php
-
-# فایل‌های سیستم‌عامل/ویرایشگر که ممکن است بعداً پیدا شوند
+# به‌درخواستِ صریحِ کاربر: همه‌چیزِ سایت آپلود می‌شود، فقط نویز سیستم‌عامل/
+# ویرایشگر نادیده گرفته می‌شود. توجه: این یعنی رمزِ واقعیِ دیتابیس
+# (includes/config.php، server-config.php) و رمزِ پنلِ ادمین (reset-admin.php)
+# هم در ریپو می‌مانند.
 Thumbs.db
 .DS_Store
+
+# تنظیماتِ محلیِ خودِ ابزار Claude Code — جزوِ اطلاعاتِ سایت نیست
+.claude/
