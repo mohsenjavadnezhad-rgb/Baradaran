@@ -454,11 +454,13 @@ function paymentC2cAwaiting(array $order) {
 }
 
 /* ---------- چک: ثبتِ اطلاعات توسط همکار و «دریافت چک» توسط مدیر ----------
-   دقیقاً هم‌الگوی کارت‌به‌کارت بالا: مشتری (همکار) پس از ثبت سفارش، در همان
-   صفحهٔ order-success.php اطلاعات چک را می‌گوید؛ سفارش «در انتظار بررسی چک»
-   می‌ماند. تیکِ «دریافت چک» مدیر با «پرداخت شد» یکی نیست — چک رسیده‌بودن به
-   معنیِ وصول‌شدنش نیست؛ برای «پرداخت شد» همان دکمهٔ عمومیِ paymentMarkPaid
-   جداگانه در ادمین می‌ماند. */
+   دقیقاً هم‌الگوی کارت‌به‌کارت بالا: مشتری (همکار) پیش از ثبت سفارش، در همان
+   صفحهٔ checkout.php اطلاعات چک را می‌گوید (بانک، سریال، تاریخ، مبلغ، در وجه،
+   شناسهٔ صیاد)؛ سفارش «در انتظار بررسی چک» می‌ماند. تیکِ «دریافت چک» مدیر با
+   «پرداخت شد» یکی نیست — چک رسیده‌بودن به معنیِ وصول‌شدنش نیست؛ برای «پرداخت
+   شد» همان دکمهٔ عمومیِ paymentMarkPaid جداگانه در ادمین می‌ماند.
+   2026-08-29: با تصمیم تازهٔ کاربر این فرم برگشت (پیش‌تر از ۲۰۲۶-۰۸-۳۰ برداشته
+   شده بود) و فیلدِ «در وجه» هم تازه اضافه شده است. */
 function paymentChequeReady() {
     if (isset($GLOBALS['__pay_cheque'])) return $GLOBALS['__pay_cheque'];
     $GLOBALS['__pay_cheque'] = paymentReady() && dbHasColumn('orders', 'cheque_number');
@@ -471,17 +473,20 @@ function paymentChequeClean(array $in) {
         'number'    => trim((string)($in['number'] ?? '')),
         'date'      => trim((string)($in['date'] ?? '')),
         'amount'    => (int)preg_replace('/\D+/', '', faToLatinDigits((string)($in['amount'] ?? ''))),
+        'payee'     => trim((string)($in['payee'] ?? '')),
         'sayad'     => trim((string)($in['sayad'] ?? '')),
         'error'     => '',
     ];
     if ($out['bank'] === '')          $out['error'] = 'نام بانک را وارد کنید.';
-    elseif ($out['number'] === '')    $out['error'] = 'شمارهٔ چک را وارد کنید.';
+    elseif ($out['number'] === '')    $out['error'] = 'سریال چک را وارد کنید.';
     elseif ($out['date'] === '')      $out['error'] = 'تاریخ چک را وارد کنید.';
     elseif ($out['amount'] <= 0)      $out['error'] = 'مبلغ چک را وارد کنید.';
+    elseif ($out['payee'] === '')     $out['error'] = 'در وجهِ چک را وارد کنید.';
 
     if (mb_strlen($out['bank'])   > 120) $out['bank']   = mb_substr($out['bank'], 0, 120);
     if (mb_strlen($out['number']) > 60)  $out['number'] = mb_substr($out['number'], 0, 60);
     if (mb_strlen($out['date'])   > 40)  $out['date']   = mb_substr($out['date'], 0, 40);
+    if (mb_strlen($out['payee'])  > 120) $out['payee']  = mb_substr($out['payee'], 0, 120);
     if (mb_strlen($out['sayad'])  > 60)  $out['sayad']  = mb_substr($out['sayad'], 0, 60);
     return $out;
 }
@@ -493,12 +498,21 @@ function paymentChequeSave($orderId, array $in) {
     $v = paymentChequeClean($in);
     if ($v['error'] !== '') return $v['error'];
 
+    /* ستونِ cheque_payee ممکن است روی نصب‌های قدیمی‌تر (پیش از این تغییر) هنوز
+       مهاجرت نشده باشد؛ گارد می‌شود تا ثبتِ سفارش روی چنین نصبی 500 نگیرد —
+       بقیهٔ فیلدهای چک همچنان ذخیره می‌شوند. */
+    $payeeOn = dbHasColumn('orders', 'cheque_payee');
+    $sql = "UPDATE orders SET cheque_bank=?, cheque_number=?, cheque_date=?, cheque_amount=?"
+         . ($payeeOn ? ", cheque_payee=?" : "")
+         . ", cheque_sayad=?, cheque_reported_at=NOW(), payment_status='pending'
+           WHERE id=? AND payment_method='cheque' AND payment_status <> 'paid'";
+    $vals = [$v['bank'], $v['number'], $v['date'], $v['amount']];
+    if ($payeeOn) $vals[] = $v['payee'];
+    $vals[] = $v['sayad'];
+    $vals[] = (int)$orderId;
+
     try {
-        $pdo->prepare("UPDATE orders
-                       SET cheque_bank=?, cheque_number=?, cheque_date=?, cheque_amount=?, cheque_sayad=?,
-                           cheque_reported_at=NOW(), payment_status='pending'
-                       WHERE id=? AND payment_method='cheque' AND payment_status <> 'paid'")
-            ->execute([$v['bank'], $v['number'], $v['date'], $v['amount'], $v['sayad'], (int)$orderId]);
+        $pdo->prepare($sql)->execute($vals);
         return '';
     } catch (Throwable $e) {
         paymentLog("cheque-save failed order=$orderId: " . $e->getMessage());
@@ -506,11 +520,7 @@ function paymentChequeSave($orderId, array $in) {
     }
 }
 
-/* آیا این سفارش منتظر دریافتِ فیزیکیِ چک است؟ (نشانِ صف در فهرست ادمین).
-   2026-08-30: دیگر به cheque_number گره نیست — فرمِ ثبتِ بانک/شماره/تاریخ/
-   مبلغ از تسویه‌حساب و صفحهٔ سفارش برداشته شد (خواستهٔ کاربر: فقط یک پیغامِ
-   تأییدِ سفارش + مهلتِ ارسالِ اصلِ چک، بدون فرم)، پس دیگر هیچ سفارشِ چکی‌ای
-   cheque_number پر نمی‌کند — همان لحظهٔ ثبتِ سفارش «منتظرِ دریافت» است. */
+/* آیا این سفارش منتظر دریافتِ فیزیکیِ چک است؟ (نشانِ صف در فهرست ادمین) */
 function paymentChequeAwaiting(array $order) {
     return (string)($order['payment_method'] ?? '') === 'cheque'
         && (string)($order['payment_status'] ?? '') !== 'paid';
