@@ -637,11 +637,11 @@ if ($pchk && !empty($pchk['product_id'])) {
             <?php endif; ?>
 
             <?php if ($chqOn && $payMethod === 'cheque'): ?>
-            <?php /* از ۲۰۲۶-۰۸-۳۰ همکار دیگر بانک/شماره/تاریخ/مبلغِ چک را تایپ نمی‌کند
-                    (خواستهٔ کاربر) — فقط اصلِ چک باید فیزیکی برسد. پس این جعبه دیگر
-                    وابسته به cheque_number نیست؛ دکمهٔ «دریافت چک» همیشه در دسترس
-                    است. اگر سفارش قدیمی‌تر از این تغییر باشد و آن ستون‌ها را دارد،
-                    همچنان به‌عنوان اطلاعاتِ تاریخی نشان داده می‌شود. */ ?>
+            <?php /* از ۲۰۲۶-۰۸-۲۹ همکار دوباره بانک/سریال/تاریخ/مبلغ/در وجه/شناسهٔ
+                    صیادِ چک را در تسویه‌حساب تایپ می‌کند (خواستهٔ تازهٔ کاربر). دکمهٔ
+                    «دریافت چک» هم‌چنان همیشه در دسترس است، چون رسیدنِ فیزیکیِ چک
+                    مستقل از پرشدنِ این فرم است (سفارش‌های قدیمی‌تر که این ستون‌ها
+                    را ندارند هم بدون خطا کار می‌کنند). */ ?>
             <?php $hasChq = trim((string)($order['cheque_number'] ?? '')) !== ''; ?>
             <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
                 <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</h4>
@@ -653,13 +653,16 @@ if ($pchk && !empty($pchk['product_id'])) {
                 <?php if ($hasChq): ?>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.75rem 1.5rem;margin-bottom:0.75rem;">
                     <p style="margin:0;"><strong>بانک:</strong> <?= h((string)$order['cheque_bank']) ?></p>
-                    <p style="margin:0;"><strong>شمارهٔ چک:</strong> <span dir="ltr"><?= h((string)$order['cheque_number']) ?></span></p>
+                    <p style="margin:0;"><strong>سریال چک:</strong> <span dir="ltr"><?= h((string)$order['cheque_number']) ?></span></p>
                     <p style="margin:0;"><strong>تاریخ چک:</strong> <?= h((string)$order['cheque_date']) ?></p>
                     <p style="margin:0;"><strong>مبلغ چک:</strong> <?= formatPrice((int)($order['cheque_amount'] ?? 0)) ?>
                         <?php if ((int)($order['cheque_amount'] ?? 0) !== (int)$order['total_amount']): ?>
                         <span style="color:#FBBF24;font-size:0.78rem;">(مبلغ سفارش: <?= formatPrice((int)$order['total_amount']) ?>)</span>
                         <?php endif; ?>
                     </p>
+                    <?php if (trim((string)($order['cheque_payee'] ?? '')) !== ''): ?>
+                    <p style="margin:0;"><strong>در وجه:</strong> <?= h((string)$order['cheque_payee']) ?></p>
+                    <?php endif; ?>
                     <?php if (trim((string)($order['cheque_sayad'] ?? '')) !== ''): ?>
                     <p style="margin:0;"><strong>شناسهٔ صیاد:</strong> <span dir="ltr"><?= h((string)$order['cheque_sayad']) ?></span></p>
                     <?php endif; ?>
