@@ -165,11 +165,13 @@ require_once __DIR__ . '/includes/header.php';
 <div class="container">
     <h1 class="page-title"><?= icon('camera') ?> بررسی عکس قطعه پیش از خرید</h1>
 
-    <?php /* چهار‌گامِ خرید — مشتری بداند کجای مسیر است (۲۰۲۶-۰۸-۳۰: بررسیِ
-            موجودی گامِ مستقلِ خودش را گرفت) */ ?>
+    <?php /* چهار‌گامِ خرید — مشتری بداند کجای مسیر است. دو گامِ اول (سبد و
+            همین صفحه) قابلِ کلیک‌اند تا مشتری بتواند عقب برود؛ دو گامِ بعدی
+            صرفاً نشانگرند (بی‌آنکه از گیت رد شده باشد، رفتن به آن‌ها بی‌معناست
+            و برمی‌گردد). */ ?>
     <ol class="pchk-steps">
-        <li class="is-done"><span>۱</span> سبد خرید</li>
-        <li class="is-now"><span>۲</span> بررسی عکس قطعه</li>
+        <li class="is-done"><a href="cart.php"><span>۱</span> سبد خرید</a></li>
+        <li class="is-now"><a href="part-check.php"><span>۲</span> بررسی عکس قطعه</a></li>
         <li><span>۳</span> بررسی موجودی</li>
         <li><span>۴</span> ثبت سفارش و پرداخت</li>
     </ol>

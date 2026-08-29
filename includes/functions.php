@@ -744,8 +744,10 @@ function partCheckOn() {
 
 /* حداقل تعداد عکس — پیش‌فرضِ خواستهٔ مدیر: سه زاویهٔ مختلف */
 function partCheckMinPhotos() {
-    $n = (int)faToLatinDigits((string)getSettingRaw('partcheck_min_photos', '3'));
-    return max(1, min(8, $n ?: 3));
+    /* پیش‌فرض ۱ (خواستهٔ کاربر: «برای سه تا عکس اجبار نباشه») — ادمین همچنان
+       می‌تواند در تنظیمات عددِ بالاتر بگذارد. */
+    $n = (int)faToLatinDigits((string)getSettingRaw('partcheck_min_photos', '1'));
+    return max(1, min(8, $n ?: 1));
 }
 
 /* امضای کالاهای سبد (فقط شناسهٔ محصول‌ها، نه تعداد) — کم/زیادکردنِ تعداد

@@ -49,9 +49,11 @@ require_once __DIR__ . '/includes/header.php';
 <div class="container">
     <h1 class="page-title"><?= icon('shield-check') ?> بررسی موجودی</h1>
 
+    <?php /* گامِ ۱ و ۲ قابلِ کلیک‌اند تا مشتری بتواند عقب برود (مثلاً برای
+            فرستادنِ عکسِ تازه به part-check.php)، هم‌الگوی همان صفحه. */ ?>
     <ol class="pchk-steps">
-        <li class="is-done"><span>۱</span> سبد خرید</li>
-        <li class="is-done"><span>۲</span> بررسی عکس قطعه</li>
+        <li class="is-done"><a href="cart.php"><span>۱</span> سبد خرید</a></li>
+        <li class="is-done"><a href="part-check.php"><span>۲</span> بررسی عکس قطعه</a></li>
         <li class="is-now"><span>۳</span> بررسی موجودی</li>
         <li><span>۴</span> ثبت سفارش و پرداخت</li>
     </ol>
@@ -132,11 +134,9 @@ require_once __DIR__ . '/includes/header.php';
             <a href="cart.php" class="btn btn-secondary"><?= icon('arrow-right') ?>بازگشت به سبد خرید</a>
         </div>
     </div>
-    <script>
-    /* خودکار وارد تسویه‌حساب می‌شویم — کلیدِ بالا فقط برای وقتی جاوااسکریپت
-       خاموش است می‌ماند. کمی مکث تا انیمیشنِ تیکِ سبز دیده شود. */
-    setTimeout(function () { location.href = 'checkout.php'; }, 1800);
-    </script>
+    <?php /* خودکار وارد تسویه‌حساب نمی‌شویم — خواستهٔ کاربر: فقط خودِ تغییرِ
+            وضعیت (تیکِ سبز) باید بدونِ رفرشِ دستی دیده شود؛ رفتن به صفحهٔ
+            پرداخت را خودِ مشتری با همین دکمهٔ بالا می‌زند. */ ?>
     <?php endif; ?>
 </div>
 
