@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/cart-functions.php';
@@ -53,7 +53,7 @@ function renderBrandsTree($brands) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="assets/css/style.css?v=53">
+    <link rel="stylesheet" href="assets/css/style.css?v=54">
     <style>
     @font-face{font-family:Peyda;src:url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff2') format('woff2'),url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff') format('woff')}
     .variant-section{margin-bottom:1rem;padding:0.75rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px}

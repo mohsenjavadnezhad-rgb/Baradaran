@@ -3606,8 +3606,11 @@ input::-webkit-inner-spin-button {
     border-radius: var(--radius-sm);
 }
 .c2c-msg > .ic { flex-shrink: 0; margin-top: 0.25rem; }
-.c2c-msg.is-ok  { color: var(--green); background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
-.c2c-msg.is-bad { color: var(--red-light); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+.c2c-msg.is-ok   { color: var(--green); background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+.c2c-msg.is-bad  { color: var(--red-light); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+/* یادآوریِ خنثی (نه خطا، نه تأییدِ کامل) — مثلِ «چک را هم باید ارسال کنید».
+   هم‌رنگِ کادرهای زردِ .pay-c2c در checkout.php تا زبانِ رنگیِ سایت یکدست بماند. */
+.c2c-msg.is-note { color: var(--text-secondary); background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); }
 .c2c-note {
     display: flex;
     align-items: flex-start;

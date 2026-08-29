@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
@@ -227,7 +227,7 @@ if ($pchk && !empty($pchk['product_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جزئیات سفارش <?= h(orderNumber($order)) ?> - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=53">
+    <link rel="stylesheet" href="../assets/css/style.css?v=54">
 </head>
 <body style="background:var(--bg-primary);min-height:100vh;">
     <div class="admin-layout">

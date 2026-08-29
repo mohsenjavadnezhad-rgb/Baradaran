@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /* شروع پرداخت آنلاین — سفارش را می‌گیرد، درگاه را صدا می‌زند و کاربر را منتقل می‌کند.
    header.php لود نمی‌شود تا هیچ POST سبد خرید دوباره پردازش نشود و انتقال بدون رندر صفحه انجام شود. */
 require_once __DIR__ . '/includes/config.php';
@@ -75,7 +75,7 @@ if (!paymentReady()) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>پرداخت — <?= h(SITE_NAME) ?></title>
-<link rel="stylesheet" href="assets/css/style.css?v=53">
+<link rel="stylesheet" href="assets/css/style.css?v=54">
 <style>
 @font-face{font-family:Peyda;src:url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff2') format('woff2'),url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff') format('woff')}
 <?= iconBaseCss() ?>

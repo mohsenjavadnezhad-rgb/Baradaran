@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /* درگاه پرداخت آزمایشی (شبیه‌ساز داخلی).
    ---------------------------------------------------------------
    هدف: تست کامل چرخهٔ پرداخت (تسویه ← درگاه ← بازگشت ← تأیید ← ثبت وضعیت)
@@ -35,7 +35,7 @@ if ($err === '') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>درگاه پرداخت آزمایشی</title>
-<link rel="stylesheet" href="assets/css/style.css?v=53">
+<link rel="stylesheet" href="assets/css/style.css?v=54">
 <style>
 @font-face{font-family:Peyda;src:url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff2') format('woff2'),url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff') format('woff')}
 <?= iconBaseCss() ?>

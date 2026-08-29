@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ورود به پنل مدیریت - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=53">
+    <link rel="stylesheet" href="../assets/css/style.css?v=54">
 </head>
 <body class="login-page">
     <form method="POST" class="login-form">

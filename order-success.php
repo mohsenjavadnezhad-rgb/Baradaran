@@ -208,7 +208,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
                 (متن و روزشمار از admin/settings.php، پرداخت با paymentChequeNoteText()). */ ?>
         <div class="c2c-box">
             <div class="c2c-t"><?= icon('check-circle', 'ic-sm') ?> سفارش شما تأیید شد</div>
-            <p class="c2c-msg is-bad"><?= icon('alert', 'ic-sm') ?> <?= h(paymentChequeNoteText()) ?></p>
+            <p class="c2c-msg is-note"><?= icon('info', 'ic-sm') ?> <?= h(paymentChequeNoteText()) ?></p>
             <?php if (($chqSampleImg = trim((string)getSettingRaw('pay_cheque_sample', ''))) !== ''): ?>
             <div class="pc2-sample">
                 <img src="uploads/settings/<?= h($chqSampleImg) ?>" alt="نمونهٔ چک">
