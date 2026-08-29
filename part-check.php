@@ -1,12 +1,11 @@
 <?php
-/* مرحلهٔ «ارسال عکس نمونهٔ قطعه» — میان سبد خرید و ثبت سفارش.
-   مشتری چند عکس از زوایای مختلفِ قطعهٔ موردنیازش می‌فرستد، مدیر آن را با کالای
-   سبد مقایسه و موجودی را تأیید می‌کند. از ۲۰۲۶-۰۸-۳۰: تا وقتی هر دو تأیید
-   نشوند (مطابقتِ عکس + موجودی)، مشتری در همین صفحه در حالتِ «در انتظار
-   بررسی موجودی» می‌ماند و به‌محضِ تأییدِ ادمین خودکار به ثبتِ سفارش می‌رود —
-   دیگر راهِ فراری نیست. کلیدِ «رد کردن این مرحله» هم دیگر بایپس نمی‌کند؛ فقط
-   یعنی «بدونِ عکس، فقط منتظرِ تأییدِ موجودی می‌مانم» و همچنان وارد همین صفِ
-   انتظار می‌شود.
+/* گامِ ۲ از ۴ (سبد → بررسی عکس → بررسی موجودی → ثبت سفارش): «ارسال عکس
+   نمونهٔ قطعه». این صفحه فقط اقدامِ مشتری را می‌گیرد — آپلود یا رد کردن — و
+   نتیجه/انتظار را دیگر خودش نشان نمی‌دهد؛ بلافاصله به stock-check.php
+   می‌فرستد (گامِ ۳)، همان‌جا که مشتری منتظرِ تأییدِ ادمین می‌ماند. تنها
+   حالتی که همین‌جا می‌ماند «رد شد» است، چون باید دوباره عکس بفرستد.
+   ۲۰۲۶-۰۸-۳۰: «رد کردنِ مرحله» دیگر بایپس نیست — یک ردیفِ part_checks
+   (بدون عکس) می‌سازد و مثلِ آپلود وارد صفِ stock-check.php می‌شود.
    POST پیش از include هدر انجام می‌شود تا ریدایرکتِ PRG ممکن باشد؛ نامِ فیلدها
    pc_* است تا با handleCartAction() سراسریِ هدر تلاقی نکند. */
 require_once __DIR__ . '/includes/config.php';
@@ -23,7 +22,6 @@ $c      = currentCustomer();
 $minPh  = partCheckMinPhotos();
 $sigNow = partCheckCartSig($cartItems);
 $errors = [];
-$sent   = isset($_GET['sent']);
 
 /* شناسهٔ محصول‌های سبد — انتخابِ مشتری باید یکی از همین‌ها باشد */
 $cartPids = [];
@@ -35,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* رد کردنِ مرحله — از ۲۰۲۶-۰۸-۳۰ دیگر بایپسِ بی‌درنگ نیست (خواستهٔ کاربر:
        گیتِ «بررسی موجودی» کاملاً مسدودکننده باشد). همان‌قدر که آپلودِ عکس یک
        ردیفِ part_checks می‌سازد، رد کردن هم یکی می‌سازد — فقط بدونِ عکس —
-       و مشتری به همین صفحه برمی‌گردد تا در صفِ «در انتظار بررسی موجودی» ادمین
-       بماند؛ کارشناس دیگر مطابقتِ عکس را نمی‌سنجد (چیزی نفرستاده)، فقط موجودی
-       را تأیید می‌کند. */
+       و مشتری به stock-check.php (گامِ ۳) می‌رود تا در صفِ ادمین بماند؛
+       کارشناس دیگر مطابقتِ عکس را نمی‌سنجد (چیزی نفرستاده)، فقط موجودی را
+       تأیید می‌کند. */
     if ($act === 'skip') {
         /* اگر همین الان یک درخواستِ «در انتظار» برای همین سبد هست (چه با عکس،
            چه رد‌شدهٔ قبلی)، ردیفِ تازه نساز — وگرنه هر کلیکِ «رد کردن» یک ردیفِ
@@ -54,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                '(مشتری مرحلهٔ بررسی عکس را رد کرد؛ عکسی ارسال نشده — فقط موجودی را بررسی کنید)']);
             } catch (Throwable $e) {}
         }
-        redirect('part-check.php');
+        redirect('stock-check.php');
     }
 
     if ($act === 'upload') {
@@ -96,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cid = (int)$pdo->lastInsertId();
                 $ins = $pdo->prepare("INSERT INTO part_check_images (check_id, image, sort_order) VALUES (?,?,?)");
                 foreach ($files as $i => $f) $ins->execute([$cid, $f, $i]);
-                redirect('part-check.php?sent=1');
+                redirect('stock-check.php?sent=1');
             } catch (Throwable $e) {
                 foreach ($files as $f) {
                     $p = __DIR__ . '/uploads/partchecks/' . $f;
@@ -108,20 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* وضعیت فعلی.
-   ۲۰۲۶-۰۸-۳۰: «در انتظار بررسی موجودی» گیتِ نهایی است — تا status='approved'
-   *و* stock_ok=1 با هم برقرار نباشند، مشتری در حالتِ انتظار می‌ماند، حتی اگر
-   کارشناس مطابقتِ عکس را از قبل تأیید کرده باشد (approved-but-stock-pending
-   هم بصری همان کادرِ «در انتظار» را می‌بیند، نه پیامِ تبریک). */
+/* وضعیت فعلی — این صفحه فقط دو حالت را خودش نشان می‌دهد: «form» (چیزی
+   نساخته یا سبد عوض شده) و «rejected» (باید دوباره بفرستد). هر ردیفِ
+   pending/approved (یعنی مشتری اقدامش را کرده و فقط منتظرِ ادمین است)
+   بلافاصله به stock-check.php می‌رود — آن صفحه اینها را نشان می‌دهد. */
 $row      = partCheckCurrent((int)$c['id']);
 $sameCart = $row && ((string)$row['cart_sig'] === $sigNow || (string)$row['cart_sig'] === '');
-$state    = 'form';                                   /* form | pending | approved | rejected */
-$stockReq = partCheckStockRequired();
-if ($row && $sameCart) {
-    $state = (string)$row['status'];
-    if ($stockReq && $state === 'approved' && empty($row['stock_ok'])) $state = 'pending';
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $row && $sameCart
+    && in_array((string)$row['status'], ['pending', 'approved'], true)) {
+    redirect('stock-check.php');
 }
-$imgs     = ($state !== 'form') ? partCheckImages((int)$row['id']) : [];
+
+$state = ($row && $sameCart) ? (string)$row['status'] : 'form'; /* form | rejected (فقط این دو اینجا رندر می‌شوند) */
+$imgs     = ($state === 'rejected') ? partCheckImages((int)$row['id']) : [];
 $rowProd  = null;
 if ($row && !empty($row['product_id'])) {
     try {
@@ -142,11 +140,13 @@ require_once __DIR__ . '/includes/header.php';
 <div class="container">
     <h1 class="page-title"><?= icon('camera') ?> بررسی عکس قطعه پیش از خرید</h1>
 
-    <?php /* سه‌گامِ خرید — مشتری بداند کجای مسیر است */ ?>
+    <?php /* چهار‌گامِ خرید — مشتری بداند کجای مسیر است (۲۰۲۶-۰۸-۳۰: بررسیِ
+            موجودی گامِ مستقلِ خودش را گرفت) */ ?>
     <ol class="pchk-steps">
         <li class="is-done"><span>۱</span> سبد خرید</li>
         <li class="is-now"><span>۲</span> بررسی عکس قطعه</li>
-        <li><span>۳</span> ثبت سفارش و پرداخت</li>
+        <li><span>۳</span> بررسی موجودی</li>
+        <li><span>۴</span> ثبت سفارش و پرداخت</li>
     </ol>
 
     <?php /* پیغامِ درشتِ بالای صفحه — خواستهٔ مدیر: مشتری حتماً آن را ببیند */ ?>
@@ -184,10 +184,6 @@ require_once __DIR__ . '/includes/header.php';
     </form>
     <?php endif; ?>
 
-    <?php if ($sent): ?>
-    <div class="flash flash-success"><?= icon('check-circle', 'ic-sm') ?> عکس‌های شما ثبت شد و برای بررسی به کارشناس ما رفت.</div>
-    <?php endif; ?>
-
     <?php foreach ($errors as $e): ?>
     <div class="flash flash-error"><?= icon('alert', 'ic-sm') ?> <?= h($e) ?></div>
     <?php endforeach; ?>
@@ -198,92 +194,9 @@ require_once __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <?php /* ---------- در انتظار بررسیِ موجودی ----------
-            کادرِ بزرگِ مسدودکننده: خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰. تا وقتی ادمین در
-            پنل تیکِ «موجودی کالا را تأیید می‌کنم» را نزند (همراه با تأییدِ
-            مطابقتِ عکس، اگر عکسی بوده)، مشتری همین‌جا می‌ماند — نه دکمهٔ فرار،
-            نه timeout. صفحه هر چند ثانیه خودش تازه می‌شود تا با تأییدِ ادمین،
-            بدونِ کاری از سمتِ مشتری به تسویه‌حساب برود. */ ?>
-    <?php if ($state === 'pending'): ?>
-    <?php $photoReviewed = ((string)$row['status'] === 'approved'); /* عکس تأیید شده، فقط موجودی مانده */ ?>
-    <div class="pchk-panel is-wait pchk-panel-big">
-        <div class="pchk-wait-glow" aria-hidden="true"></div>
-        <div class="pchk-wait-icon"><?= icon('package', 'ic-lg') ?></div>
-        <div class="pchk-panel-head" style="justify-content:center;">
-            <span class="pchk-badge is-wait pchk-badge-blink"><?= icon('clock', 'ic-sm') ?> در انتظار بررسی موجودی</span>
-            <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($row['created_at'], true)) ?></span>
-        </div>
-        <p class="pchk-panel-text" style="text-align:center;">
-            <?php if ($photoReviewed): ?>
-            کارشناسِ ما مطابقتِ عکسِ قطعه را تأیید کرد؛ فقط <b>تأییدِ موجودیِ انبار</b> باقی مانده.
-            <?php else: ?>
-            درخواستِ شما رسید و در نوبتِ <b>بررسیِ موجودیِ انبار</b> است.
-            <?php endif; ?>
-            به‌محضِ تأییدِ کارشناسِ ما، همین صفحه خودکار سبز می‌شود و مستقیم به
-            <b>ثبتِ سفارش و پرداخت</b> می‌روید — کاری لازم نیست بکنید، فقط این صفحه را باز نگه دارید.
-        </p>
-        <?php require __DIR__ . '/includes/partcheck-photos.php'; ?>
-        <div class="pchk-actions" style="justify-content:center;">
-            <a href="part-check.php" class="btn btn-secondary"><?= icon('refresh') ?>بررسی وضعیت</a>
-            <?php if (!$photoReviewed): ?>
-            <form method="POST" action="" class="pchk-skip-form">
-                <input type="hidden" name="pc_action" value="skip">
-                <button type="submit" class="btn btn-ghost pchk-skip">به‌جای عکس، فقط منتظرِ بررسیِ موجودی بمانم <?= icon('arrow-left', 'ic-sm') ?></button>
-            </form>
-            <?php endif; ?>
-        </div>
-    </div>
-    <script>
-    /* در حالت انتظار، صفحه خودش تازه می‌شود تا مشتری مجبور نباشد رفرش کند */
-    setTimeout(function () { location.replace('part-check.php'); }, 10000);
-    </script>
-
-    <?php /* ---------- تأیید شد — خودکار به تسویه‌حساب ---------- */ ?>
-    <?php elseif ($state === 'approved'): ?>
-    <div class="pchk-panel is-ok pchk-panel-big pchk-panel-pop">
-        <div class="pchk-wait-icon is-ok"><?= icon('check-circle', 'ic-lg') ?></div>
-        <div class="pchk-panel-head" style="justify-content:center;">
-            <span class="pchk-badge is-ok"><?= icon('check-circle', 'ic-sm') ?> موجودی تأیید شد</span>
-            <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($row['reviewed_at'] ?: $row['created_at'], true)) ?></span>
-        </div>
-        <p class="pchk-panel-text" style="text-align:center;">
-            کارشناسِ ما موجودیِ کالا را تأیید کرد. در حالِ انتقال به <b>ثبتِ سفارش و پرداخت</b>…
-        </p>
-        <div class="pchk-confirm">
-            <?php if ($imgs): ?>
-            <div class="pchk-confirm-row is-ok">
-                <?= icon('check-circle', 'ic-sm') ?> <b>مطابقت قطعه:</b> تأیید شد
-            </div>
-            <?php else: ?>
-            <div class="pchk-confirm-row is-soft">
-                <?= icon('info', 'ic-sm') ?> <b>مطابقت قطعه:</b> بررسی نشد (عکسی ارسال نشده بود)
-            </div>
-            <?php endif; ?>
-            <div class="pchk-confirm-row is-ok">
-                <?= icon('package', 'ic-sm') ?>
-                <b>موجودی کالا:</b> موجود است و برای شما کنار گذاشته شد
-                <?php if (trim((string)$row['stock_note']) !== ''): ?>
-                <span class="pchk-confirm-note">— <?= h($row['stock_note']) ?></span>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php if (trim((string)$row['admin_note']) !== ''): ?>
-        <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت کارشناس:</b> <?= nl2br(h($row['admin_note'])) ?></p>
-        <?php endif; ?>
-        <?php require __DIR__ . '/includes/partcheck-photos.php'; ?>
-        <div class="pchk-actions" style="justify-content:center;">
-            <a href="checkout.php" class="btn btn-primary btn-lg"><?= icon('cart') ?>ادامه به ثبتِ سفارش و پرداخت</a>
-            <a href="cart.php" class="btn btn-secondary"><?= icon('arrow-right') ?>بازگشت به سبد خرید</a>
-        </div>
-    </div>
-    <script>
-    /* خودکار وارد تسویه‌حساب می‌شویم — کلیدِ بالا فقط برای وقتی جاوااسکریپت
-       خاموش است می‌ماند. کمی مکث تا انیمیشنِ تیکِ سبز دیده شود. */
-    setTimeout(function () { location.href = 'checkout.php'; }, 1800);
-    </script>
-
-    <?php /* ---------- تأیید نشد ---------- */ ?>
-    <?php elseif ($state === 'rejected'): ?>
+    <?php /* pending/approved دیگر اینجا رندر نمی‌شوند — بالاتر، پیش از
+            require_once header.php، به stock-check.php ریدایرکت شده‌اند. */ ?>
+    <?php if ($state === 'rejected'): ?>
     <div class="pchk-panel is-no">
         <div class="pchk-panel-head">
             <span class="pchk-badge is-no"><?= icon('x-circle', 'ic-sm') ?> قطعه تأیید نشد</span>

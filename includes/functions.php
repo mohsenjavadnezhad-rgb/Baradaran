@@ -827,6 +827,24 @@ function partCheckPassed($cartItems, $customer = null) {
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
 }
 
+/* اگر مشتری هنوز از این مرحله نگذشته، باید به کدام صفحه برود؟ ۲۰۲۶-۰۸-۳۰:
+   مسیر ۴ گامی شد (سبد → بررسی عکس → بررسی موجودی → ثبت سفارش)، پس یک گیتِ
+   واحد دیگر کافی نیست — باید بین دو صفحهٔ مقصد یکی را انتخاب کرد:
+   - هنوز درخواستی برایِ همین سبد نساخته (یا رد شده) ⇒ part-check.php
+     (اقدامِ اول: آپلود یا رد کردن)
+   - درخواست ساخته شده و pending/approved است (فقط منتظرِ ادمین) ⇒ stock-check.php
+   خروجیِ '' یعنی گذشته، ریدایرکتی لازم نیست. */
+function partCheckGateUrl($cartItems, $customer = null) {
+    if (!partCheckOn()) return '';
+    if (partCheckPassed($cartItems, $customer)) return '';
+    $sig = partCheckCartSig($cartItems);
+    $cid = (int)($customer['id'] ?? ($_SESSION['customer_id'] ?? 0));
+    $row = partCheckCurrent($cid);
+    $sameCart = $row && ((string)$row['cart_sig'] === $sig || (string)$row['cart_sig'] === '');
+    if (!$row || !$sameCart || (string)$row['status'] === 'rejected') return 'part-check.php';
+    return 'stock-check.php';
+}
+
 /* پس از ثبتِ موفقِ سفارش: درخواستِ باز به همان سفارش گره می‌خورد تا مدیر آن را
    در «جزئیات سفارش» ببیند، و پرچمِ «رد کردن» پاک می‌شود. */
 function partCheckAttachToOrder($orderId, $customerId) {
