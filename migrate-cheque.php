@@ -13,6 +13,7 @@ $stmts = [
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_date VARCHAR(40) NULL",
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_amount INT NOT NULL DEFAULT 0",
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_sayad VARCHAR(60) NULL",
+    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_payee VARCHAR(120) NULL",
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_reported_at DATETIME NULL",
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cheque_received_at DATETIME NULL",
 ];
