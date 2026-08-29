@@ -130,19 +130,11 @@ if ($c2cIn['amount'] === '') $c2cIn['amount'] = (string)$payable;
 if ($c2cIn['date'] === '')   $c2cIn['date']   = jDate($c2cNow->format('Y-m-d'));
 $c2cIn['paid_text'] = trim($c2cIn['date'] . ' - ' . $c2cIn['time']);
 
-/* ---------- چک: ورودی‌های آن هم روی همین صفحه ----------
-   خواستهٔ کاربر: کادرِ اطلاعاتِ چک همین‌جا (وقتی «چک» را انتخاب می‌کند) باز
-   شود، نه در مرحلهٔ بعد — دقیقاً همان الگوی کارت‌به‌کارتِ بالا. order-success.php
-   همچنان فرمِ خودش را دارد، فقط برای وقتی که مشتری بخواهد بعداً اصلاح کند. */
+/* ---------- چک: از ۲۰۲۶-۰۸-۳۰ دیگر هیچ فرمی روی این صفحه نیست ----------
+   خواستهٔ کاربر: همکار دیگر بانک/شماره/تاریخ/مبلغِ چک را تایپ نمی‌کند —
+   فقط انتخابِ «چک» کافی است؛ اصلِ چک باید فیزیکی ارسال/تحویل شود (پیغامش
+   در order-success.php با paymentChequeNoteText() نشان داده می‌شود). */
 $chqReady = (isset($payMethods['cheque']) && paymentChequeReady());
-$chqIn = [
-    'bank'   => trim((string)($_POST['cheque_bank'] ?? '')),
-    'number' => trim((string)($_POST['cheque_number'] ?? '')),
-    'date'   => trim(faToLatinDigits((string)($_POST['cheque_date'] ?? ''))),
-    'amount' => trim((string)($_POST['cheque_amount'] ?? '')),
-    'sayad'  => trim((string)($_POST['cheque_sayad'] ?? '')),
-];
-if ($chqIn['amount'] === '') $chqIn['amount'] = (string)$payable;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     $name     = trim($_POST['customer_name'] ?? '');
@@ -169,12 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
         if ($c2cErr !== '') $errors[] = $c2cErr;
     }
 
-    /* چک: همان قاعده — تا اطلاعاتِ چک کامل نباشد سفارش ثبت نمی‌شود. */
-    $chqOn = ($payMethod === 'cheque' && paymentChequeReady());
-    if ($chqOn) {
-        $chqErr = paymentChequeClean($chqIn)['error'];
-        if ($chqErr !== '') $errors[] = $chqErr;
-    }
 
     /* روش ارسال هم فقط از میان روش‌های فعال؛ هزینه در سرور از نرخ‌نامه/تنظیمات
        محاسبه می‌شود، نه از فرم، تا کسی نتواند با دست‌کاری فرم هزینه را صفر کند.
@@ -220,10 +206,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             );
 
             /* سفارش‌های آنلاین با وضعیت «در انتظار پرداخت» ثبت می‌شوند تا در بازگشت از درگاه تکمیل شوند.
-               «پرداخت اول ماه» چیزی برای گزارش‌کردن از سمت همکار ندارد (بر خلاف
-               کارت‌به‌کارت/چک که فرمِ جداگانه‌ای در order-success.php دارند)، پس
-               همان‌جا مستقیم «در انتظار» می‌شود تا در صفِ بررسیِ مدیر بیفتد. */
-            $payStatus = paymentIsOnline($payMethod) ? 'pending' : ($payMethod === 'partner_month' ? 'pending' : 'unpaid');
+               «پرداخت اول ماه» و «چک» چیزی برای گزارش‌کردن از سمت همکار ندارند
+               (چک هم از ۲۰۲۶-۰۸-۳۰ دیگر فرمی روی این صفحه ندارد — فقط پیغامِ
+               مهلتِ ارسالِ اصلِ چک در order-success.php)، پس هر دو مستقیم
+               «در انتظار» می‌شوند تا در صفِ پیگیریِ مدیر/تسویهٔ همکاران بیفتند. */
+            $payStatus = paymentIsOnline($payMethod) ? 'pending' : (in_array($payMethod, ['partner_month', 'cheque'], true) ? 'pending' : 'unpaid');
 
             /* ستون‌ها بر اساس مهاجرت‌های اجرا‌شده ساخته می‌شوند تا صفحه روی
                نصب‌های قدیمی‌تر (بدون ستون‌های پرداخت یا ارسال) هم کار کند. */
@@ -265,10 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             if ($c2cOn) {
                 $c2cErr = paymentC2cSave($orderId, $c2cIn);
                 if ($c2cErr !== '') throw new Exception($c2cErr);
-            }
-            if ($chqOn) {
-                $chqErr = paymentChequeSave($orderId, $chqIn);
-                if ($chqErr !== '') throw new Exception($chqErr);
             }
 
             $pdo->commit();
@@ -483,9 +466,10 @@ require_once __DIR__ . '/includes/header.php';
                                     کامل می‌شود و در انتظار پیگیریِ مدیر برای تسویهٔ اول ماه می‌ماند. */ ?>
                             <small>سفارش بدون پرداختِ الان ثبت می‌شود؛ تسویه در ابتدای ماه انجام می‌شود.</small>
                             <?php elseif ($pk === 'cheque'): ?>
-                            <?php /* ویژهٔ همکارِ تأییدشده — اطلاعات چک همین‌جا (کادرِ پایینِ فهرست،
-                                    مثل کارت‌به‌کارت) گرفته می‌شود، پیش از ثبت سفارش. */ ?>
-                            <small>اطلاعات چک را همین‌جا وارد می‌کنید؛ سفارش پس از تکمیلِ آن ثبت می‌شود تا مدیر بررسی و دریافت را تأیید کند.</small>
+                            <?php /* ویژهٔ همکارِ تأییدشده — چیزی اینجا گرفته نمی‌شود (خواستهٔ کاربر:
+                                    دیگر فرمی برای بانک/شماره/تاریخ/مبلغ نیست)؛ سفارش کامل می‌شود و
+                                    فقط اصلِ چک باید بعداً فیزیکی برایمان برسد — جزئیاتش در صفحهٔ بعد. */ ?>
+                            <small>سفارش بدون پرکردنِ فرم ثبت می‌شود؛ فقط اصلِ چک را باید تا مهلتی که در صفحهٔ بعد می‌بینید برایمان ارسال یا تحویل دهید.</small>
                             <?php else: ?>
                             <small>انتقال به درگاه بانکی و پرداخت اینترنتی با کارت‌های شتاب.</small>
                             <?php endif; ?>
@@ -574,45 +558,18 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <?php if ($chqReady): ?>
-                    <?php /* اطلاعات چک، فقط وقتی «چک» انتخاب شده باشد — دقیقاً همان الگوی
-                            کارت‌به‌کارتِ بالا (کادر پنهان + required را اسکریپت پایین
-                            کنترل می‌کند، سرور هم دوباره اعتبار را می‌سنجد). */ ?>
+                    <?php /* دیگر فرمی نیست — فقط یادآوریِ کوتاه، همان‌جا که پیش‌تر فرم بود.
+                            پیغامِ کاملِ «تا چند روز» بعد از ثبتِ سفارش در order-success.php
+                            با paymentChequeNoteText() نشان داده می‌شود. */ ?>
                     <div class="pay-c2c" id="pay-cheque"<?= $payDefault === 'cheque' ? '' : ' hidden' ?>>
-                        <div class="pc2-t"><?= icon('receipt', 'ic-sm') ?> اطلاعات چک</div>
-                        <p class="pc2-note"><?= icon('info', 'ic-sm') ?> مشخصات چک را دقیق وارد کنید تا کارشناس ما بررسی و دریافت را تأیید کند.</p>
+                        <div class="pc2-t"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</div>
+                        <p class="pc2-note"><?= icon('info', 'ic-sm') ?> بعد از ثبتِ سفارش، فقط باید اصلِ چک را برایمان ارسال یا تحویل دهید — چیزی این‌جا لازم نیست تایپ کنید.</p>
                         <?php if (($chqSampleImg = trim((string)getSettingRaw('pay_cheque_sample', ''))) !== ''): ?>
                         <div class="pc2-sample">
                             <img src="uploads/settings/<?= h($chqSampleImg) ?>" alt="نمونهٔ چک">
-                            <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا — مشخصاتِ خواسته‌شده را از روی چکِ خودتان همین‌طور واضح بنویسید</span>
+                            <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا</span>
                         </div>
                         <?php endif; ?>
-                        <div class="pc2-grid">
-                            <div class="form-group">
-                                <label for="cheque_bank">نام بانک *</label>
-                                <input type="text" name="cheque_bank" id="cheque_bank" class="form-control"
-                                       value="<?= h($chqIn['bank']) ?>" placeholder="مثلاً ملی">
-                            </div>
-                            <div class="form-group">
-                                <label for="cheque_number">شمارهٔ چک *</label>
-                                <input type="text" name="cheque_number" id="cheque_number" class="form-control" dir="ltr"
-                                       value="<?= h($chqIn['number']) ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="cheque_date">تاریخ چک *</label>
-                                <input type="text" name="cheque_date" id="cheque_date" class="form-control" dir="ltr"
-                                       inputmode="numeric" value="<?= h($chqIn['date']) ?>" placeholder="1405/07/01">
-                            </div>
-                            <div class="form-group">
-                                <label for="cheque_amount">مبلغ چک (تومان) *</label>
-                                <input type="text" name="cheque_amount" id="cheque_amount" class="form-control" dir="ltr"
-                                       inputmode="numeric" value="<?= h($chqIn['amount']) ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="cheque_sayad">شناسهٔ صیاد (اختیاری)</label>
-                                <input type="text" name="cheque_sayad" id="cheque_sayad" class="form-control" dir="ltr"
-                                       value="<?= h($chqIn['sayad']) ?>" placeholder="اگر در سامانه صیاد ثبت شده">
-                            </div>
-                        </div>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -644,7 +601,6 @@ require_once __DIR__ . '/includes/header.php';
             var c2cBox = document.getElementById('pay-c2c');
             var amtEl  = document.getElementById('c2c_amount');
             var chqBox = document.getElementById('pay-cheque');
-            var chqAmtEl = document.getElementById('cheque_amount');
             var cityEl = document.getElementById('city');
             var sumBox = document.querySelector('.checkout-summary');
             /* متن‌ها و نرخ‌نامه از سرور می‌آیند تا ارقامِ زنده با آنچه سرور رندر
@@ -673,7 +629,6 @@ require_once __DIR__ . '/includes/header.php';
             /* مبلغ واریزی/چک تا وقتی مشتری خودش عددی نزده، همان مبلغ قابل پرداخت
                می‌ماند؛ بعد از آن دست‌نخورده باقی می‌ماند. */
             if (amtEl) amtEl.addEventListener('input', function(){ amtEl.setAttribute('data-touched', '1'); });
-            if (chqAmtEl) chqAmtEl.addEventListener('input', function(){ chqAmtEl.setAttribute('data-touched', '1'); });
 
             function bind(box) {
                 box.addEventListener('change', function(){
@@ -691,7 +646,7 @@ require_once __DIR__ . '/includes/header.php';
                 var sel = document.querySelector('input[name=payment_method]:checked');
                 var val = sel ? sel.value : '';
                 toggleBox(c2cBox, val === 'card',   ['c2c_ref', 'c2c_amount', 'c2c_last4', 'c2c_date']);
-                toggleBox(chqBox, val === 'cheque', ['cheque_bank', 'cheque_number', 'cheque_date', 'cheque_amount']);
+                toggleBox(chqBox, val === 'cheque', []);
             }
 
             function toggleBox(box, on, requiredIds) {
@@ -805,7 +760,6 @@ require_once __DIR__ . '/includes/header.php';
                 if (cCell) cCell.textContent = res ? costText(res) : TXT.pick;
                 if (pCell) pCell.textContent = money(pay);
                 if (amtEl && amtEl.getAttribute('data-touched') !== '1') amtEl.value = String(pay);
-                if (chqAmtEl && chqAmtEl.getAttribute('data-touched') !== '1') chqAmtEl.value = String(pay);
             }
 
             function money(n) { return n.toLocaleString('en-US') + ' تومان'; }

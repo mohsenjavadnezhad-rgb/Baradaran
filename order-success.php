@@ -33,34 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['c2c_report']) && $ord
     }
 }
 
-/* ---------- ثبت اطلاعاتِ چک (PRG) ---------- همان قاعده: فقط صاحبِ سفارشِ
-   چکیِ پرداخت‌نشده. بانک/شماره/تاریخ/مبلغ الزامی؛ شناسهٔ صیاد اختیاری. */
-$chqErr = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cheque_report']) && $orderId > 0) {
-    $own = false;
-    try {
-        $st = $pdo->prepare("SELECT customer_id, payment_method, payment_status FROM orders WHERE id=?");
-        $st->execute([$orderId]);
-        $row = $st->fetch();
-        $own = $row && isCustomerLoggedIn() && (int)($row['customer_id'] ?? 0) === (int)$_SESSION['customer_id']
-               && (string)($row['payment_method'] ?? '') === 'cheque'
-               && (string)($row['payment_status'] ?? '') !== 'paid';
-    } catch (Throwable $e) { $own = false; }
-
-    if (!$own) {
-        $chqErr = 'این سفارش قابل ثبتِ چک نیست.';
-    } else {
-        $chqErr = paymentChequeSave($orderId, [
-            'bank'   => $_POST['cheque_bank']   ?? '',
-            'number' => $_POST['cheque_number'] ?? '',
-            'date'   => $_POST['cheque_date']   ?? '',
-            'amount' => $_POST['cheque_amount'] ?? '',
-            'sayad'  => $_POST['cheque_sayad']  ?? '',
-        ]);
-        if ($chqErr === '') redirect('order-success.php?id=' . $orderId . '&chq=ok');
-    }
-}
-
 require_once __DIR__ . '/includes/header.php';
 
 $stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
@@ -109,10 +81,9 @@ $c2cOn     = $payOn && $payMethod === 'card' && !$payIsPaid && paymentC2cReady()
 $c2cDone   = $c2cOn && trim((string)($order['c2c_ref'] ?? '')) !== '';
 $c2cSaved  = ((string)($_GET['c2c'] ?? '') === 'ok');
 
-/* همان الگو برای چک */
-$chqOn     = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady();
-$chqDone   = $chqOn && trim((string)($order['cheque_number'] ?? '')) !== '';
-$chqSaved  = ((string)($_GET['chq'] ?? '') === 'ok');
+/* چک از ۲۰۲۶-۰۸-۳۰ دیگر فرمی ندارد — فقط پیغامِ تأیید + مهلتِ ارسالِ اصلِ چک
+   (paymentChequeNoteText()) وقتی سفارش هنوز دریافت نشده. */
+$chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady();
 ?>
 
 <div class="container">
@@ -233,80 +204,18 @@ $chqSaved  = ((string)($_GET['chq'] ?? '') === 'ok');
         <?php endif; ?>
 
         <?php if ($chqOn): ?>
-        <?php /* ثبت اطلاعات چک — پنج مورد: بانک، شماره، تاریخ، مبلغ، شناسهٔ صیاد
-                (اختیاری). سفارش تا «دریافت چک» مدیر «در انتظار بررسی چک» می‌ماند. */ ?>
+        <?php /* از ۲۰۲۶-۰۸-۳۰ دیگر فرمی نیست — فقط پیغامِ تأیید + مهلتِ ارسالِ اصلِ چک
+                (متن و روزشمار از admin/settings.php، پرداخت با paymentChequeNoteText()). */ ?>
         <div class="c2c-box">
-            <div class="c2c-t"><?= icon('receipt', 'ic-sm') ?> ثبت اطلاعات چک</div>
-
-            <?php if ($chqErr !== ''): ?>
-            <p class="c2c-msg is-bad"><?= icon('alert', 'ic-sm') ?> <?= h($chqErr) ?></p>
-            <?php elseif ($chqSaved): ?>
-            <p class="c2c-msg is-ok"><?= icon('check-circle', 'ic-sm') ?> اطلاعات چک ثبت شد. سفارش شما تا بررسیِ فروشگاه «در انتظار بررسی چک» است.</p>
-            <?php endif; ?>
-
-            <p class="c2c-note"><?= icon('info', 'ic-sm') ?> مشخصات چک را دقیق وارد کنید تا کارشناس ما بررسی و دریافت را تأیید کند.</p>
+            <div class="c2c-t"><?= icon('check-circle', 'ic-sm') ?> سفارش شما تأیید شد</div>
+            <p class="c2c-msg is-bad"><?= icon('alert', 'ic-sm') ?> <?= h(paymentChequeNoteText()) ?></p>
             <?php if (($chqSampleImg = trim((string)getSettingRaw('pay_cheque_sample', ''))) !== ''): ?>
             <div class="pc2-sample">
                 <img src="uploads/settings/<?= h($chqSampleImg) ?>" alt="نمونهٔ چک">
-                <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا — مشخصاتِ خواسته‌شده را از روی چکِ خودتان همین‌طور واضح بنویسید</span>
+                <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا</span>
             </div>
             <?php endif; ?>
-
-            <?php if ($chqDone): ?>
-            <div class="c2c-recap">
-                <div><span>بانک</span><b><?= h((string)$order['cheque_bank']) ?></b></div>
-                <div><span>شمارهٔ چک</span><b dir="ltr"><?= h((string)$order['cheque_number']) ?></b></div>
-                <div><span>تاریخ چک</span><b><?= h((string)$order['cheque_date']) ?></b></div>
-                <div><span>مبلغ چک</span><b><?= formatPrice((int)$order['cheque_amount']) ?></b></div>
-                <?php if (trim((string)($order['cheque_sayad'] ?? '')) !== ''): ?>
-                <div><span>شناسهٔ صیاد</span><b dir="ltr"><?= h((string)$order['cheque_sayad']) ?></b></div>
-                <?php endif; ?>
-                <div><span>وضعیتِ دریافت</span><b><?= !empty($order['cheque_received_at']) ? icon('check-circle', 'ic-sm') . ' چک دریافت شد' : icon('clock', 'ic-sm') . ' هنوز دریافت نشده' ?></b></div>
-            </div>
-            <?php if (empty($order['cheque_received_at'])): ?>
-            <?php /* ثبتِ آنلاینِ مشخصات چک با تحویلِ فیزیکیِ خودِ چک فرق دارد — این
-                    یادآوریِ صریح همان چیزی است که کاربر خواسته: «همکار ببیند که باید
-                    چک را ارسال کند»، نه فقط یک وضعیتِ خنثی. */ ?>
-            <p class="c2c-msg is-bad" style="margin-top:0.6rem;"><?= icon('alert', 'ic-sm') ?>
-                ثبتِ این مشخصات کافی نیست — <b>اصلِ چک</b> را هم باید برایمان ارسال یا تحویل دهید؛
-                سفارش تا رسیدنِ فیزیکیِ چک «در انتظار دریافت چک» می‌ماند.
-            </p>
-            <?php endif; ?>
-            <p class="c2c-note"><?= icon('clock', 'ic-sm') ?> اگر اشتباهی وارد کرده‌اید، فرم زیر را دوباره پر کنید تا اطلاعات جایگزین شود.</p>
-            <?php endif; ?>
-
-            <form method="POST" action="order-success.php?id=<?= (int)$order['id'] ?>" class="c2c-form">
-                <input type="hidden" name="cheque_report" value="1">
-                <div class="c2c-grid">
-                    <div class="form-group">
-                        <label for="cheque_bank">نام بانک *</label>
-                        <input type="text" name="cheque_bank" id="cheque_bank" class="form-control" required
-                               value="<?= h((string)($order['cheque_bank'] ?? '')) ?>" placeholder="مثلاً ملی">
-                    </div>
-                    <div class="form-group">
-                        <label for="cheque_number">شمارهٔ چک *</label>
-                        <input type="text" name="cheque_number" id="cheque_number" class="form-control" dir="ltr" required
-                               value="<?= h((string)($order['cheque_number'] ?? '')) ?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="cheque_date">تاریخ چک *</label>
-                        <input type="text" name="cheque_date" id="cheque_date" class="form-control" required
-                               value="<?= h((string)($order['cheque_date'] ?? '')) ?>" placeholder="مثلاً ۱۴۰۵/۰۷/۰۱">
-                    </div>
-                    <div class="form-group">
-                        <label for="cheque_amount">مبلغ چک (تومان) *</label>
-                        <input type="text" name="cheque_amount" id="cheque_amount" class="form-control" dir="ltr"
-                               inputmode="numeric" required
-                               value="<?= (int)($order['cheque_amount'] ?? 0) > 0 ? (int)$order['cheque_amount'] : (int)$order['total_amount'] ?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="cheque_sayad">شناسهٔ صیاد (اختیاری)</label>
-                        <input type="text" name="cheque_sayad" id="cheque_sayad" class="form-control" dir="ltr"
-                               value="<?= h((string)($order['cheque_sayad'] ?? '')) ?>" placeholder="اگر در سامانه صیاد ثبت شده">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm"><?= icon('check-circle', 'ic-sm') ?> <?= $chqDone ? 'به‌روزرسانی اطلاعات چک' : 'ثبت اطلاعات چک' ?></button>
-            </form>
+            <a href="cart.php" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;"><?= icon('cart', 'ic-sm') ?> بازگشت به سبد <span style="color:var(--text-muted);font-weight:400;">(برای تغییرات)</span></a>
         </div>
         <?php endif; ?>
 

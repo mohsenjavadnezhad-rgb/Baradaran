@@ -1125,23 +1125,16 @@ function renderCustomerOrderCard($order) {
                   . '<a href="order-success.php?id=' . $id . '" class="btn btn-secondary btn-sm">'
                   . icon('receipt', 'ic-sm') . ' ' . $lbl . '</a></div>';
         } elseif (function_exists('paymentChequeReady') && paymentChequeReady() && $pm === 'cheque' && $ps !== 'paid' && $st !== 'cancelled') {
-            /* چک: همان الگوی کارت‌به‌کارت — راه رسیدن به فرم «ثبت اطلاعات چک»،
-               و اگر مدیر «دریافت چک» را زده باشد، نشان سبزِ جداگانه (که با
-               payment_status یکی نیست — چک رسیده بودن یعنی وصول‌شدنش، نه). */
-            $chqRegistered = trim((string)($order['cheque_number'] ?? '')) !== '';
-            $lbl = $chqRegistered ? 'پیگیری چک' : 'ثبت اطلاعات چک';
-            $out .= '<div class="account-order-row" style="justify-content:flex-end;">'
-                  . '<a href="order-success.php?id=' . $id . '" class="btn btn-secondary btn-sm">'
-                  . icon('receipt', 'ic-sm') . ' ' . $lbl . '</a></div>';
+            /* چک از ۲۰۲۶-۰۸-۳۰ دیگر فرمی ندارد (نه ثبت، نه ویرایش) — فقط یک
+               یادآوریِ صریح تا رسیدنِ فیزیکیِ چک، بعد نشانِ سبز. اگر مدیر
+               «دریافت چک» را زده باشد یعنی رسیده — که با payment_status یکی
+               نیست، چک رسیده‌بودن یعنی وصول‌شدنش، نه. */
             if (!empty($order['cheque_received_at'])) {
                 $out .= '<div class="account-order-row"><span style="color:#4ADE80;font-size:0.78rem;">'
                       . icon('check-circle', 'ic-sm') . ' چک دریافت شد</span></div>';
-            } elseif ($chqRegistered) {
-                /* مشخصات آنلاین ثبت شده ولی اصلِ چک هنوز نرسیده — یادآوریِ صریح، نه
-                   فقط یک وضعیتِ خنثی؛ همان چیزی که کاربر خواسته: «همکار ببیند باید
-                   چک را ارسال کند». */
+            } elseif (function_exists('paymentChequeNoteText')) {
                 $out .= '<div class="account-order-row"><span style="color:#FBBF24;font-size:0.78rem;">'
-                      . icon('alert', 'ic-sm') . ' باید اصلِ چک را برایمان ارسال/تحویل دهید</span></div>';
+                      . icon('alert', 'ic-sm') . ' ' . h(paymentChequeNoteText()) . '</span></div>';
             }
         }
     }

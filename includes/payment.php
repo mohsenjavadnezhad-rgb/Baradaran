@@ -358,10 +358,7 @@ function paymentStatusBadge($status) {
    همهٔ نمایش‌های وضعیت (سایت و ادمین) از این دو تابع می‌خوانند تا یک جمله بگویند. */
 function paymentStatusLabelFor($status, $method = '') {
     if ($method === 'card' && $status === 'pending') return 'در انتظار تأیید واریز';
-    if ($method === 'cheque') {
-        if ($status === 'unpaid')  return 'در انتظار ثبت چک';
-        if ($status === 'pending') return 'در انتظار بررسی چک';
-    }
+    if ($method === 'cheque' && ($status === 'unpaid' || $status === 'pending')) return 'در انتظار دریافت چک';
     if ($method === 'partner_month' && $status === 'pending') return 'پرداخت اول ماه — در انتظار';
     return paymentStatusLabel($status);
 }
@@ -509,11 +506,27 @@ function paymentChequeSave($orderId, array $in) {
     }
 }
 
-/* آیا این سفارش منتظر بررسیِ چک است؟ (نشانِ صف در فهرست ادمین) */
+/* آیا این سفارش منتظر دریافتِ فیزیکیِ چک است؟ (نشانِ صف در فهرست ادمین).
+   2026-08-30: دیگر به cheque_number گره نیست — فرمِ ثبتِ بانک/شماره/تاریخ/
+   مبلغ از تسویه‌حساب و صفحهٔ سفارش برداشته شد (خواستهٔ کاربر: فقط یک پیغامِ
+   تأییدِ سفارش + مهلتِ ارسالِ اصلِ چک، بدون فرم)، پس دیگر هیچ سفارشِ چکی‌ای
+   cheque_number پر نمی‌کند — همان لحظهٔ ثبتِ سفارش «منتظرِ دریافت» است. */
 function paymentChequeAwaiting(array $order) {
     return (string)($order['payment_method'] ?? '') === 'cheque'
-        && (string)($order['payment_status'] ?? '') !== 'paid'
-        && trim((string)($order['cheque_number'] ?? '')) !== '';
+        && (string)($order['payment_status'] ?? '') !== 'paid';
+}
+
+/* مهلتِ ارسال/تحویلِ اصلِ چک (روز) — از admin/settings.php («درگاه پرداخت») */
+function paymentChequeDeadlineDays() {
+    $d = (int)getSettingRaw('pay_cheque_deadline_days', '10');
+    return $d > 0 ? $d : 10;
+}
+
+/* متنِ پیغامِ تأییدِ سفارشِ چکی، با جایگزینیِ {days} */
+function paymentChequeNoteText() {
+    $tpl = getSetting('pay_cheque_note',
+        'سفارش شما تأیید شد؛ اما اصلِ چک را هم باید برایمان تا {days} روزِ دیگر ارسال یا تحویل دهید. سفارش تا رسیدنِ فیزیکیِ چک «در انتظار دریافت چک» می‌ماند. ارسالِ سفارشِ شما انجام خواهد شد.');
+    return str_replace('{days}', (string)paymentChequeDeadlineDays(), $tpl);
 }
 
 /* تیکِ «دریافت چک» مدیر — فقط زمان را ثبت می‌کند، وضعیتِ پرداخت را عوض نمی‌کند */

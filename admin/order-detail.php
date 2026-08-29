@@ -637,21 +637,21 @@ if ($pchk && !empty($pchk['product_id'])) {
             <?php endif; ?>
 
             <?php if ($chqOn && $payMethod === 'cheque'): ?>
-            <?php /* اطلاعاتی که همکار خودش پس از ثبت سفارش وارد کرده + دکمهٔ «دریافت چک».
-                    این دکمه پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده؛
-                    وصول‌شدنش با همان فرمِ عمومیِ «ثبت وضعیت پرداخت» بالا ثبت می‌شود. */ ?>
+            <?php /* از ۲۰۲۶-۰۸-۳۰ همکار دیگر بانک/شماره/تاریخ/مبلغِ چک را تایپ نمی‌کند
+                    (خواستهٔ کاربر) — فقط اصلِ چک باید فیزیکی برسد. پس این جعبه دیگر
+                    وابسته به cheque_number نیست؛ دکمهٔ «دریافت چک» همیشه در دسترس
+                    است. اگر سفارش قدیمی‌تر از این تغییر باشد و آن ستون‌ها را دارد،
+                    همچنان به‌عنوان اطلاعاتِ تاریخی نشان داده می‌شود. */ ?>
             <?php $hasChq = trim((string)($order['cheque_number'] ?? '')) !== ''; ?>
             <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
-                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> اطلاعاتِ چکِ ثبت‌شده توسط همکار</h4>
+                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</h4>
 
                 <?php if (isset($_GET['chqsaved'])): ?>
                 <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> دریافتِ چک ثبت شد.</div>
                 <?php endif; ?>
 
-                <?php if (!$hasChq): ?>
-                <p style="color:var(--text-muted);font-size:0.85rem;"><?= icon('clock', 'ic-sm') ?> همکار هنوز اطلاعات چک را ثبت نکرده است.</p>
-                <?php else: ?>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.75rem 1.5rem;">
+                <?php if ($hasChq): ?>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.75rem 1.5rem;margin-bottom:0.75rem;">
                     <p style="margin:0;"><strong>بانک:</strong> <?= h((string)$order['cheque_bank']) ?></p>
                     <p style="margin:0;"><strong>شمارهٔ چک:</strong> <span dir="ltr"><?= h((string)$order['cheque_number']) ?></span></p>
                     <p style="margin:0;"><strong>تاریخ چک:</strong> <?= h((string)$order['cheque_date']) ?></p>
@@ -666,19 +666,20 @@ if ($pchk && !empty($pchk['product_id'])) {
                     <?php if (!empty($order['cheque_reported_at'])): ?>
                     <p style="margin:0;"><strong>زمان ثبت در سایت:</strong> <?= date('Y/m/d H:i', strtotime($order['cheque_reported_at'])) ?></p>
                     <?php endif; ?>
-                    <?php if (!empty($order['cheque_received_at'])): ?>
-                    <p style="margin:0;color:var(--green);"><strong>دریافت‌شده در:</strong> <?= date('Y/m/d H:i', strtotime($order['cheque_received_at'])) ?></p>
-                    <?php endif; ?>
                 </div>
+                <?php else: ?>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.75rem;">مهلتِ ارسال/تحویلِ اصلِ چک: <b><?= (int)paymentChequeDeadlineDays() ?> روز</b> از زمانِ ثبتِ سفارش.</p>
+                <?php endif; ?>
 
-                <?php if (empty($order['cheque_received_at'])): ?>
-                <form method="POST" action="order-detail.php?id=<?= $id ?>" style="margin-top:0.9rem;"
+                <?php if (!empty($order['cheque_received_at'])): ?>
+                <p style="margin:0;color:var(--green);"><?= icon('check-circle', 'ic-sm') ?> <strong>چک دریافت شد</strong> — <?= date('Y/m/d H:i', strtotime($order['cheque_received_at'])) ?></p>
+                <?php else: ?>
+                <form method="POST" action="order-detail.php?id=<?= $id ?>"
                       onsubmit="return confirm('دریافتِ این چک ثبت شود؟ (این کار پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده است.)');">
                     <input type="hidden" name="cheque_receive" value="1">
                     <button type="submit" class="btn btn-primary"><?= icon('check-circle', 'ic-sm') ?> ثبتِ دریافتِ چک</button>
                     <span style="color:var(--text-muted);font-size:0.72rem;margin-inline-start:0.5rem;">وقتی چک واقعاً وصول شد، از فرمِ «ثبت وضعیت پرداخت» بالا «پرداخت‌شده» را بزنید.</span>
                 </form>
-                <?php endif; ?>
                 <?php endif; ?>
             </div>
             <?php endif; ?>

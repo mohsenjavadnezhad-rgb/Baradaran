@@ -30,6 +30,8 @@ $secTextKeys = [
     'pay'    => [
         'pay_desc', 'pay_cod_note', 'pay_card_holder', 'pay_card_bank', 'pay_card_note', 'pay_c2c_note',
         'pay_zarinpal_merchant', 'pay_zibal_merchant', 'pay_idpay_key',
+        /* پیغامِ تأییدِ سفارشِ چکی — pay_cheque_deadline_days رقمی است و پایین‌تر جدا پاک‌سازی می‌شود */
+        'pay_cheque_note',
     ],
     /* پرداخت اعتباری/اقساطی — بخشِ جداگانه، چون سرویس‌دهندهٔ متفاوتی دارد
        (BNPL، نه دروازهٔ بانکی) و کنارِ «درگاه پرداخت» شلوغش می‌کرد.
@@ -116,6 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
            عمومی» نیست، ولی مدیر می‌تواند اینجا خاموششان کند). */
         setSetting('pay_enable_partner_month', isset($_POST['pay_enable_partner_month']) ? '1' : '0');
         setSetting('pay_enable_cheque',        isset($_POST['pay_enable_cheque'])        ? '1' : '0');
+
+        $chqDays = (int)faToLatinDigits((string)($_POST['pay_cheque_deadline_days'] ?? '10'));
+        setSetting('pay_cheque_deadline_days', (string)max(1, min(90, $chqDays ?: 10)));
 
         /* عکسِ نمونهٔ چک — زیرِ کادرِ «اطلاعات چک» در تسویه‌حساب/صفحهٔ سفارش
            نشان داده می‌شود (خواستهٔ کاربر). حذفِ عکسِ فعلی با تیکِ جداگانه،
@@ -742,6 +747,17 @@ require_once __DIR__ . '/layout-top.php';
       </label>
       <?php endif; ?>
       <input type="file" name="cheque_sample" class="form-control" accept="image/*">
+    </div>
+
+    <?php /* دیگر فرمِ ثبتِ بانک/شماره/تاریخ/مبلغِ چک نداریم (خواستهٔ کاربر) —
+             فقط یک پیغامِ تأییدِ سفارش + مهلتِ تحویلِ اصلِ چک، که همین‌جا
+             قابلِ تنظیم است. {days} در متن با عددِ زیر جایگزین می‌شود. */ ?>
+    <div class="form-group"><label>مهلتِ ارسال/تحویلِ اصلِ چک (روز)</label>
+      <input type="number" name="pay_cheque_deadline_days" class="form-control" style="width:140px;"
+             value="<?= (int)(sv('pay_cheque_deadline_days') ?: 10) ?>" min="1" max="90"></div>
+
+    <div class="form-group"><label>متنِ پیغامِ تأییدِ سفارشِ چکی <span style="color:var(--text-muted);font-weight:400;font-size:0.72rem;">(به‌جایِ <code dir="ltr">{days}</code> عددِ بالا نوشته می‌شود)</span></label>
+      <textarea name="pay_cheque_note" class="form-control" rows="3"><?= h(sv('pay_cheque_note') ?: 'سفارش شما تأیید شد؛ اما اصلِ چک را هم باید برایمان تا {days} روزِ دیگر ارسال یا تحویل دهید. سفارش تا رسیدنِ فیزیکیِ چک «در انتظار دریافت چک» می‌ماند. ارسالِ سفارشِ شما انجام خواهد شد.') ?></textarea>
     </div>
 
     <div class="form-group"><label>یادداشت «پرداخت در محل» (زیر گزینه در صفحهٔ تسویه)</label>
