@@ -131,11 +131,32 @@ if ($c2cIn['amount'] === '') $c2cIn['amount'] = (string)$payable;
 if ($c2cIn['date'] === '')   $c2cIn['date']   = jDate($c2cNow->format('Y-m-d'));
 $c2cIn['paid_text'] = trim($c2cIn['date'] . ' - ' . $c2cIn['time']);
 
-/* ---------- چک: از ۲۰۲۶-۰۸-۳۰ دیگر هیچ فرمی روی این صفحه نیست ----------
-   خواستهٔ کاربر: همکار دیگر بانک/شماره/تاریخ/مبلغِ چک را تایپ نمی‌کند —
-   فقط انتخابِ «چک» کافی است؛ اصلِ چک باید فیزیکی ارسال/تحویل شود (پیغامش
-   در order-success.php با paymentChequeNoteText() نشان داده می‌شود). */
+/* ---------- چک: ورودی‌های ثبتِ چک روی همین صفحه ----------
+   با تصمیم تازهٔ کاربر (۲۰۲۶-۰۸-۲۹) فرم دوباره برگشت — عیناً به الگوی
+   کارت‌به‌کارت بالا: بانک، سریال، تاریخ، مبلغ، در وجه و شناسهٔ صیادِ چک همین‌جا
+   گرفته می‌شود. مقدارها پس از خطای فرم دوباره پر می‌شوند؛ مبلغ پیش‌فرض همان
+   مبلغ قابل پرداخت و تاریخ پیش‌فرض همین امروز است، همه قابل ویرایش‌اند.
+   اصلِ چک هم‌چنان باید فیزیکی ارسال/تحویل شود (پیغامش در order-success.php
+   با paymentChequeNoteText() نشان داده می‌شود) — این فرم فقط اطلاعاتِ چک را
+   از پیش می‌گیرد تا مدیر آن‌ها را با اصلِ رسیده مقایسه کند. */
 $chqReady = (isset($payMethods['cheque']) && paymentChequeReady());
+
+$chqDate = trim(faToLatinDigits((string)($_POST['chq_date'] ?? '')));
+if (preg_match('~^(\d{4})\s*[/\-.]\s*(\d{1,2})\s*[/\-.]\s*(\d{1,2})$~', $chqDate, $mDate2)) {
+    $chqDate = sprintf('%04d/%02d/%02d', (int)$mDate2[1],
+                       min(12, max(1, (int)$mDate2[2])), min(31, max(1, (int)$mDate2[3])));
+}
+
+$chqIn = [
+    'bank'   => trim((string)($_POST['chq_bank'] ?? '')),
+    'number' => trim((string)($_POST['chq_number'] ?? '')),
+    'date'   => $chqDate,
+    'amount' => trim((string)($_POST['chq_amount'] ?? '')),
+    'payee'  => trim((string)($_POST['chq_payee'] ?? '')),
+    'sayad'  => trim((string)($_POST['chq_sayad'] ?? '')),
+];
+if ($chqIn['amount'] === '') $chqIn['amount'] = (string)$payable;
+if ($chqIn['date'] === '')   $chqIn['date']   = jDate($c2cNow->format('Y-m-d'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     $name     = trim($_POST['customer_name'] ?? '');
@@ -162,6 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
         if ($c2cErr !== '') $errors[] = $c2cErr;
     }
 
+    /* چک: اطلاعات چک هم همین‌جا گرفته می‌شود (تصمیم تازهٔ کاربر) — همان الگوی
+       کارت‌به‌کارت بالا. اعتبار پیش از INSERT سنجیده می‌شود، وگرنه سفارشی ثبت
+       می‌شد که اطلاعات چکش ناقص است. */
+    $chqOn = ($payMethod === 'cheque' && paymentChequeReady());
+    if ($chqOn) {
+        $chqErr = paymentChequeClean($chqIn)['error'];
+        if ($chqErr !== '') $errors[] = $chqErr;
+    }
 
     /* روش ارسال هم فقط از میان روش‌های فعال؛ هزینه در سرور از نرخ‌نامه/تنظیمات
        محاسبه می‌شود، نه از فرم، تا کسی نتواند با دست‌کاری فرم هزینه را صفر کند.
@@ -207,10 +236,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             );
 
             /* سفارش‌های آنلاین با وضعیت «در انتظار پرداخت» ثبت می‌شوند تا در بازگشت از درگاه تکمیل شوند.
-               «پرداخت اول ماه» و «چک» چیزی برای گزارش‌کردن از سمت همکار ندارند
-               (چک هم از ۲۰۲۶-۰۸-۳۰ دیگر فرمی روی این صفحه ندارد — فقط پیغامِ
-               مهلتِ ارسالِ اصلِ چک در order-success.php)، پس هر دو مستقیم
-               «در انتظار» می‌شوند تا در صفِ پیگیریِ مدیر/تسویهٔ همکاران بیفتند. */
+               «پرداخت اول ماه» چیزی برای گزارش‌کردن از سمت همکار ندارد و «چک»
+               اطلاعاتش را همین‌جا (پایین‌تر) ذخیره می‌کند، ولی هیچ‌کدام «پرداخت‌شده»
+               نیستند، پس هر دو مستقیم «در انتظار» می‌شوند تا در صفِ پیگیریِ
+               مدیر/تسویهٔ همکاران بیفتند. */
             $payStatus = paymentIsOnline($payMethod) ? 'pending' : (in_array($payMethod, ['partner_month', 'cheque'], true) ? 'pending' : 'unpaid');
 
             /* ستون‌ها بر اساس مهاجرت‌های اجرا‌شده ساخته می‌شوند تا صفحه روی
@@ -253,6 +282,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             if ($c2cOn) {
                 $c2cErr = paymentC2cSave($orderId, $c2cIn);
                 if ($c2cErr !== '') throw new Exception($c2cErr);
+            }
+
+            /* اطلاعات چک هم همراه خودِ سفارش ذخیره می‌شود؛ وضعیت پرداخت
+               «در انتظار» می‌ماند تا مدیر اصلِ چکِ رسیده را با این اطلاعات
+               مقایسه و بعد «دریافتِ چک» را در جزئیات سفارش ثبت کند. */
+            if ($chqOn) {
+                $chqErr = paymentChequeSave($orderId, $chqIn);
+                if ($chqErr !== '') throw new Exception($chqErr);
             }
 
             $pdo->commit();
@@ -467,10 +504,9 @@ require_once __DIR__ . '/includes/header.php';
                                     کامل می‌شود و در انتظار پیگیریِ مدیر برای تسویهٔ اول ماه می‌ماند. */ ?>
                             <small>سفارش بدون پرداختِ الان ثبت می‌شود؛ تسویه در ابتدای ماه انجام می‌شود.</small>
                             <?php elseif ($pk === 'cheque'): ?>
-                            <?php /* ویژهٔ همکارِ تأییدشده — چیزی اینجا گرفته نمی‌شود (خواستهٔ کاربر:
-                                    دیگر فرمی برای بانک/شماره/تاریخ/مبلغ نیست)؛ سفارش کامل می‌شود و
-                                    فقط اصلِ چک باید بعداً فیزیکی برایمان برسد — جزئیاتش در صفحهٔ بعد. */ ?>
-                            <small>سفارش بدون پرکردنِ فرم ثبت می‌شود؛ فقط اصلِ چک را باید تا مهلتی که در صفحهٔ بعد می‌بینید برایمان ارسال یا تحویل دهید.</small>
+                            <?php /* ویژهٔ همکارِ تأییدشده — اطلاعاتِ چک را در کادر پایین وارد می‌کند؛
+                                    اصلِ چک هم‌چنان باید بعداً فیزیکی برایمان برسد — جزئیاتش در صفحهٔ بعد. */ ?>
+                            <small>اطلاعات چک را در کادر پایین وارد کنید؛ اصلِ چک را هم باید تا مهلتی که در صفحهٔ بعد می‌بینید برایمان ارسال یا تحویل دهید.</small>
                             <?php else: ?>
                             <small>انتقال به درگاه بانکی و پرداخت اینترنتی با کارت‌های شتاب.</small>
                             <?php endif; ?>
@@ -559,18 +595,75 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <?php if ($chqReady): ?>
-                    <?php /* دیگر فرمی نیست — فقط یادآوریِ کوتاه، همان‌جا که پیش‌تر فرم بود.
-                            پیغامِ کاملِ «تا چند روز» بعد از ثبتِ سفارش در order-success.php
-                            با paymentChequeNoteText() نشان داده می‌شود. */ ?>
+                    <?php /* اطلاعاتِ چک، فقط وقتی «چک» انتخاب شده باشد — همان الگوی کادرِ
+                            کارت‌به‌کارت بالا. هیچ فیلدی required نیست: کادر پنهان می‌شود و
+                            فیلدِ پنهانِ required جلوی ارسال فرم را بی‌آنکه دیده شود می‌گرفت.
+                            اسکریپت پایین با نمایش کادر required را می‌گذارد و سرور در هر
+                            حال دوباره اعتبار را می‌سنجد. پیغامِ کاملِ «تا چند روز» بعد از
+                            ثبتِ سفارش در order-success.php با paymentChequeNoteText() نشان
+                            داده می‌شود. */ ?>
                     <div class="pay-c2c" id="pay-cheque"<?= $payDefault === 'cheque' ? '' : ' hidden' ?>>
-                        <div class="pc2-t"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</div>
-                        <p class="pc2-note"><?= icon('info', 'ic-sm') ?> بعد از ثبتِ سفارش، فقط باید اصلِ چک را برایمان ارسال یا تحویل دهید — چیزی این‌جا لازم نیست تایپ کنید.</p>
+                        <div class="pc2-t"><?= icon('receipt', 'ic-sm') ?> اطلاعات چک</div>
                         <?php if (($chqSampleImg = trim((string)getSettingRaw('pay_cheque_sample', ''))) !== ''): ?>
                         <div class="pc2-sample">
                             <img src="uploads/settings/<?= h($chqSampleImg) ?>" alt="نمونهٔ چک">
                             <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا</span>
                         </div>
                         <?php endif; ?>
+                        <p class="pc2-note"><?= icon('info', 'ic-sm') ?> بعد از ثبتِ سفارش، اصلِ چک را هم باید تا مهلتی که در صفحهٔ بعد می‌بینید برایمان ارسال یا تحویل دهید.</p>
+                        <div class="pc2-grid">
+                            <div class="form-group">
+                                <label for="chq_bank">بانک *</label>
+                                <input type="text" name="chq_bank" id="chq_bank" class="form-control"
+                                       value="<?= h($chqIn['bank']) ?>" placeholder="مثلاً ملت">
+                            </div>
+                            <div class="form-group">
+                                <label for="chq_number">سریال چک *</label>
+                                <input type="text" name="chq_number" id="chq_number" class="form-control" dir="ltr"
+                                       value="<?= h($chqIn['number']) ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="chq_date">تاریخ چک *</label>
+                                <?php /* همان تقویمِ شمسیِ کادرِ «تاریخ واریز» بالا (خواستهٔ کاربر:
+                                        «مثل تاریخی که در کارت به کارت استفاده کرده»)، با شناسهٔ
+                                        جداگانه چون هر دو کادر می‌توانند هم‌زمان در DOM باشند. */ ?>
+                                <div class="jdp" id="jdp-cheque">
+                                    <input type="text" name="chq_date" id="chq_date" class="form-control" dir="ltr"
+                                           inputmode="numeric" autocomplete="off"
+                                           value="<?= h($chqIn['date']) ?>" placeholder="1405/06/03">
+                                    <button type="button" class="jdp-btn" title="انتخاب از تقویم"
+                                            aria-label="انتخاب تاریخ از تقویم"><?= icon('calendar', 'ic-sm') ?></button>
+                                    <div class="jdp-pop" hidden>
+                                        <div class="jdp-h">
+                                            <button type="button" class="jdp-nav" data-mv="-1" aria-label="ماه قبل"><?= icon('chevron-right', 'ic-sm') ?></button>
+                                            <b class="jdp-ttl"></b>
+                                            <button type="button" class="jdp-nav" data-mv="1" aria-label="ماه بعد"><?= icon('chevron-left', 'ic-sm') ?></button>
+                                        </div>
+                                        <div class="jdp-w"><i>ش</i><i>ی</i><i>د</i><i>س</i><i>چ</i><i>پ</i><i>ج</i></div>
+                                        <div class="jdp-g"></div>
+                                        <div class="jdp-f">
+                                            <button type="button" class="jdp-now">امروز</button>
+                                            <button type="button" class="jdp-x">بستن</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chq_amount">مبلغ چک (تومان) *</label>
+                                <input type="text" name="chq_amount" id="chq_amount" class="form-control" dir="ltr"
+                                       inputmode="numeric" value="<?= h($chqIn['amount']) ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="chq_payee">در وجه *</label>
+                                <input type="text" name="chq_payee" id="chq_payee" class="form-control"
+                                       value="<?= h($chqIn['payee']) ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="chq_sayad">شناسهٔ صیاد</label>
+                                <input type="text" name="chq_sayad" id="chq_sayad" class="form-control" dir="ltr"
+                                       inputmode="numeric" value="<?= h($chqIn['sayad']) ?>" placeholder="۱۶ رقم">
+                            </div>
+                        </div>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -647,7 +740,7 @@ require_once __DIR__ . '/includes/header.php';
                 var sel = document.querySelector('input[name=payment_method]:checked');
                 var val = sel ? sel.value : '';
                 toggleBox(c2cBox, val === 'card',   ['c2c_ref', 'c2c_amount', 'c2c_last4', 'c2c_date']);
-                toggleBox(chqBox, val === 'cheque', []);
+                toggleBox(chqBox, val === 'cheque', ['chq_bank', 'chq_number', 'chq_date', 'chq_amount', 'chq_payee']);
             }
 
             function toggleBox(box, on, requiredIds) {
@@ -887,6 +980,140 @@ require_once __DIR__ . '/includes/header.php';
 
             pop.addEventListener('click', function(e){
                 /* بالا رفتن تا خودِ دکمه: کلیک ممکن است روی SVG درونِ آن باشد */
+                var b = e.target;
+                while (b && b !== pop && b.tagName !== 'BUTTON') b = b.parentNode;
+                if (!b || b === pop) return;
+                if (!view) draw();
+                if (b.hasAttribute('data-mv')) {
+                    view.m += parseInt(b.getAttribute('data-mv'), 10);
+                    if (view.m > 12) { view.m = 1;  view.y++; }
+                    if (view.m < 1)  { view.m = 12; view.y--; }
+                    draw();
+                } else if (b.hasAttribute('data-d')) {
+                    pick(view.y, view.m, parseInt(b.getAttribute('data-d'), 10));
+                } else if (b.className.indexOf('jdp-now') !== -1) {
+                    var t = today(); pick(t[0], t[1], t[2]);
+                } else if (b.className.indexOf('jdp-x') !== -1) {
+                    close();
+                }
+            });
+
+            document.addEventListener('click', function(e){
+                if (!pop.hidden && !wrap.contains(e.target)) close();
+            });
+            document.addEventListener('keydown', function(e){
+                if (!pop.hidden && (e.key === 'Escape' || e.keyCode === 27)) close();
+            });
+        })();
+        </script>
+        <?php endif; ?>
+
+        <?php if ($chqReady): ?>
+        <script>
+        /* ---------- تقویم شمسیِ «تاریخ چک» ----------
+           عیناً همان تقویمِ «تاریخ واریز»ی کارت‌به‌کارت بالا (خواستهٔ کاربر: «مثل
+           تاریخی که در کارت به کارت استفاده کرده») روی یک شناسهٔ جداگانه، چون هر
+           دو کادر می‌توانند هم‌زمان در DOM باشند. */
+        (function(){
+            var wrap = document.getElementById('jdp-cheque');
+            if (!wrap) return;
+            var inp  = wrap.querySelector('input');
+            var btn  = wrap.querySelector('.jdp-btn');
+            var pop  = wrap.querySelector('.jdp-pop');
+            var ttl  = wrap.querySelector('.jdp-ttl');
+            var grid = wrap.querySelector('.jdp-g');
+            var MN   = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+                        'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+            var view = null;   /* ماهی که همین حالا نشان داده می‌شود */
+
+            function g2j(gy, gm, gd) {
+                var gdm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+                var gy2 = (gm > 2) ? (gy + 1) : gy;
+                var days = 355666 + (365 * gy) + ~~((gy2 + 3) / 4) - ~~((gy2 + 99) / 100)
+                         + ~~((gy2 + 399) / 400) + gd + gdm[gm - 1];
+                var jy = -1595 + (33 * ~~(days / 12053));
+                days %= 12053;
+                jy += 4 * ~~(days / 1461);
+                days %= 1461;
+                if (days > 365) { jy += ~~((days - 1) / 365); days = (days - 1) % 365; }
+                if (days < 186) return [jy, 1 + ~~(days / 31), 1 + (days % 31)];
+                return [jy, 7 + ~~((days - 186) / 30), 1 + ((days - 186) % 30)];
+            }
+            function j2g(jy, jm, jd) {
+                jy += 1595;
+                var days = -355668 + (365 * jy) + (~~(jy / 33) * 8) + ~~(((jy % 33) + 3) / 4)
+                         + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+                var gy = 400 * ~~(days / 146097);
+                days %= 146097;
+                if (days > 36524) {
+                    gy += 100 * ~~(--days / 36524);
+                    days %= 36524;
+                    if (days >= 365) days++;
+                }
+                gy += 4 * ~~(days / 1461);
+                days %= 1461;
+                if (days > 365) { gy += ~~((days - 1) / 365); days = (days - 1) % 365; }
+                var gd = days + 1;
+                var leap = ((gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0);
+                var dim  = [0, 31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                var gm = 0;
+                while (gm < 13 && gd > dim[gm]) { gd -= dim[gm]; gm++; }
+                return [gy, gm, gd];
+            }
+
+            function mdays(jy, jm) {
+                if (jm < 7)  return 31;
+                if (jm < 12) return 30;
+                var g = j2g(jy, 12, 30), b = g2j(g[0], g[1], g[2]);
+                return (b[0] === jy && b[1] === 12 && b[2] === 30) ? 30 : 29;
+            }
+            function pad(n)  { return (n < 10 ? '0' : '') + n; }
+            function today() { var d = new Date(); return g2j(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
+            function ord(y, m, d) { var g = j2g(y, m, d); return Date.UTC(g[0], g[1] - 1, g[2]); }
+
+            function parse(s) {
+                s = String(s || '').replace(/[۰-۹]/g, function(c){
+                    return String.fromCharCode(c.charCodeAt(0) - 0x06F0 + 48);
+                });
+                var m = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+                if (!m) return null;
+                var y = +m[1], mo = +m[2], d = +m[3];
+                if (mo < 1 || mo > 12 || d < 1 || d > mdays(y, mo)) return null;
+                return [y, mo, d];
+            }
+
+            function draw() {
+                var t = today(), sel = parse(inp.value), i;
+                if (!view) view = sel ? {y: sel[0], m: sel[1]} : {y: t[0], m: t[1]};
+                var n   = mdays(view.y, view.m);
+                var g1  = j2g(view.y, view.m, 1);
+                var lead = (new Date(g1[0], g1[1] - 1, g1[2]).getDay() + 1) % 7;
+                var out  = '';
+                for (i = 0; i < lead; i++) out += '<span></span>';
+                for (i = 1; i <= n; i++) {
+                    var cls = [];
+                    if (sel && sel[0] === view.y && sel[1] === view.m && sel[2] === i) cls.push('is-on');
+                    if (t[0] === view.y && t[1] === view.m && t[2] === i) cls.push('is-today');
+                    out += '<button type="button" class="' + cls.join(' ') + '" data-d="' + i + '">' + i + '</button>';
+                }
+                ttl.textContent = MN[view.m - 1] + ' ' + view.y;
+                grid.innerHTML  = out;
+            }
+
+            function open()  { view = null; draw(); pop.hidden = false; }
+            function close() { pop.hidden = true; }
+            function pick(y, m, d) { inp.value = y + '/' + pad(m) + '/' + pad(d); close(); }
+
+            btn.addEventListener('click', function(){ if (pop.hidden) open(); else close(); });
+            inp.addEventListener('click', open);
+            inp.addEventListener('input', function(){
+                if (pop.hidden) return;
+                var v = parse(inp.value);
+                if (v) view = {y: v[0], m: v[1]};
+                draw();
+            });
+
+            pop.addEventListener('click', function(e){
                 var b = e.target;
                 while (b && b !== pop && b.tagName !== 'BUTTON') b = b.parentNode;
                 if (!b || b === pop) return;
