@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#14365D"/>
+      <stop offset="100%" stop-color="#0F2B46"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E6C84D"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 6 L54 14 L54 44 Q54 52 32 58 Q10 52 10 44 L10 14Z" fill="url(#bg)"/>
+  <path d="M32 12 L49 18 L49 42 Q49 48 32 53 Q15 48 15 42 L15 18Z" fill="none" stroke="url(#gold)" stroke-width="1" opacity=".5"/>
+  <text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="18" fill="url(#gold)" letter-spacing="4">MVM</text>
+</svg>

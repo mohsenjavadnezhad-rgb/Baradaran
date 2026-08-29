@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#004C99"/>
+      <stop offset="100%" stop-color="#003D7C"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="url(#bg)"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#fff" stroke-width="1" opacity=".25"/>
+  <path d="M22 38 Q18 26 26 18 Q22 24 24 36 Q28 32 32 24 Q36 32 40 36 Q42 24 38 18 Q46 26 42 38 Q38 44 32 46 Q26 44 22 38Z" fill="#fff"/>
+  <text x="32" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="7" fill="#fff" letter-spacing="3">IKCO</text>
+</svg>

@@ -1,0 +1,190 @@
+<?php
+/* برندها و مدل‌ها (جدول categories، دو سطحی: parent_id NULL = برند).
+   بازطراحیِ 2026-08-26: قبلاً یک جدولِ تخت با همهٔ برند+مدل‌ها ردیف‌به‌ردیف
+   بود که با ده‌ها برند خیلی طولانی می‌شد (خواستهٔ کاربر: «طراحیشو تغییر بده»)
+   و صفحهٔ مستقلِ خودش را داشت (نه layout-top.php)، پس با بقیهٔ پنل هم‌شکل
+   نبود. حالا مثل admin/part-categories.php گروه‌بندی‌شده و جمع‌شونده است. */
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/functions.php';
+if (!isLoggedIn()) { header('Location: login.php'); exit; }
+
+$msg = '';
+$msgErr = false;
+
+/* نمایشِ نامِ انگلیسیِ برند (اسلاگ) روی تگ‌های shop.php — [[batch9-fixes]] */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_brand_en'])) {
+    $mode = in_array($_POST['brand_en_mode'] ?? '', ['off', 'hover', 'always'], true) ? $_POST['brand_en_mode'] : 'off';
+    setSetting('brand_en_mode', $mode);
+    $msg = 'تنظیمِ نمایشِ نامِ انگلیسی ذخیره شد.';
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
+    $name = trim($_POST['name'] ?? '');
+    $parentId = $_POST['parent_id'] !== '' ? (int)$_POST['parent_id'] : null;
+    $editId = (int)($_POST['edit_id'] ?? 0);
+    $slug = slugify($name);
+
+    if ($name !== '') {
+        if ($editId > 0) {
+            $stmt = $pdo->prepare("UPDATE categories SET name=?, slug=?, parent_id=? WHERE id=?");
+            $stmt->execute([$name, $slug, $parentId, $editId]);
+            $msg = 'دسته‌بندی به‌روزرسانی شد.';
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO categories (name, slug, parent_id) VALUES (?, ?, ?)");
+            $stmt->execute([$name, $slug, $parentId]);
+            $msg = 'دسته‌بندی اضافه شد.';
+        }
+    }
+}
+
+/* حذف — اگر برندی هنوز مدل دارد رد می‌شود (وگرنه مدل‌ها یتیم می‌مانند)،
+   هم‌الگوی گاردِ part-categories.php ([[part-categories-admin-crud]]). */
+if (isset($_GET['delete'])) {
+    $delId = (int)$_GET['delete'];
+    $chk = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE parent_id=?");
+    $chk->execute([$delId]);
+    if ((int)$chk->fetchColumn() > 0) {
+        $msg = 'این برند هنوز مدل دارد؛ ابتدا مدل‌هایش را حذف یا به برند دیگری منتقل کنید.';
+        $msgErr = true;
+    } else {
+        $pdo->prepare("DELETE FROM categories WHERE id = ?")->execute([$delId]);
+        $msg = 'دسته‌بندی حذف شد.';
+    }
+}
+
+$brands = $pdo->query("SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name")->fetchAll();
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM product_categories WHERE category_id = ?");
+$childStmt = $pdo->prepare("SELECT * FROM categories WHERE parent_id = ? ORDER BY name");
+
+$tree = [];
+foreach ($brands as $b) {
+    $countStmt->execute([$b['id']]);
+    $ownCount = (int)$countStmt->fetchColumn();
+    $childStmt->execute([$b['id']]);
+    $children = [];
+    foreach ($childStmt->fetchAll() as $c) {
+        $countStmt->execute([$c['id']]);
+        $children[] = ['row' => $c, 'count' => (int)$countStmt->fetchColumn()];
+    }
+    $tree[] = ['row' => $b, 'own' => $ownCount, 'children' => $children];
+}
+
+$editCat = null;
+if (isset($_GET['edit'])) {
+    $stmt = $pdo->prepare("SELECT * FROM categories WHERE id = ?");
+    $stmt->execute([(int)$_GET['edit']]);
+    $editCat = $stmt->fetch();
+}
+$newModelParent = 0;
+if (!$editCat && isset($_GET['new_model'])) $newModelParent = (int)$_GET['new_model'];
+
+require_once __DIR__ . '/layout-top.php';
+?>
+
+<?php if ($msg): ?><div class="flash <?= $msgErr ? 'flash-error' : 'flash-success' ?>" style="margin:0 0 1rem;"><?= h($msg) ?></div><?php endif; ?>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+    <h2 style="font-size:1rem;color:var(--text-primary);"><?= icon('layers', 'ic-sm') ?> برندها و مدل‌ها</h2>
+    <a href="categories-report.php" target="_blank" class="btn btn-secondary btn-sm"><?= icon('printer', 'ic-sm') ?> چاپ / خروجی اکسل</a>
+</div>
+
+<?php $benMode = brandEnMode(); ?>
+<div class="dg-box" style="padding:0.85rem 1rem;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:0.6rem;">
+    <span style="font-size:0.82rem;color:var(--text-secondary);"><?= icon('globe', 'ic-sm') ?> نمایشِ نامِ انگلیسیِ برند روی دکمه‌های صفحهٔ «قطعات خودرو»</span>
+    <form method="POST" style="display:flex;align-items:center;gap:0.4rem;">
+        <input type="hidden" name="save_brand_en" value="1">
+        <select name="brand_en_mode" class="form-control" style="width:auto;font-size:0.8rem;padding:0.4rem 0.7rem;" onchange="this.form.submit()">
+            <option value="off"    <?= $benMode === 'off'    ? 'selected' : '' ?>>نشان نده (پیش‌فرض)</option>
+            <option value="hover"  <?= $benMode === 'hover'  ? 'selected' : '' ?>>فقط با نگه‌داشتنِ موس رویش</option>
+            <option value="always" <?= $benMode === 'always' ? 'selected' : '' ?>>همیشه به‌جای فارسی نشان بده</option>
+        </select>
+        <noscript><button type="submit" class="btn btn-secondary btn-sm">ذخیره</button></noscript>
+    </form>
+    <span style="font-size:0.72rem;color:var(--text-muted);">حروفِ اولِ کلماتِ انگلیسی خودکار بزرگ نوشته می‌شود.</span>
+</div>
+
+<div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;">
+    <div>
+        <div class="dg-box">
+            <div class="dg-box-hd"><h3>
+                <?php if ($editCat): ?>ویرایش «<?= h($editCat['name']) ?>»
+                <?php elseif ($newModelParent): ?>مدلِ جدید — <?php $npRow = null; foreach ($brands as $b) { if ((int)$b['id'] === $newModelParent) { $npRow = $b; break; } } ?>«<?= h($npRow['name'] ?? '') ?>»
+                <?php else: ?>برند یا مدلِ جدید
+                <?php endif; ?>
+            </h3></div>
+            <div class="dg-box-bd" style="padding:1rem;">
+                <form method="POST">
+                    <input type="hidden" name="edit_id" value="<?= $editCat['id'] ?? 0 ?>">
+                    <div class="form-group">
+                        <label for="name">نام</label>
+                        <input type="text" name="name" id="name" class="form-control" value="<?= h($editCat['name'] ?? '') ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parent_id">برند مادر</label>
+                        <select name="parent_id" id="parent_id" class="form-control">
+                            <option value="">-- برند اصلی (بدون والد) --</option>
+                            <?php foreach ($brands as $b): ?>
+                            <option value="<?= $b['id'] ?>" <?= ($editCat['parent_id'] ?? $newModelParent) == $b['id'] ? 'selected' : '' ?>><?= h($b['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی بگذارید تا یک برندِ تازه بسازید؛ یک برند انتخاب کنید تا مدلِ همان برند شود.</small>
+                    </div>
+                    <button type="submit" name="save_category" class="btn btn-primary btn-block"><?= $editCat ? 'به‌روزرسانی' : 'افزودن' ?></button>
+                    <?php if ($editCat || $newModelParent): ?><a href="categories.php" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">انصراف</a><?php endif; ?>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="dg-box">
+        <div class="dg-box-hd"><h3>برندها (<?= count($tree) ?>)</h3></div>
+        <div class="dg-box-bd" style="padding:0;">
+            <?php foreach ($tree as $t): $bid = 'catbr-' . (int)$t['row']['id']; ?>
+            <div class="pset-row">
+                <input type="checkbox" id="<?= $bid ?>" class="pset-toggle" hidden <?= count($t['children']) <= 8 ? 'checked' : '' ?>>
+                <div class="pset-sum-wrap">
+                    <label for="<?= $bid ?>" class="pset-sum">
+                        <span class="pset-name">
+                            <?= icon('layers', 'ic-sm') ?> <b><?= h($t['row']['name']) ?></b>
+                            <span class="pset-count"><?= count($t['children']) ?> مدل · <?= $t['own'] ?> محصولِ مستقیم</span>
+                        </span>
+                        <span class="pset-caret"><?= icon('chevron-down', 'ic-sm') ?></span>
+                    </label>
+                    <a href="?edit=<?= (int)$t['row']['id'] ?>" class="btn btn-secondary btn-sm">ویرایش برند</a>
+                    <a href="?new_model=<?= (int)$t['row']['id'] ?>" class="btn btn-secondary btn-sm">+ مدل</a>
+                    <a href="?delete=<?= (int)$t['row']['id'] ?>" class="btn btn-danger btn-sm"
+                       <?= $t['children'] ? '' : 'onclick="return confirm(\'این برند حذف شود؟\');"' ?>>حذف</a>
+                </div>
+
+                <div class="pset-body">
+                    <?php if (!$t['children']): ?>
+                    <p style="color:var(--text-muted);font-size:0.82rem;padding:0 0 0.75rem;">این برند هنوز مدلی ندارد.</p>
+                    <?php else: ?>
+                    <table class="admin-table" style="margin:0 0 0.75rem;">
+                        <thead><tr><th>مدل</th><th style="width:140px;">تعداد محصول</th><th style="width:170px;">عملیات</th></tr></thead>
+                        <tbody>
+                            <?php foreach ($t['children'] as $c): ?>
+                            <tr>
+                                <td><?= h($c['row']['name']) ?></td>
+                                <td><?= number_format($c['count']) ?></td>
+                                <td>
+                                    <a href="?edit=<?= (int)$c['row']['id'] ?>" class="btn btn-secondary btn-sm">ویرایش</a>
+                                    <a href="?delete=<?= (int)$c['row']['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این مدل حذف شود؟ ارتباط آن با محصولات هم حذف می‌شود.')">حذف</a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php if (!$tree): ?>
+            <p style="color:var(--text-muted);font-size:0.85rem;padding:1rem;text-align:center;">هنوز برندی ثبت نشده است.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<?php require_once __DIR__ . '/layout-bottom.php'; ?>

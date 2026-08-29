@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF1A2E"/>
+      <stop offset="100%" stop-color="#E60012"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="8" fill="url(#bg)"/>
+  <text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="20" fill="url(#red)" letter-spacing="5">KMC</text>
+  <line x1="16" y1="49" x2="48" y2="49" stroke="url(#red)" stroke-width="1.5"/>
+</svg>
