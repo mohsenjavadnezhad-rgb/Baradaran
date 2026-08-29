@@ -798,17 +798,19 @@ function partCheckStatusLabel($status) {
 }
 
 /* آیا مشتری می‌تواند از این مرحله بگذرد؟
-   «آری» یعنی یا رد کرده، یا درخواستش برای همین سبد تأیید شده است.
-   در حالتِ «در انتظار بررسی» جواب «نه» است تا منتظرِ تأیید بماند. */
+   «آری» یعنی درخواستش برای همین سبد هم مطابقتش تأیید شده هم موجودی‌اش —
+   یعنی status='approved' و stock_ok=1، هر دو با هم (خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰:
+   «در انتظار بررسی موجودی» یک گیتِ کاملاً مسدودکننده باشد، بدون راهِ فرار).
+   پیش از این تاریخ، «رد کردنِ مرحله» با یک پرچمِ session بی‌درنگ رد می‌شد —
+   آن مسیر حذف شد: حالا رد کردن هم یک ردیفِ part_checks (بدون عکس) می‌سازد و
+   وارد همین صف/گیت می‌شود، پس دیگر بایپس ندارد. */
 function partCheckPassed($cartItems, $customer = null) {
     if (!partCheckOn()) return true;
     $sig = partCheckCartSig($cartItems);
-    /* رد کردنِ مرحله فقط تا وقتی معتبر است که کالاهای سبد همان‌ها باشند */
-    if (($_SESSION['partcheck_skip_sig'] ?? '') === $sig && $sig !== '') return true;
     $cid = (int)($customer['id'] ?? ($_SESSION['customer_id'] ?? 0));
     $row = partCheckCurrent($cid);
     if (!$row) return false;
-    if ($row['status'] !== 'approved') return false;
+    if ($row['status'] !== 'approved' || empty($row['stock_ok'])) return false;
     /* تأییدِ قطعهٔ دیگری به این سبد منتقل نمی‌شود */
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
 }
