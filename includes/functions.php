@@ -1102,10 +1102,25 @@ function orderStatusLabel($status) {
     return $m[(string)$status] ?? (string)$status;
 }
 
-/* سفارشِ «در جریان» = نه ارسال‌شده و نه لغوشده.
-   مبنای جدا‌کردنِ فهرستِ account.php از صفحهٔ سفارش‌های گذشته. */
+/* تعدادِ روزهایی که یک سفارشِ «ارسال‌شده» هنوز جزوِ سفارش‌هایِ در جریان
+   دیده می‌شود (به‌جایِ پریدنِ فوری به سفارش‌هایِ گذشته) — خواستهٔ مدیر تا
+   مشتری چند روز فرصتِ پیگیری داشته باشد. */
+function orderPastDelayDays() {
+    return 7;
+}
+
+/* سفارشِ «در جریان» = لغوشده نیست، و اگر ارسال‌شده هم هست، هنوز کمتر از
+   orderPastDelayDays() روز از تیکِ «سفارش ارسال شد» (track_shipped_at)
+   نگذشته. اگر آن ستون به‌هردلیل خالی باشد (سفارشِ قدیمی/بدونِ ثبتِ زمان)،
+   محتاطانه فوراً گذشته حساب می‌شود — رفتارِ قبلِ این تغییر. */
 function orderIsOpen($order) {
-    return !in_array((string)($order['status'] ?? ''), ['shipped', 'cancelled'], true);
+    $status = (string)($order['status'] ?? '');
+    if ($status === 'cancelled') return false;
+    if ($status !== 'shipped') return true;
+    $shippedAt = $order['track_shipped_at'] ?? null;
+    if (!$shippedAt) return false;
+    $cutoff = strtotime((string)$shippedAt) + orderPastDelayDays() * 86400;
+    return $cutoff !== false && time() < $cutoff;
 }
 
 /* سفارش‌ها را به دو دستهٔ [در جریان، گذشته] تقسیم می‌کند (ترتیب حفظ می‌شود) */
