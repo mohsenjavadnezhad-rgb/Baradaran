@@ -196,6 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         setSetting('partcheck_min_photos', (string)max(1, min(8, $mp ?: 3)));
     }
 
+    if ($sec === 'checkout') {
+        setSetting('allow_guest_checkout', isset($_POST['allow_guest_checkout']) ? '1' : '0');
+    }
+
     if ($sec === 'shiprate') {
         /* ویرایشِ گروهیِ ردیف‌های نرخ‌نامه (شهر / واحد وزن / هزینهٔ هر واحد).
            فقط ردیف‌هایی نوشته می‌شوند که در POST آمده‌اند، پس اگر مدیر فهرست را
@@ -1394,6 +1398,30 @@ require_once __DIR__ . '/layout-top.php';
       <a href="part-checks.php" style="color:var(--red-light);">رفتن به صفحهٔ بررسی</a>
     </div>
     <?php endif; ?>
+  </div>
+  <?php endif; ?>
+
+  <?php /* ---------- ثبت سفارش / ورود ---------- */ ?>
+  <?php if ($sec === 'checkout'): ?>
+  <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
+    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('login') ?> ثبت سفارش و ورود مشتری</h3>
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
+      به‌طور پیش‌فرض، مشتریِ واردنشده برای زدنِ کلیدِ «ادامه» در سبد خرید باید وارد حساب شود
+      (با شمارهٔ موبایل و کد تأیید یا بدونش، بسته به تنظیمِ پیامک).
+      با روشن‌کردنِ گزینهٔ زیر، اگر مشتری نخواهد وارد/عضو شود، فقط شمارهٔ موبایلش را می‌گذارد —
+      بدون کدِ تأیید — و مستقیم به مراحلِ ثبتِ آدرس و تکمیلِ سفارش می‌رود؛ حسابش پشتِ صحنه و
+      خودکار ساخته می‌شود، دقیقاً مثلِ مشتری‌های دیگر در پنلِ سفارش‌ها دیده می‌شود.
+    </p>
+
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="allow_guest_checkout" id="allow_guest_checkout" value="1"
+             <?= getSettingRaw('allow_guest_checkout', '0') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="allow_guest_checkout" style="margin:0;cursor:pointer;">خرید بدون ثبت‌نام (فقط شمارهٔ موبایل) مجاز باشد</label>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
+      با برداشتنِ تیک، رفتارِ قبلی برمی‌گردد: مشتریِ واردنشده برای ادامه به صفحهٔ ورود هدایت می‌شود.
+    </div>
   </div>
   <?php endif; ?>
 
