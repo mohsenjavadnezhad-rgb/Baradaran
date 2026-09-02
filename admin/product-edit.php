@@ -7,7 +7,7 @@ if (!isLoggedIn()) { header('Location: login.php'); exit; }
 if (isset($_GET['delete'])) { $id = (int)$_GET['delete']; $pdo->prepare("UPDATE products SET is_active = 0 WHERE id = ?")->execute([$id]); redirect('products.php?deleted=1'); }
 
 /* ===================== گالری تصاویر (کاروسل صفحهٔ محصول) =====================
-   در جدولِ موجودِ product_images (image, sort_order) ذخیره می‌شود. */
+   در جدول موجود product_images (image, sort_order) ذخیره می‌شود. */
 define('GALLERY_MAX_UPLOAD', 12);   // حداکثر تصویر در هر بار آپلود
 
 /* آپلود چند تصویر هم‌زمان → آرایهٔ نام فایل‌های ذخیره‌شده */
@@ -31,7 +31,7 @@ function saveGalleryUploads($field, $max = GALLERY_MAX_UPLOAD) {
     return $saved;
 }
 
-/* حذف فایل تصویر فقط وقتی هیچ محصول یا ردیف گالریِ دیگری به آن ارجاع ندارد */
+/* حذف فایل تصویر فقط وقتی هیچ محصول یا ردیف گالری دیگری به آن ارجاع ندارد */
 function galleryUnlinkIfUnused($file) {
     global $pdo;
     if (!$file) return;
@@ -52,7 +52,7 @@ function galleryOrder($productId) {
     return array_map('intval', array_column($st->fetchAll(), 'id'));
 }
 
-/* شماره‌گذاری دوبارهٔ ۰..n-۱ روی همان ترتیبِ داده‌شده */
+/* شماره‌گذاری دوبارهٔ ۰..n-۱ روی همان ترتیب داده‌شده */
 function galleryApplyOrder(array $ids) {
     global $pdo;
     $up = $pdo->prepare("UPDATE product_images SET sort_order = ? WHERE id = ?");
@@ -190,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE products SET stock = ?, retail_price = ?, wholesale_price = ? WHERE id = ?")
                 ->execute([$totalStock, (int)($vRetail[0]??0), (int)($vWhole[0]??0), $pid]);
 
-            /* تیک «فروش ویژه» (بنرِ زیرِ بنر اصلی صفحهٔ اصلی) — جدا و محافظت‌شده
+            /* تیک «فروش ویژه» (بنر زیر بنر اصلی صفحهٔ اصلی) — جدا و محافظت‌شده
                تا اگر ستون is_special نبود، ذخیرهٔ محصول به خطا نخورد. */
             if (specialSaleReady()) {
                 $pdo->prepare("UPDATE products SET is_special = ? WHERE id = ?")
@@ -198,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             /* وزن محصول (کیلوگرم) — اختیاری و فقط برای نرخ‌نامهٔ ارسال. خالی
-               گذاشتنش NULL می‌شود و صفحهٔ تسویه سراغِ «نرخ پایه»ی شهر می‌رود، پس
+               گذاشتنش NULL می‌شود و صفحهٔ تسویه سراغ «نرخ پایه»ی شهر می‌رود، پس
                لازم نیست وزن همهٔ محصولات یک‌جا وارد شود. مثل is_special جدا و
                محافظت‌شده نوشته می‌شود تا پیش از اجرای مهاجرت خطا ندهد. */
             if (shippingWeightReady()) {
@@ -228,8 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $allCategories = $pdo->query("SELECT c.*, p.name AS parent_name FROM categories c LEFT JOIN categories p ON c.parent_id = p.id ORDER BY COALESCE(p.name,c.name), c.name")->fetchAll();
 
-/* مدل‌های خودرو گروه‌بندی‌شده زیر برندِ خودشان — فهرست تختِ «برند - مدل» خیلی
-   شلوغ می‌شد. کوئری از قبل بر اساس نام برند و بعد نام مدل مرتب است، پس ترتیبِ
+/* مدل‌های خودرو گروه‌بندی‌شده زیر برند خودشان — فهرست تخت «برند - مدل» خیلی
+   شلوغ می‌شد. کوئری از قبل بر اساس نام برند و بعد نام مدل مرتب است، پس ترتیب
    کلیدها همان ترتیب الفبایی برندها می‌ماند. */
 $postCats = $_POST['categories'] ?? $selectedCats;
 $modelsByBrand = [];
@@ -351,11 +351,11 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
     </div>
     <?php if (shippingWeightReady()): ?>
     <?php /* وزن اختیاری است: فقط برای نرخ‌نامهٔ ارسال به کار می‌رود و می‌توان
-            به‌تدریج پر کرد. خالی بودنش یعنی صفحهٔ تسویه سراغِ نرخ پایهٔ شهر برود. */ ?>
+            به‌تدریج پر کرد. خالی بودنش یعنی صفحهٔ تسویه سراغ نرخ پایهٔ شهر برود. */ ?>
     <div>
       <label>وزن (کیلوگرم) — اختیاری</label>
       <input type="text" name="weight" class="form-control" dir="ltr" inputmode="decimal"
-             placeholder="مثلاً 2.5"
+             placeholder="مثلا 2.5"
              value="<?= h($_POST['weight'] ?? (isset($product['weight']) && $product['weight'] !== null ? shippingWeightText($product['weight']) : '')) ?>"
              style="width:200px;">
       <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;max-width:320px;line-height:1.7;">
@@ -370,7 +370,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
       <h3 style="font-size:0.9rem;color:var(--red-primary);">واریانت های محصول (کشور + شرکت سازنده)</h3>
       <button type="button" class="btn btn-primary btn-sm" onclick="addVariant()">+ افزودن واریانت</button>
     </div>
-    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;">برای هر واریانت می‌توانید درصد تخفیف جزئی و کلی را جداگانه وارد کنید (۰ = بدون تخفیف). قیمت و تخفیفِ واریانت اول برای کارت محصولات و سبد خرید استفاده می‌شود.</div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.6rem;">برای هر واریانت می‌توانید درصد تخفیف جزئی و کلی را جداگانه وارد کنید (۰ = بدون تخفیف). قیمت و تخفیف واریانت اول برای کارت محصولات و سبد خرید استفاده می‌شود.</div>
     <div id="variantsContainer">
       <?php
       $postVarCount = max(1, count($_POST['v_country'] ?? []), count($existingVariants));
@@ -398,9 +398,9 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
   </div>
 
   <?php if (taxReady()):
-    /* برای چک‌باکس، بعد از یک POST ناموفق باید دقیقاً همان چیزی که فرستاده شده
-       نمایش داده شود (حتی «تیک نخورده») نه مقدارِ قدیمیِ $product — وگرنه با
-       خطای اعتبارسنجی، برداشتنِ تیک توسط مدیر روی صفحه دیده نمی‌شود. */
+    /* برای چک‌باکس، بعد از یک POST ناموفق باید دقیقا همان چیزی که فرستاده شده
+       نمایش داده شود (حتی «تیک نخورده») نه مقدار قدیمی $product — وگرنه با
+       خطای اعتبارسنجی، برداشتن تیک توسط مدیر روی صفحه دیده نمی‌شود. */
     $taxChecked = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['tax_enabled']) : !empty($product['tax_enabled'] ?? 0);
   ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1rem;margin-bottom:1rem;">
@@ -415,7 +415,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
              value="<?= h($_POST['tax_percent'] ?? $product['tax_percent'] ?? '9') ?>">
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);line-height:1.8;">
-      اگر فعال باشد، این درصد روی قیمتِ این محصول در سبد خرید و تسویه‌حساب اضافه می‌شود و در فاکتور به‌صورت یک ردیفِ جدا نشان داده می‌شود.
+      اگر فعال باشد، این درصد روی قیمت این محصول در سبد خرید و تسویه‌حساب اضافه می‌شود و در فاکتور به‌صورت یک ردیف جدا نشان داده می‌شود.
     </div>
   </div>
   <?php endif; ?>
@@ -461,15 +461,15 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
     <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.6rem 0.8rem;border:1px solid <?= $spChecked ? 'rgba(220,38,38,0.4)' : 'var(--border-color)' ?>;border-radius:8px;background:<?= $spChecked ? 'rgba(220,38,38,0.08)' : 'var(--bg-secondary)' ?>;">
       <input type="checkbox" name="is_special" value="1" <?= $spChecked ? 'checked' : '' ?> style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);cursor:pointer;">
       <?= icon('flame', 'ic-sm') ?>
-      <span>فروش ویژه (نمایش در بنرِ «تخفیف ویژه» زیرِ بنر اصلی صفحهٔ اصلی)</span>
+      <span>فروش ویژه (نمایش در بنر «تخفیف ویژه» زیر بنر اصلی صفحهٔ اصلی)</span>
     </label>
     <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.35rem;line-height:1.7;">
-      بنر به‌صورت خودکار از تصویر، نام و قیمتِ تخفیف‌دارِ همین محصول ساخته می‌شود. اگر چند محصول تیک داشته باشند، جدیدترین نمایش داده می‌شود.
+      بنر به‌صورت خودکار از تصویر، نام و قیمت تخفیف‌دار همین محصول ساخته می‌شود. اگر چند محصول تیک داشته باشند، جدیدترین نمایش داده می‌شود.
     </div>
   </div>
   <?php endif; ?>
   <?php /* انتخابگر مدل خودرو: گروه‌بندی زیر برند + جست‌وجو + نشان انتخاب‌شده‌ها.
-           چک‌باکس‌ها همان name="categories[]" قبلی‌اند تا ذخیره و ساختِ خودکارِ
+           چک‌باکس‌ها همان name="categories[]" قبلی‌اند تا ذخیره و ساخت خودکار
            شمارهٔ فنی (که به رویداد change همین چک‌باکس‌ها گوش می‌دهد) دست‌نخورده بماند. */ ?>
   <div class="form-group" id="carmodels">
     <label style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
@@ -608,8 +608,8 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
 })();
 
 /* ---------- انتخابگر مدل‌های خودرو (گروه‌بندی + جست‌وجو + برچسب انتخاب‌شده‌ها) ----------
-   چک‌باکس‌ها دست‌نخورده‌اند؛ این کد فقط نمایش را مرتب می‌کند. هر تغییرِ برنامه‌ای
-   یک رویداد change واقعی می‌فرستد تا سازندهٔ خودکارِ شمارهٔ فنی هم خبردار شود. */
+   چک‌باکس‌ها دست‌نخورده‌اند؛ این کد فقط نمایش را مرتب می‌کند. هر تغییر برنامه‌ای
+   یک رویداد change واقعی می‌فرستد تا سازندهٔ خودکار شمارهٔ فنی هم خبردار شود. */
 (function(){
     var box = document.getElementById('cmBox');
     if (!box) return;
@@ -626,7 +626,7 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
         savedOpen = null;
 
     /* یکسان‌سازی نویسه‌ها: ی/ي، ک/ك، ه/ة، ارقام فارسی و عربی، و حذف نیم‌فاصله
-       تا جست‌وجو به شکلِ تایپ حساس نباشد. */
+       تا جست‌وجو به شکل تایپ حساس نباشد. */
     function norm(s) {
         s = String(s == null ? '' : s);
         var fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩', out = '', i, ch, k;
@@ -716,7 +716,7 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
         applyFilter();
     }
 
-    /* هنگام جست‌وجو گروه‌ها موقتاً باز می‌شوند؛ با پاک‌شدن عبارت، وضعیت قبلی برمی‌گردد */
+    /* هنگام جست‌وجو گروه‌ها موقتا باز می‌شوند؛ با پاک‌شدن عبارت، وضعیت قبلی برمی‌گردد */
     function setTempView(on) {
         if (on && !tempView) { savedOpen = brands.map(function (b) { return b.open; }); tempView = true; }
         else if (!on && tempView) {
@@ -759,7 +759,7 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
         if (kind === 'clear') {
             var on = [].slice.call(box.querySelectorAll('input[name="categories[]"]:checked'));
             if (!on.length) return;
-            if (on.length > 1 && !confirm('انتخابِ ' + on.length + ' مدل حذف شود؟')) return;
+            if (on.length > 1 && !confirm('انتخاب ' + on.length + ' مدل حذف شود؟')) return;
             on.forEach(function (b) { b.checked = false; });
             fire(on[0]);
         }
@@ -787,7 +787,7 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
             if (inp) { inp.checked = false; fire(inp); }
             return;
         }
-        /* «همه» در سرِ برند: نباید گروه را باز/بسته کند */
+        /* «همه» در سر برند: نباید گروه را باز/بسته کند */
         var all = t.closest('.cm-ball');
         if (all) { e.preventDefault(); e.stopPropagation(); toggleBrand(all.closest('.cm-brand')); return; }
 
