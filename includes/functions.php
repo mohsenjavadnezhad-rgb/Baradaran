@@ -132,6 +132,7 @@ function settingsSections() {
         'shiprate' => ['label' => 'نرخ‌نامه‌های ارسال', 'icon' => 'scale',     'title' => 'نرخ‌نامه‌های ارسال — شهر، واحد وزن و هزینه'],
         'pchk'   => ['label' => 'بررسی عکس قطعه',      'icon' => 'camera',      'title' => 'بررسی عکس نمونهٔ قطعه پیش از خرید'],
         'checkout' => ['label' => 'ثبت سفارش / ورود', 'icon' => 'login',       'title' => 'ثبت سفارش و ورود مشتری'],
+        'productyear' => ['label' => 'سال تولید خودرو', 'icon' => 'calendar', 'title' => 'بازهٔ سال تولید خودرو در فروشگاه'],
         'terms'  => ['label' => 'شرایط و قوانین',      'icon' => 'clipboard-list', 'title' => 'شرایط و قوانین سایت'],
     ];
 }
@@ -619,22 +620,27 @@ function productYearReady() {
     return $GLOBALS['__pyear_ready'] = dbHasColumn('products', 'year_from');
 }
 
-/* گزینه‌های سال تولید برای انتخابگر سمت فروشگاه — نزولی (جدیدترین بالا).
-   بازه از دادهٔ واقعی محصولات خوانده می‌شود؛ اگر هنوز چیزی ثبت نشده، ۳۰ سال
-   اخیر شمسی پیش‌فرض است تا انتخابگر هیچ‌وقت خالی نماند. */
+/* بازهٔ سال تولید (از پنل مدیریت ← تنظیمات ← سال تولید خودرو، تنظیم‌شده با
+   product_year_min/max)؛ پیش‌فرض ۳۰ سال اخیر شمسی، یعنی مدیر تا وقتی چیزی
+   تنظیم نکرده همان رفتار قبلی را می‌بیند. */
+function productYearRange() {
+    $today = jalaliToday()[0];
+    $min = (int)faToLatinDigits((string)getSettingRaw('product_year_min', (string)($today - 30)));
+    $max = (int)faToLatinDigits((string)getSettingRaw('product_year_max', (string)$today));
+    if ($min <= 0) $min = $today - 30;
+    if ($max <= 0) $max = $today;
+    if ($min > $max) { $tmp = $min; $min = $max; $max = $tmp; }
+    return [$min, $max];
+}
+
+/* گزینه‌های سال تولید برای انتخابگر سمت فروشگاه — نزولی (جدیدترین بالا)،
+   دقیقا همان بازه‌ای که مدیر تنظیم کرده (productYearRange). اگر محصولی
+   خارج از این بازه سالی ثبت شده باشد باز هم قابل‌خریداری می‌ماند (فقط
+   چیپش در انتخابگر دیده نمی‌شود)، چون فیلتر getProducts() جدا از این
+   فهرست عمل می‌کند. */
 function productYearOptions() {
-    global $pdo;
-    $end = jalaliToday()[0];
-    $start = $end - 30;
-    if (productYearReady()) {
-        try {
-            $r = $pdo->query("SELECT MIN(year_from) mn, MAX(year_to) mx FROM products WHERE is_active = 1")->fetch();
-            if ($r && $r['mn'] !== null) $start = min($start, (int)$r['mn']);
-            if ($r && $r['mx'] !== null) $end = max($end, (int)$r['mx']);
-        } catch (Throwable $e) {}
-    }
-    $years = range($end, $start);
-    return $years;
+    list($start, $end) = productYearRange();
+    return range($end, $start);
 }
 
 function getProductById($id) {
@@ -1028,7 +1034,7 @@ function orderDeliveryMode($order) {
 
 /* همان orderTrackSteps() ولی فقط مرحله‌هایی که مشتری این سفارش باید ببیند.
    خود orderTrackSteps() دست‌نخورده می‌ماند: تیک‌های پنل ادمین و کارت تنظیمات
-   پیامک به همهٔ مرحله‌ها نیاز دارند («فقط سمت ادمین باشه»)؛ این فیلتر تنها
+   پیامک به همه مرحله‌ها نیاز دارند («فقط سمت ادمین باشه»)؛ این فیلتر تنها
    برای چشم مشتری است. سه مرحلهٔ تأیید/جمع‌آوری/ارسال هرگز حذف نمی‌شوند. */
 function orderTrackStepsVisible($order) {
     $steps = orderTrackSteps();
@@ -1278,7 +1284,7 @@ function getSpecialSaleProduct() {
     } catch (Throwable $e) { return null; }
 }
 
-/* همهٔ آفرهای زمان‌دار فعال — ورودی اسلایدر صفحهٔ اصلی.
+/* همه آفرهای زمان‌دار فعال — ورودی اسلایدر صفحهٔ اصلی.
    آفر منقضی حذف نمی‌شود: بنرش می‌ماند و روی آن «مهلت خرید تمام شد» نوشته
    می‌شود (خواستهٔ کاربر)؛ فقط به انتهای صف می‌رود تا آفرهای زندهٔ قابل خرید
    اول دیده شوند. «فروخته شد» هم همین‌طور — بنر با مهر گوشه می‌ماند.
@@ -1369,7 +1375,7 @@ function getProducts($filters = []) {
         $conditions[] = "(p.retail_discount > 0 OR p.wholesale_discount > 0)";
     }
 
-    /* سال تولید خودرو (شمسی): محصولی که برایش بازه‌ای ثبت نشده «برای همهٔ
+    /* سال تولید خودرو (شمسی): محصولی که برایش بازه‌ای ثبت نشده «برای همه
        سال‌ها» حساب می‌شود (خالی‌گذاشتن سال در فرم محصول یعنی محدودیتی
        ندارد)، نه اینکه از نتیجه بیفتد. */
     if (!empty($filters['year']) && productYearReady()) {
@@ -2007,7 +2013,7 @@ function generateTechnicalNumber($productName, $categoryIds = [], $exceptProduct
    جدول‌ها: product_reviews (نظر + امتیاز ۱..۵) و product_qa (نخ‌دار: parent_id
    خالی = پرسش، مقداردار = پاسخ به همان پرسش). فقط ردیف‌های approved عمومی‌اند. */
 
-/* میانگین و تعداد نظرهای تأییدشدهٔ همهٔ محصولات — یک کوئری برای کل درخواست.
+/* میانگین و تعداد نظرهای تأییدشدهٔ همه محصولات — یک کوئری برای کل درخواست.
    کارت‌های فهرست (تا ۲۴ کارت در هر صفحه) از همین کش می‌خوانند تا به‌جای
    ۲۴ کوئری فقط یکی اجرا شود. */
 function ratingsAll() {
@@ -2137,7 +2143,7 @@ require_once __DIR__ . '/shipping.php';
 require_once __DIR__ . '/tax.php';
 
 /* نگهبان مالکیت سبد، یک‌بار در هر درخواست. همین‌جا صدا زده می‌شود چون تنها
-   جایی است که همهٔ صفحه‌ها (سایت، پنل ادمین، اسکریپت‌های یک‌بارمصرف) از آن
+   جایی است که همه صفحه‌ها (سایت، پنل ادمین، اسکریپت‌های یک‌بارمصرف) از آن
    می‌گذرند و هیچ خروجی‌ای هم پیش‌تر تولید نشده. اگر نشست فعال نباشد (اجرای
    خط فرمان) کاری نمی‌کند. */
 if (session_status() === PHP_SESSION_ACTIVE) cartOwnerSync();
