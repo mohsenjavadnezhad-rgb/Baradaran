@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dropdown.hidden = true;
     wrap.appendChild(dropdown);
 
-    /* برای دراپ‌داون، نامِ محصول را خودمان با <mark> عبارتِ جست‌وجوشده را
-       پررنگ می‌کنیم — بدونِ کتابخانه، با escape دستی تا HTML تزریق نشود. */
+    /* برای دراپ‌داون، نام محصول را خودمان با <mark> عبارت جست‌وجوشده را
+       پررنگ می‌کنیم — بدون کتابخانه، با escape دستی تا HTML تزریق نشود. */
     function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
