@@ -64,9 +64,9 @@ function paymentGateways() {
         ],
         /* پرداخت اعتباری/اقساطی. برچسبش از تنظیمات خوانده می‌شود چون نام
            ارائه‌دهنده متفاوت است. پیش‌فرض خاموش (pay_enable_credit=0) و تا
-           پرنشدنِ آدرس‌ها و شناسهٔ پذیرنده در فهرست تسویه ظاهر نمی‌شود.
-           credit_only یعنی این درگاه، «درگاه بانکیِ اصلی» نیست و کلید خودش
-           آن را روشن می‌کند (پس در فهرست انتخابِ درگاه بانکی نمی‌آید). */
+           پرنشدن آدرس‌ها و شناسهٔ پذیرنده در فهرست تسویه ظاهر نمی‌شود.
+           credit_only یعنی این درگاه، «درگاه بانکی اصلی» نیست و کلید خودش
+           آن را روشن می‌کند (پس در فهرست انتخاب درگاه بانکی نمی‌آید). */
         'credit' => [
             'label'       => getSetting('pay_credit_label', 'پرداخت اعتباری (اقساطی)'),
             'kind'        => 'online',
@@ -75,9 +75,9 @@ function paymentGateways() {
             'unit'        => 'rial',
             'credit_only' => true,
         ],
-        /* دو روشِ زیر فقط برای همکارانِ تأییدشده نمایش داده می‌شوند
+        /* دو روش زیر فقط برای همکاران تأییدشده نمایش داده می‌شوند
            (paymentAvailableMethods($toman, $isPartner) — نه اینجا، آنجا فیلتر
-           می‌شود) و بدون درگاه‌اند: سفارش کامل می‌شود، پرداخت بعداً و بیرون از
+           می‌شود) و بدون درگاه‌اند: سفارش کامل می‌شود، پرداخت بعدا و بیرون از
            سایت انجام/بررسی می‌شود. */
         'partner_month' => [
             'label' => 'پرداخت اول ماه',
@@ -101,7 +101,7 @@ function paymentCreditEnabled() {
     return getSettingRaw('pay_enable_credit', '0') === '1' && paymentIsConfigured('credit');
 }
 
-/* حدِ پایینِ مبلغ برای پرداخت اعتباری (تومان). ۰ = بدون حد. */
+/* حد پایین مبلغ برای پرداخت اعتباری (تومان). ۰ = بدون حد. */
 function paymentCreditMin() {
     $v = preg_replace('/\D+/', '', faToLatinDigits((string)getSettingRaw('pay_credit_min', '0')));
     return $v === '' ? 0 : (int)$v;
@@ -148,7 +148,7 @@ function paymentReady() {
 }
 
 /* آیا ستون‌های «کارت به کارت» ساخته شده‌اند؟ (migrate-cityrates.php)
-   پیش از مهاجرت، فرمِ ثبت واریز نمایش داده نمی‌شود و بقیهٔ صفحه سالم می‌ماند. */
+   پیش از مهاجرت، فرم ثبت واریز نمایش داده نمی‌شود و بقیهٔ صفحه سالم می‌ماند. */
 function paymentC2cReady() {
     if (isset($GLOBALS['__pay_c2c'])) return $GLOBALS['__pay_c2c'];
     $GLOBALS['__pay_c2c'] = paymentReady() && dbHasColumn('orders', 'c2c_ref');
@@ -167,8 +167,8 @@ function paymentIsConfigured($key) {
 }
 
 /* درگاه آنلاین انتخاب‌شده در تنظیمات؛ اگر تنظیم نشده و حالت تست روشن است ← درگاه آزمایشی
-   پرداخت اعتباری اینجا نمی‌آید: کلید مستقلِ خودش (pay_enable_credit) آن را روشن
-   می‌کند و در کنارِ درگاه بانکی نمایش داده می‌شود، نه به‌جای آن. */
+   پرداخت اعتباری اینجا نمی‌آید: کلید مستقل خودش (pay_enable_credit) آن را روشن
+   می‌کند و در کنار درگاه بانکی نمایش داده می‌شود، نه به‌جای آن. */
 function paymentActiveGateway() {
     $key = trim((string)getSetting('pay_gateway', ''));
     $d   = paymentGatewayDef($key);
@@ -177,9 +177,9 @@ function paymentActiveGateway() {
     return '';
 }
 
-/* روش‌های پرداختِ قابل نمایش در صفحهٔ تسویه، به‌ترتیب نمایش.
-   $isPartner: آیا مشتریِ همین سفارش، همکارِ تأییدشده است؟ («پرداخت اول ماه»
-   و «چک» فقط برای همکارانِ تأییدشده نمایش داده می‌شوند — خواستهٔ مدیر.) */
+/* روش‌های پرداخت قابل نمایش در صفحهٔ تسویه، به‌ترتیب نمایش.
+   $isPartner: آیا مشتری همین سفارش، همکار تأییدشده است؟ («پرداخت اول ماه»
+   و «چک» فقط برای همکاران تأییدشده نمایش داده می‌شوند — خواستهٔ مدیر.) */
 function paymentAvailableMethods($toman = null, $isPartner = false) {
     $out = [];
     if (getSettingRaw('pay_enable_cod', '1') === '1') {
@@ -189,13 +189,13 @@ function paymentAvailableMethods($toman = null, $isPartner = false) {
         $gw = paymentActiveGateway();
         if ($gw !== '') $out[$gw] = paymentGatewayDef($gw);
     }
-    /* کارت‌به‌کارت عمداً بعد از درگاهِ آنلاین/آزمایشی می‌آید (خواستهٔ مدیر) —
-       ترتیبِ نمایش در تسویه دقیقاً همین ترتیبِ افزودن به $out است. */
+    /* کارت‌به‌کارت عمدا بعد از درگاه آنلاین/آزمایشی می‌آید (خواستهٔ مدیر) —
+       ترتیب نمایش در تسویه دقیقا همین ترتیب افزودن به $out است. */
     if (getSettingRaw('pay_enable_card', '0') === '1' && paymentIsConfigured('card')) {
         $out['card'] = paymentGatewayDef('card');
     }
     /* پرداخت اعتباری: مستقل از درگاه بانکی. اگر مبلغ سفارش داده شده باشد و از
-       حدِ پایینِ ارائه‌دهنده کمتر باشد، نشان داده نمی‌شود تا مشتری بی‌دلیل
+       حد پایین ارائه‌دهنده کمتر باشد، نشان داده نمی‌شود تا مشتری بی‌دلیل
        به درگاهی نرود که مبلغش را نمی‌پذیرد. */
     if (paymentCreditEnabled()) {
         $min = paymentCreditMin();
@@ -203,8 +203,8 @@ function paymentAvailableMethods($toman = null, $isPartner = false) {
             $out['credit'] = paymentGatewayDef('credit');
         }
     }
-    /* دو روشِ ویژهٔ همکاران، آخرِ فهرست — یک مشتریِ جزئی اصلاً این دو تیک را
-       نمی‌بیند، پس نیازی نیست بالای فهرستِ عمومی جا بگیرند. */
+    /* دو روش ویژهٔ همکاران، آخر فهرست — یک مشتری جزئی اصلا این دو تیک را
+       نمی‌بیند، پس نیازی نیست بالای فهرست عمومی جا بگیرند. */
     if ($isPartner && paymentChequeReady()) {
         if (getSettingRaw('pay_enable_partner_month', '1') === '1') $out['partner_month'] = paymentGatewayDef('partner_month');
         if (getSettingRaw('pay_enable_cheque', '1') === '1')        $out['cheque']         = paymentGatewayDef('cheque');
@@ -370,12 +370,12 @@ function paymentStatusBadgeFor($status, $method = '') {
          . h(paymentStatusLabelFor($status, $method)) . '</span>';
 }
 
-/* ---------- کارت به کارت: ثبتِ واریز توسط مشتری و تأیید توسط مدیر ----------
+/* ---------- کارت به کارت: ثبت واریز توسط مشتری و تأیید توسط مدیر ----------
    مشتری چهار چیز را می‌گوید: شناسهٔ واریز، مبلغ، چهار رقم آخر کارت مبدأ و زمان
    واریز. سفارش با وضعیت «در انتظار تأیید واریز» (pending) می‌ماند تا مدیر در
    جزئیات سفارش تأیید کند — تصمیم مدیر: پرداخت خودکار تأیید نمی‌شود. */
-/* پاک‌سازی و اعتبارسنجیِ ورودیِ واریز، جدا از ذخیره‌سازی. صفحهٔ تسویه اطلاعات
-   واریز را پیش از ثبتِ سفارش می‌گیرد، پس باید بتواند پیش از INSERT اعتبار را
+/* پاک‌سازی و اعتبارسنجی ورودی واریز، جدا از ذخیره‌سازی. صفحهٔ تسویه اطلاعات
+   واریز را پیش از ثبت سفارش می‌گیرد، پس باید بتواند پیش از INSERT اعتبار را
    بسنجد؛ وگرنه سفارشی ثبت می‌شد که اطلاعات واریزش ناقص است. */
 function paymentC2cClean(array $in) {
     $out = [
@@ -411,7 +411,7 @@ function paymentC2cSave($orderId, array $in) {
         return '';
     } catch (Throwable $e) {
         paymentLog("c2c-save failed order=$orderId: " . $e->getMessage());
-        return 'ثبت واریز انجام نشد. لطفاً دوباره تلاش کنید.';
+        return 'ثبت واریز انجام نشد. لطفا دوباره تلاش کنید.';
     }
 }
 
@@ -428,8 +428,8 @@ function paymentC2cVerify($orderId, array $order = []) {
         } catch (Throwable $e) { $order = []; }
     }
     if (!$order) return false;
-    /* فقط سفارشِ کارت‌به‌کارتی که مشتری واریزش را اعلام کرده و پرداخت‌نشده است.
-       این گارد باعث می‌شود این تابع هیچ‌وقت جای تأییدِ دستیِ عمومی را نگیرد. */
+    /* فقط سفارش کارت‌به‌کارتی که مشتری واریزش را اعلام کرده و پرداخت‌نشده است.
+       این گارد باعث می‌شود این تابع هیچ‌وقت جای تأیید دستی عمومی را نگیرد. */
     if (!paymentC2cAwaiting($order)) return false;
 
     $amount = (int)($order['c2c_amount'] ?? 0);
@@ -446,21 +446,21 @@ function paymentC2cVerify($orderId, array $order = []) {
     return true;
 }
 
-/* آیا این سفارش منتظر تأیید واریزِ کارت‌به‌کارت است؟ (نشانِ صف در فهرست ادمین) */
+/* آیا این سفارش منتظر تأیید واریز کارت‌به‌کارت است؟ (نشان صف در فهرست ادمین) */
 function paymentC2cAwaiting(array $order) {
     return (string)($order['payment_method'] ?? '') === 'card'
         && (string)($order['payment_status'] ?? '') !== 'paid'
         && trim((string)($order['c2c_ref'] ?? '')) !== '';
 }
 
-/* ---------- چک: ثبتِ اطلاعات توسط همکار و «دریافت چک» توسط مدیر ----------
-   دقیقاً هم‌الگوی کارت‌به‌کارت بالا: مشتری (همکار) پیش از ثبت سفارش، در همان
+/* ---------- چک: ثبت اطلاعات توسط همکار و «دریافت چک» توسط مدیر ----------
+   دقیقا هم‌الگوی کارت‌به‌کارت بالا: مشتری (همکار) پیش از ثبت سفارش، در همان
    صفحهٔ checkout.php اطلاعات چک را می‌گوید (بانک، سریال، تاریخ، مبلغ، در وجه،
-   شناسهٔ صیاد)؛ سفارش «در انتظار بررسی چک» می‌ماند. تیکِ «دریافت چک» مدیر با
-   «پرداخت شد» یکی نیست — چک رسیده‌بودن به معنیِ وصول‌شدنش نیست؛ برای «پرداخت
-   شد» همان دکمهٔ عمومیِ paymentMarkPaid جداگانه در ادمین می‌ماند.
+   شناسهٔ صیاد)؛ سفارش «در انتظار بررسی چک» می‌ماند. تیک «دریافت چک» مدیر با
+   «پرداخت شد» یکی نیست — چک رسیده‌بودن به معنی وصول‌شدنش نیست؛ برای «پرداخت
+   شد» همان دکمهٔ عمومی paymentMarkPaid جداگانه در ادمین می‌ماند.
    2026-08-29: با تصمیم تازهٔ کاربر این فرم برگشت (پیش‌تر از ۲۰۲۶-۰۸-۳۰ برداشته
-   شده بود) و فیلدِ «در وجه» هم تازه اضافه شده است. */
+   شده بود) و فیلد «در وجه» هم تازه اضافه شده است. */
 function paymentChequeReady() {
     if (isset($GLOBALS['__pay_cheque'])) return $GLOBALS['__pay_cheque'];
     $GLOBALS['__pay_cheque'] = paymentReady() && dbHasColumn('orders', 'cheque_number');
@@ -481,7 +481,7 @@ function paymentChequeClean(array $in) {
     elseif ($out['number'] === '')    $out['error'] = 'سریال چک را وارد کنید.';
     elseif ($out['date'] === '')      $out['error'] = 'تاریخ چک را وارد کنید.';
     elseif ($out['amount'] <= 0)      $out['error'] = 'مبلغ چک را وارد کنید.';
-    elseif ($out['payee'] === '')     $out['error'] = 'در وجهِ چک را وارد کنید.';
+    elseif ($out['payee'] === '')     $out['error'] = 'در وجه چک را وارد کنید.';
 
     if (mb_strlen($out['bank'])   > 120) $out['bank']   = mb_substr($out['bank'], 0, 120);
     if (mb_strlen($out['number']) > 60)  $out['number'] = mb_substr($out['number'], 0, 60);
@@ -498,8 +498,8 @@ function paymentChequeSave($orderId, array $in) {
     $v = paymentChequeClean($in);
     if ($v['error'] !== '') return $v['error'];
 
-    /* ستونِ cheque_payee ممکن است روی نصب‌های قدیمی‌تر (پیش از این تغییر) هنوز
-       مهاجرت نشده باشد؛ گارد می‌شود تا ثبتِ سفارش روی چنین نصبی 500 نگیرد —
+    /* ستون cheque_payee ممکن است روی نصب‌های قدیمی‌تر (پیش از این تغییر) هنوز
+       مهاجرت نشده باشد؛ گارد می‌شود تا ثبت سفارش روی چنین نصبی 500 نگیرد —
        بقیهٔ فیلدهای چک همچنان ذخیره می‌شوند. */
     $payeeOn = dbHasColumn('orders', 'cheque_payee');
     $sql = "UPDATE orders SET cheque_bank=?, cheque_number=?, cheque_date=?, cheque_amount=?"
@@ -516,30 +516,30 @@ function paymentChequeSave($orderId, array $in) {
         return '';
     } catch (Throwable $e) {
         paymentLog("cheque-save failed order=$orderId: " . $e->getMessage());
-        return 'ثبت اطلاعات چک انجام نشد. لطفاً دوباره تلاش کنید.';
+        return 'ثبت اطلاعات چک انجام نشد. لطفا دوباره تلاش کنید.';
     }
 }
 
-/* آیا این سفارش منتظر دریافتِ فیزیکیِ چک است؟ (نشانِ صف در فهرست ادمین) */
+/* آیا این سفارش منتظر دریافت فیزیکی چک است؟ (نشان صف در فهرست ادمین) */
 function paymentChequeAwaiting(array $order) {
     return (string)($order['payment_method'] ?? '') === 'cheque'
         && (string)($order['payment_status'] ?? '') !== 'paid';
 }
 
-/* مهلتِ ارسال/تحویلِ اصلِ چک (روز) — از admin/settings.php («درگاه پرداخت») */
+/* مهلت ارسال/تحویل اصل چک (روز) — از admin/settings.php («درگاه پرداخت») */
 function paymentChequeDeadlineDays() {
     $d = (int)getSettingRaw('pay_cheque_deadline_days', '10');
     return $d > 0 ? $d : 10;
 }
 
-/* متنِ پیغامِ تأییدِ سفارشِ چکی، با جایگزینیِ {days} */
+/* متن پیغام تأیید سفارش چکی، با جایگزینی {days} */
 function paymentChequeNoteText() {
     $tpl = getSetting('pay_cheque_note',
         'سفارش شما تأیید شد؛ اما اصل چک را هم باید برایمان تا {days} روز دیگر ارسال یا تحویل دهید. سفارش تا رسیدن فیزیکی چک «در انتظار دریافت چک» می‌ماند. ارسال سفارش شما انجام خواهد شد.');
     return str_replace('{days}', (string)paymentChequeDeadlineDays(), $tpl);
 }
 
-/* تیکِ «دریافت چک» مدیر — فقط زمان را ثبت می‌کند، وضعیتِ پرداخت را عوض نمی‌کند */
+/* تیک «دریافت چک» مدیر — فقط زمان را ثبت می‌کند، وضعیت پرداخت را عوض نمی‌کند */
 function paymentChequeReceive($orderId) {
     global $pdo;
     if (!paymentChequeReady()) return false;
@@ -578,10 +578,10 @@ function paymentCreate($gw, array $order) {
 
 /* ---------- پرداخت اعتباری/اقساطی ----------
    ارائه‌دهنده‌های اعتباری (اسنپ‌پی، تارا، دیجی‌پی و…) همگی یک الگو دارند:
-   POST جِیسون به «آدرس ایجاد» با مبلغ و آدرس بازگشت → پاسخی که یک نشانهٔ
+   POST جیسون به «آدرس ایجاد» با مبلغ و آدرس بازگشت → پاسخی که یک نشانهٔ
    یکتا (token/trackId/…) و یک آدرس پرداخت دارد. چون هنوز قراردادی بسته
-   نشده، آدرس‌ها و نامِ فیلدها از تنظیمات خوانده می‌شوند تا بعداً بدون
-   تغییرِ کد قابل استفاده باشند؛ پاسخ هم با چند نامِ رایج خوانده می‌شود. */
+   نشده، آدرس‌ها و نام فیلدها از تنظیمات خوانده می‌شوند تا بعدا بدون
+   تغییر کد قابل استفاده باشند؛ پاسخ هم با چند نام رایج خوانده می‌شود. */
 function paymentCreditHeaders() {
     $h = ['Content-Type: application/json', 'Accept: application/json'];
     $key = trim((string)getSettingRaw('pay_credit_merchant', ''));
@@ -589,7 +589,7 @@ function paymentCreditHeaders() {
     return $h;
 }
 
-/* اولین کلیدِ موجود از میان چند نامِ رایج را برمی‌گرداند (پاسخ‌ها یکسان نیستند) */
+/* اولین کلید موجود از میان چند نام رایج را برمی‌گرداند (پاسخ‌ها یکسان نیستند) */
 function paymentCreditPick($j, array $names) {
     if (!is_array($j)) return '';
     foreach ($names as $n) {
@@ -602,7 +602,7 @@ function paymentCreditPick($j, array $names) {
 
 function paymentCreateCredit(array $order, $amount, $cb, $desc, $mobile) {
     /* اگر مدیر پرداخت اعتباری را خاموش کرده، هیچ مشتری تازه‌ای به آن درگاه نمی‌رود.
-       (تأیید همچنان کار می‌کند تا پرداختِ نیمه‌تمامِ قبلی بی‌سرانجام نماند.) */
+       (تأیید همچنان کار می‌کند تا پرداخت نیمه‌تمام قبلی بی‌سرانجام نماند.) */
     if (getSettingRaw('pay_enable_credit', '0') !== '1') {
         return ['ok' => false, 'error' => 'پرداخت اعتباری در حال حاضر فعال نیست.'];
     }
@@ -758,7 +758,7 @@ function paymentVerify($gw, array $order, array $req) {
 
 /* تأیید پرداخت اعتباری. اگر «آدرس تأیید» تنظیم نشده باشد هیچ‌چیز خودکار
    پرداخت‌شده نمی‌شود؛ سفارش «در انتظار» می‌ماند تا مدیر دستی بررسی کند.
-   (قاعدهٔ ثابتِ این لایه: بدونِ تأییدِ سمت سرور، هیچ سفارشی paid نمی‌شود.) */
+   (قاعدهٔ ثابت این لایه: بدون تأیید سمت سرور، هیچ سفارشی paid نمی‌شود.) */
 function paymentVerifyCredit(array $order, array $req) {
     $url = trim((string)getSettingRaw('pay_credit_verify_url', ''));
     $auth = trim((string)($order['payment_authority'] ?? ''));
@@ -766,7 +766,7 @@ function paymentVerifyCredit(array $order, array $req) {
         $auth = (string)(paymentCreditPick($req, ['token', 'trackId', 'authority', 'paymentToken', 'id']) ?: '');
     }
 
-    /* لغو از سمت مشتری: ارائه‌دهنده‌ها معمولاً وضعیت را در پارامتر بازگشت می‌آورند */
+    /* لغو از سمت مشتری: ارائه‌دهنده‌ها معمولا وضعیت را در پارامتر بازگشت می‌آورند */
     $st = strtolower((string)paymentCreditPick($req, ['status', 'state', 'result']));
     if ($st !== '' && in_array($st, ['cancel', 'canceled', 'cancelled', 'nok', 'failed', '0', '-1'], true)) {
         return ['ok' => false, 'canceled' => true, 'error' => 'پرداخت اعتباری لغو شد.'];
@@ -774,7 +774,7 @@ function paymentVerifyCredit(array $order, array $req) {
 
     if ($url === '') {
         return ['ok' => false,
-                'error' => 'آدرس تأییدِ پرداخت اعتباری تنظیم نشده است؛ این پرداخت باید دستی بررسی شود.'];
+                'error' => 'آدرس تأیید پرداخت اعتباری تنظیم نشده است؛ این پرداخت باید دستی بررسی شود.'];
     }
 
     $res = httpPostJson($url, json_encode([
@@ -842,7 +842,7 @@ function paymentVerifyZarinpal(array $order, array $req) {
     $j = json_decode((string)$raw, true);
     $code = isset($j['data']['code']) ? (int)$j['data']['code'] : 0;
 
-    /* ۱۰۰ = تأیید موفق، ۱۰۱ = قبلاً تأیید شده (هر دو یعنی پول دریافت شده) */
+    /* ۱۰۰ = تأیید موفق، ۱۰۱ = قبلا تأیید شده (هر دو یعنی پول دریافت شده) */
     if ($code === 100 || $code === 101) {
         return ['ok' => true,
                 'ref'    => (string)($j['data']['ref_id'] ?? ''),
@@ -869,7 +869,7 @@ function paymentVerifyZibal(array $order, array $req) {
     $j = json_decode((string)$raw, true);
     $result = isset($j['result']) ? (int)$j['result'] : 0;
 
-    /* ۱۰۰ = تأیید موفق، ۲۰۱ = قبلاً تأیید شده */
+    /* ۱۰۰ = تأیید موفق، ۲۰۱ = قبلا تأیید شده */
     if ($result === 100 || $result === 201) {
         return ['ok' => true,
                 'ref'    => (string)($j['refNumber'] ?? $trackId),
@@ -897,7 +897,7 @@ function paymentVerifyIdpay(array $order, array $req) {
     $j = json_decode((string)$raw, true);
     $status = isset($j['status']) ? (int)$j['status'] : 0;
 
-    /* ۱۰۰ = تأییدشده، ۱۰۱ = قبلاً تأیید شده، ۲۰۰ = به حساب پذیرنده واریز شده */
+    /* ۱۰۰ = تأییدشده، ۱۰۱ = قبلا تأیید شده، ۲۰۰ = به حساب پذیرنده واریز شده */
     if ($status === 100 || $status === 101 || $status === 200) {
         $amount = (int)($j['amount'] ?? ($j['payment']['amount'] ?? paymentAmountFor('idpay', (int)$order['total_amount'])));
         return ['ok' => true,
