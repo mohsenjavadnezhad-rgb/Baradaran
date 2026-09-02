@@ -10,7 +10,7 @@ if (!isLoggedIn()) { header('Location: login.php'); exit; }
 $sections = settingsSections();
 $sec = settingsSectionKey($_POST['sec'] ?? $_GET['sec'] ?? '');
 
-/* کلیدهای متنیِ هر بخش — هنگام ذخیره فقط کلیدهای همان بخشِ ارسال‌شده نوشته
+/* کلیدهای متنی هر بخش — هنگام ذخیره فقط کلیدهای همان بخش ارسال‌شده نوشته
    می‌شوند. اگر مثل قبل روی همهٔ کلیدها حلقه بزنیم، بخش‌هایی که در این صفحه
    رندر نشده‌اند (و در POST نیستند) خالی می‌شوند. */
 $secTextKeys = [
@@ -23,18 +23,18 @@ $secTextKeys = [
     'decor'  => [],
     'sms'    => [
         'sms_api_key', 'sms_template_id', 'sms_param_name', 'sms_line_number',
-        /* متنِ پیامکِ هر مرحلهٔ روند ارسال — خالی‌گذاشتنِ هرکدام = پیامکِ آن مرحله خاموش */
+        /* متن پیامک هر مرحلهٔ روند ارسال — خالی‌گذاشتن هرکدام = پیامک آن مرحله خاموش */
         'sms_track_stock', 'sms_track_confirmed', 'sms_track_collecting', 'sms_track_finding',
         'sms_track_courier', 'sms_track_post', 'sms_track_shipped',
     ],
     'pay'    => [
         'pay_desc', 'pay_cod_note', 'pay_card_holder', 'pay_card_bank', 'pay_card_note', 'pay_c2c_note',
         'pay_zarinpal_merchant', 'pay_zibal_merchant', 'pay_idpay_key',
-        /* پیغامِ تأییدِ سفارشِ چکی — pay_cheque_deadline_days رقمی است و پایین‌تر جدا پاک‌سازی می‌شود */
+        /* پیغام تأیید سفارش چکی — pay_cheque_deadline_days رقمی است و پایین‌تر جدا پاک‌سازی می‌شود */
         'pay_cheque_note',
     ],
-    /* پرداخت اعتباری/اقساطی — بخشِ جداگانه، چون سرویس‌دهندهٔ متفاوتی دارد
-       (BNPL، نه دروازهٔ بانکی) و کنارِ «درگاه پرداخت» شلوغش می‌کرد.
+    /* پرداخت اعتباری/اقساطی — بخش جداگانه، چون سرویس‌دهندهٔ متفاوتی دارد
+       (BNPL، نه دروازهٔ بانکی) و کنار «درگاه پرداخت» شلوغش می‌کرد.
        تا وقتی pay_enable_credit خاموش است هیچ‌کجا دیده نمی‌شود.
        (pay_credit_min رقمی است و پایین‌تر جدا پاک‌سازی می‌شود.) */
     'paycredit' => [
@@ -46,14 +46,14 @@ $secTextKeys = [
     'shiprate' => ['ship_rate_note'],
     /* بررسی عکس نمونهٔ قطعه (partcheck_min_photos عددی است و پایین‌تر جدا پاک‌سازی می‌شود) */
     'pchk'   => ['partcheck_notice'],
-    /* شرایط و قوانین — یک متنِ آزادِ بلند، همان الگوی partcheck_notice */
+    /* شرایط و قوانین — یک متن آزاد بلند، همان الگوی partcheck_notice */
     'terms'  => ['terms_content'],
 ];
 
 $saved = false;
-/* فقط فرمِ اصلیِ همین بخش این پرچم را می‌فرستد. فرم‌های کوچکِ «افزودن روش
-   ارسال» و «نرخ‌نامه» (پایینِ همین صفحه) آن را ندارند، وگرنه حلقهٔ بالا
-   کلیدهای متنیِ بخش را که در آن فرم‌ها نیستند خالی می‌کرد. */
+/* فقط فرم اصلی همین بخش این پرچم را می‌فرستد. فرم‌های کوچک «افزودن روش
+   ارسال» و «نرخ‌نامه» (پایین همین صفحه) آن را ندارند، وگرنه حلقهٔ بالا
+   کلیدهای متنی بخش را که در آن فرم‌ها نیستند خالی می‌کرد. */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
     foreach ($secTextKeys[$sec] as $k) {
         setSetting($k, trim((string)($_POST[$k] ?? '')));
@@ -78,11 +78,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         setSetting('sms_test_mode', isset($_POST['sms_test_mode']) ? '1' : '0');
 
         /* تأیید پیامکی برای ورود مشتریان — خاموش‌کردنش یعنی ورود فقط با شمارهٔ
-           موبایل. چون چک‌باکسِ خاموش هیچ مقداری POST نمی‌کند و این بلوک فقط
-           وقتی اجرا می‌شود که همین بخش ذخیره شده باشد، نبودِ کلید = خاموش. */
+           موبایل. چون چک‌باکس خاموش هیچ مقداری POST نمی‌کند و این بلوک فقط
+           وقتی اجرا می‌شود که همین بخش ذخیره شده باشد، نبود کلید = خاموش. */
         setSetting('login_otp_required', isset($_POST['login_otp_required']) ? '1' : '0');
 
-        /* کلیدِ اصلیِ اطلاع‌رسانیِ مراحل ارسال: اگر پنل پیامک شارژ نداشت، همین
+        /* کلید اصلی اطلاع‌رسانی مراحل ارسال: اگر پنل پیامک شارژ نداشت، همین
            یک تیک برداشته می‌شود و هیچ پیامکی برای مراحل ارسال نمی‌رود. */
         setSetting('sms_track_enabled', isset($_POST['sms_track_enabled']) ? '1' : '0');
     }
@@ -93,9 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         setSetting('pay_enable_card',  isset($_POST['pay_enable_card'])  ? '1' : '0');
         setSetting('pay_enable_online',isset($_POST['pay_enable_online'])? '1' : '0');
 
-        /* درگاه انتخابی فقط از میان درگاه‌های آنلاینِ «عادی» پذیرفته می‌شود.
-           درگاه اعتباری (credit_only) گزینهٔ جداگانه‌ای است با تیکِ خودش و
-           نباید جای درگاه بانکیِ اصلی را بگیرد. */
+        /* درگاه انتخابی فقط از میان درگاه‌های آنلاین «عادی» پذیرفته می‌شود.
+           درگاه اعتباری (credit_only) گزینهٔ جداگانه‌ای است با تیک خودش و
+           نباید جای درگاه بانکی اصلی را بگیرد. */
         $onlineKeys = [];
         foreach (paymentGateways() as $gk => $gd) {
             if ($gd['kind'] === 'online' && empty($gd['credit_only'])) $onlineKeys[] = $gk;
@@ -113,8 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         $pan = trim(preg_replace('/[^0-9\- ]/', '', $pan));
         setSetting('pay_card_number', $pan);
 
-        /* دو روشِ ویژهٔ همکاران — پیش‌فرض روشن (چون خودشان از قبل به
-           همکارِ تأییدشده محدودند، نیازی به یک تیکِ اضافه برای «فعال‌سازی
+        /* دو روش ویژهٔ همکاران — پیش‌فرض روشن (چون خودشان از قبل به
+           همکار تأییدشده محدودند، نیازی به یک تیک اضافه برای «فعال‌سازی
            عمومی» نیست، ولی مدیر می‌تواند اینجا خاموششان کند). */
         setSetting('pay_enable_partner_month', isset($_POST['pay_enable_partner_month']) ? '1' : '0');
         setSetting('pay_enable_cheque',        isset($_POST['pay_enable_cheque'])        ? '1' : '0');
@@ -122,8 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         $chqDays = (int)faToLatinDigits((string)($_POST['pay_cheque_deadline_days'] ?? '10'));
         setSetting('pay_cheque_deadline_days', (string)max(1, min(90, $chqDays ?: 10)));
 
-        /* عکسِ نمونهٔ چک — زیرِ کادرِ «اطلاعات چک» در تسویه‌حساب/صفحهٔ سفارش
-           نشان داده می‌شود (خواستهٔ کاربر). حذفِ عکسِ فعلی با تیکِ جداگانه،
+        /* عکس نمونهٔ چک — زیر کادر «اطلاعات چک» در تسویه‌حساب/صفحهٔ سفارش
+           نشان داده می‌شود (خواستهٔ کاربر). حذف عکس فعلی با تیک جداگانه،
            چون input[type=file] خودش نمی‌تواند «خالی» بفرستد. */
         if (isset($_POST['cheque_sample_remove'])) {
             $old = trim((string)getSettingRaw('pay_cheque_sample', ''));
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
 
     if ($sec === 'paycredit') {
         /* پرداخت اعتباری/اقساطی: پیش‌فرض خاموش. تا وقتی قرارداد با ارائه‌دهنده
-           بسته نشده، این تیک برداشته می‌ماند و مشتری اصلاً آن را نمی‌بیند. */
+           بسته نشده، این تیک برداشته می‌ماند و مشتری اصلا آن را نمی‌بیند. */
         setSetting('pay_enable_credit', isset($_POST['pay_enable_credit']) ? '1' : '0');
         $crMin = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['pay_credit_min'] ?? '')));
         setSetting('pay_credit_min', $crMin === '' ? '0' : $crMin);
@@ -158,17 +158,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         $barbari = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['ship_barbari_cost'] ?? '')));
         setSetting('ship_barbari_cost', $barbari === '' ? '0' : $barbari);
 
-        /* ویرایشِ گروهیِ روش‌ها. اگر جدول ساخته نشده باشد به همان کلیدهای
-           قدیمیِ settings برمی‌گردیم تا صفحه بی‌کار نماند.
+        /* ویرایش گروهی روش‌ها. اگر جدول ساخته نشده باشد به همان کلیدهای
+           قدیمی settings برمی‌گردیم تا صفحه بی‌کار نماند.
            «هزینهٔ ثابت» و «یادداشت داخلی» از این فرم برداشته شده‌اند: تنها
-           منبعِ قیمت، نرخ‌نامهٔ شهر و وزن است. */
+           منبع قیمت، نرخ‌نامهٔ شهر و وزن است. */
         if (shippingTableReady()) {
             $up = $pdo->prepare("UPDATE shipping_methods
                                  SET label=?, icon=?, freight_collect=?, cod_only=?, is_active=?
                                  WHERE method_key=?");
             foreach (array_keys(shippingMethods()) as $mk) {
                 $label = trim((string)($_POST['m_label'][$mk] ?? ''));
-                if ($label === '') continue;                 // نامِ خالی روش را بی‌نام می‌کرد
+                if ($label === '') continue;                 // نام خالی روش را بی‌نام می‌کرد
                 $icon  = shipIconKey((string)($_POST['m_icon'][$mk] ?? 'truck'));
                 $up->execute([
                     $label, $icon,
@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
                     $mk,
                 ]);
             }
-            shippingAllMethods(true);   // کشِ درون‌درخواستی تازه شود
+            shippingAllMethods(true);   // کش درون‌درخواستی تازه شود
         } else {
             foreach (array_keys(shippingMethods()) as $mk) {
                 setSetting('ship_enable_' . $mk, isset($_POST['m_on'][$mk]) ? '1' : '0');
@@ -186,9 +186,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         }
     }
 
-    /* بررسی عکس نمونهٔ قطعه: کلیدِ روشن/خاموش + حداقل تعداد عکس.
-       چک‌باکسِ خاموش هیچ مقداری POST نمی‌کند و این بلوک فقط وقتی اجرا می‌شود که
-       همین بخش ذخیره شده باشد، پس نبودِ کلید = خاموش. */
+    /* بررسی عکس نمونهٔ قطعه: کلید روشن/خاموش + حداقل تعداد عکس.
+       چک‌باکس خاموش هیچ مقداری POST نمی‌کند و این بلوک فقط وقتی اجرا می‌شود که
+       همین بخش ذخیره شده باشد، پس نبود کلید = خاموش. */
     if ($sec === 'pchk') {
         setSetting('partcheck_enabled', isset($_POST['partcheck_enabled']) ? '1' : '0');
         setSetting('partcheck_require_stock', isset($_POST['partcheck_require_stock']) ? '1' : '0');
@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
     }
 
     if ($sec === 'shiprate') {
-        /* ویرایشِ گروهیِ ردیف‌های نرخ‌نامه (شهر / واحد وزن / هزینهٔ هر واحد).
+        /* ویرایش گروهی ردیف‌های نرخ‌نامه (شهر / واحد وزن / هزینهٔ هر واحد).
            فقط ردیف‌هایی نوشته می‌شوند که در POST آمده‌اند، پس اگر مدیر فهرست را
            فیلتر کرده باشد ردیف‌های پنهان دست‌نخورده می‌مانند. */
         if (shippingRatesReady() && !empty($_POST['rate_city']) && is_array($_POST['rate_city'])) {
@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
                                   $rc === '' ? 0 : (int)$rc,
                                   isset($_POST['rate_on'][$rid]) ? 1 : 0, $rid]);
                 } catch (Exception $e) {
-                    /* برخورد با کلید یکتای «روش + شهر»: یعنی مدیر شهرِ یک ردیف را
+                    /* برخورد با کلید یکتای «روش + شهر»: یعنی مدیر شهر یک ردیف را
                        به شهری عوض کرده که ردیف دیگری از قبل دارد. آن ردیف را
                        بی‌صدا رد می‌کنیم تا ذخیرهٔ بقیه خراب نشود. */
                 }
@@ -231,8 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
     $saved = true;
 }
 
-/* ---------- افزودن/حذفِ روش ارسال و ردیف‌های نرخ‌نامه ----------
-   این‌ها فرم‌ها و لینک‌های جداگانه‌اند (نه بخشی از فرم بزرگِ بالا) و با الگوی
+/* ---------- افزودن/حذف روش ارسال و ردیف‌های نرخ‌نامه ----------
+   این‌ها فرم‌ها و لینک‌های جداگانه‌اند (نه بخشی از فرم بزرگ بالا) و با الگوی
    PRG کار می‌کنند: POST/GET ← تغییر ← ریدایرکت، تا رفرش صفحه دوباره ثبت نکند.
    همه پیش از هر خروجی HTML اجرا می‌شوند چون header() صدا می‌زنند. */
 function shipIconKey($v) {
@@ -283,7 +283,7 @@ if ($sec === 'ship' && shippingTableReady()) {
         } catch (Exception $e) { shipRedirect('خطا در افزودن روش ارسال.'); }
     }
 
-    /* حذف روش ارسال: اگر سفارشی به آن اشاره کند «حذف نرم» می‌شود تا نامِ روشِ
+    /* حذف روش ارسال: اگر سفارشی به آن اشاره کند «حذف نرم» می‌شود تا نام روش
        آن سفارش‌ها گم نشود؛ وگرنه ردیف و نرخ‌نامه‌اش کامل پاک می‌شوند. */
     if (isset($_GET['mdel'])) {
         $k = (string)$_GET['mdel'];
@@ -310,7 +310,7 @@ if ($sec === 'ship' && shippingTableReady()) {
         $k = (string)$_GET['mtoggle'];
         try {
             $pdo->prepare("UPDATE shipping_methods SET is_active = 1 - is_active WHERE method_key = ?")->execute([$k]);
-            shipRedirect('وضعیت نمایشِ «' . shippingLabel($k) . '» عوض شد.');
+            shipRedirect('وضعیت نمایش «' . shippingLabel($k) . '» عوض شد.');
         } catch (Exception $e) { shipRedirect('خطا در تغییر وضعیت.'); }
     }
 }
@@ -318,10 +318,10 @@ if ($sec === 'ship' && shippingTableReady()) {
 if ($sec === 'shiprate' && shippingRatesReady()) {
     /* افزودن نرخ: روش + شهر (از فهرست یا دستی) + واحد وزن + هزینهٔ هر واحد.
        upsert است چون کلید یکتای (روش، شهر) اجازهٔ دو نرخ متناقض برای یک شهر
-       را نمی‌دهد — پس «افزودنِ دوبارهٔ» یک شهر نرخش را به‌روز می‌کند. */
+       را نمی‌دهد — پس «افزودن دوبارهٔ» یک شهر نرخش را به‌روز می‌کند. */
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rate_add'])) {
         $mk   = (string)($_POST['r_method'] ?? '');
-        /* شهرِ دستی بر انتخاب از فهرست مقدم است (مدیر شهری نوشته که در فهرست نیست) */
+        /* شهر دستی بر انتخاب از فهرست مقدم است (مدیر شهری نوشته که در فهرست نیست) */
         $city = trim((string)($_POST['r_city_new'] ?? ''));
         if ($city === '') $city = trim((string)($_POST['r_city'] ?? ''));
         if (shippingMethodDef($mk) === null) shipRedirect('روش ارسال را انتخاب کنید.', 'shiprate');
@@ -330,12 +330,12 @@ if ($sec === 'shiprate' && shippingRatesReady()) {
             shipRedirect('«' . shippingLabel($mk) . '» پس‌کرایه است؛ کرایه هنگام تحویل گرفته می‌شود و نرخ‌نامه برایش کاربردی ندارد.', 'shiprate');
         }
 
-        $city = shippingCityCanonical($city);       // اگر شهر در فهرست بود، نامِ رسمی‌اش
+        $city = shippingCityCanonical($city);       // اگر شهر در فهرست بود، نام رسمی‌اش
         $w = (float)preg_replace('/[^0-9.]/', '', faToLatinDigits((string)($_POST['r_weight'] ?? '1')));
         if ($w <= 0) $w = 1;                        // «هر ۱ کیلوگرم» پیش‌فرض
         $c = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['r_cost'] ?? '')));
 
-        /* شهرِ دستی به فهرست شهرها هم اضافه شود تا بار بعد از انتخابگر بیاید */
+        /* شهر دستی به فهرست شهرها هم اضافه شود تا بار بعد از انتخابگر بیاید */
         if (shippingCitiesReady()) {
             try {
                 $pdo->prepare("INSERT IGNORE INTO cities (name, name_norm, province, sort_order, is_active)
@@ -352,7 +352,7 @@ if ($sec === 'shiprate' && shippingRatesReady()) {
                            ON DUPLICATE KEY UPDATE city = VALUES(city), $unitCol = VALUES($unitCol),
                                                    cost = VALUES(cost), is_active = 1")
                 ->execute([$mk, $city, shipNormCity($city), $w, $c === '' ? 0 : (int)$c]);
-            shipRedirect('نرخِ «' . $city . '» برای «' . shippingLabel($mk) . '» ثبت شد: هر ' . shippingWeightText($w) . ' کیلوگرم ' . formatPrice($c === '' ? 0 : (int)$c) . '.', 'shiprate');
+            shipRedirect('نرخ «' . $city . '» برای «' . shippingLabel($mk) . '» ثبت شد: هر ' . shippingWeightText($w) . ' کیلوگرم ' . formatPrice($c === '' ? 0 : (int)$c) . '.', 'shiprate');
         } catch (Exception $e) { shipRedirect('خطا در ثبت نرخ.', 'shiprate'); }
     }
 
@@ -369,7 +369,7 @@ function sv($key) { return getSettingRaw($key, ''); }
 $testMode = getSettingRaw('sms_test_mode', '1') === '1';
 $smsMethod = getSetting('sms_method', 'bulk');
 $smsTrackOn = smsTrackEnabled();
-/* برچسب و آیکنِ مراحل از همان منبعی که روند ارسال از آن می‌خواند، تا اگر
+/* برچسب و آیکن مراحل از همان منبعی که روند ارسال از آن می‌خواند، تا اگر
    مرحله‌ای اضافه/کم شد این صفحه هم خودکار هم‌گام شود. */
 $trackLabels = [];
 $trackIcons  = [];
@@ -392,7 +392,7 @@ $payEnOnline = getSettingRaw('pay_enable_online', '1') === '1';
 $payEnPMonth = getSettingRaw('pay_enable_partner_month', '1') === '1';
 $payEnCheque = getSettingRaw('pay_enable_cheque', '1') === '1';
 $payActive   = paymentActiveGateway();
-/* پرداخت اعتباری: تیکِ فعال‌سازی و آماده‌بودنِ تنظیماتش جدا سنجیده می‌شوند تا
+/* پرداخت اعتباری: تیک فعال‌سازی و آماده‌بودن تنظیماتش جدا سنجیده می‌شوند تا
    ادمین ببیند «روشن است ولی کلید/آدرس ندارد» یا «همه چیز هست ولی خاموش است». */
 $payEnCredit = getSettingRaw('pay_enable_credit', '0') === '1';
 $payCrOk     = paymentIsConfigured('credit');
@@ -406,11 +406,11 @@ $shipRtOn  = shippingRatesReady();
 $shipWtOn  = shippingWeightReady();
 $shipRtU   = shippingRateUnitReady();   // ستون weight_unit ساخته شده؟
 $shipCtOn  = shippingCitiesReady();     // جدول شهرها ساخته شده؟
-/* شهرها برای انتخابگرِ نرخ‌نامه، گروه‌بندی‌شده بر اساس استان */
+/* شهرها برای انتخابگر نرخ‌نامه، گروه‌بندی‌شده بر اساس استان */
 $shipCityGroups = $shipCtOn ? shippingCityGroups() : [];
 $shipCityCount  = 0;
 foreach ($shipCityGroups as $__g) $shipCityCount += count($__g);
-/* آیکون‌های قابل انتخاب برای یک روش ارسال (همان فهرست مجازِ shipIconKey) */
+/* آیکون‌های قابل انتخاب برای یک روش ارسال (همان فهرست مجاز shipIconKey) */
 $shipIcons = ['truck' => 'کامیون / باربری', 'bike' => 'پیک موتوری', 'plane' => 'هوایی',
               'mail' => 'پست', 'send' => 'پست پیشتاز', 'package' => 'بسته',
               'layers' => 'محموله', 'store' => 'فروشگاه', 'globe' => 'بین‌شهری',
@@ -424,9 +424,9 @@ if ($shipRtOn) {
         if ($__r) $shipRates[$__mk] = $__r;
     }
 }
-/* همان ردیف‌ها، تخت‌شده برای جدولِ فشردهٔ بخش «نرخ‌نامه‌های ارسال»: یک جدول با
-   ستون «روش» جای چند جدولِ جدا، تا صفحه با هر شهرِ تازه بلندتر نشود. کلیدِ روش
-   روی هر ردیف می‌نشیند تا فیلترِ سمت مرورگر بتواند ردیف‌ها را پنهان کند. */
+/* همان ردیف‌ها، تخت‌شده برای جدول فشردهٔ بخش «نرخ‌نامه‌های ارسال»: یک جدول با
+   ستون «روش» جای چند جدول جدا، تا صفحه با هر شهر تازه بلندتر نشود. کلید روش
+   روی هر ردیف می‌نشیند تا فیلتر سمت مرورگر بتواند ردیف‌ها را پنهان کند. */
 $rateRows  = [];
 $rateCities = [];
 foreach ($shipRates as $__mk => $__rows) {
@@ -443,10 +443,10 @@ $rateMethods = [];
 foreach ($shipAll as $__mk => $__md) {
     if (!shippingIsFreightCollect($__mk)) $rateMethods[$__mk] = $__md;
 }
-/* برای توضیحِ قاعدهٔ «ارسال ↔ پرداخت» پایین همین بخش: آیا جز «پرداخت در محل»
-   روش پرداخت دیگری فعال است؟ اگر نه، قاعده برای روش‌های غیرِپیک عملاً کاری
-   نمی‌کند، چون shippingAllowedPayKeys() عمداً فهرست کامل را برمی‌گرداند تا
-   مشتری بی‌راهِ پرداخت نماند. */
+/* برای توضیح قاعدهٔ «ارسال ↔ پرداخت» پایین همین بخش: آیا جز «پرداخت در محل»
+   روش پرداخت دیگری فعال است؟ اگر نه، قاعده برای روش‌های غیرپیک عملا کاری
+   نمی‌کند، چون shippingAllowedPayKeys() عمدا فهرست کامل را برمی‌گرداند تا
+   مشتری بی‌راه پرداخت نماند. */
 $shipPayOther = array_values(array_diff(array_keys(paymentAvailableMethods()), ['cod']));
 $shipMsg = trim((string)($_GET['smsg'] ?? ''));
 
@@ -469,10 +469,10 @@ require_once __DIR__ . '/layout-top.php';
 <?php if ($shipMsg !== ''): ?><div class="flash flash-success"><?= icon('check', 'ic-sm') ?> <?= h($shipMsg) ?></div><?php endif; ?>
 
 <form method="POST" enctype="multipart/form-data" class="admin-form-full<?= ($sec === 'ship' || $sec === 'shiprate') ? ' ff-wide' : '' ?>">
-  <?php /* بخشِ ارسال‌شده، تا ذخیره فقط کلیدهای همین بخش را بازنویسی کند */ ?>
+  <?php /* بخش ارسال‌شده، تا ذخیره فقط کلیدهای همین بخش را بازنویسی کند */ ?>
   <input type="hidden" name="sec" value="<?= h($sec) ?>">
-  <?php /* پرچمِ «این فرمِ اصلیِ بخش است» — فرم‌های کوچکِ پایین صفحه آن را
-           ندارند تا کلیدهای متنیِ بخش را خالی نکنند. */ ?>
+  <?php /* پرچم «این فرم اصلی بخش است» — فرم‌های کوچک پایین صفحه آن را
+           ندارند تا کلیدهای متنی بخش را خالی نکنند. */ ?>
   <input type="hidden" name="save_section" value="1">
 
   <?php if ($sec === 'footer'): ?>
@@ -513,7 +513,7 @@ require_once __DIR__ . '/layout-top.php';
       <div class="form-group"><label>روبیکا</label><input type="text" name="social_rubika" class="form-control" value="<?= h(sv('social_rubika')) ?>" placeholder="آدرس یا شناسه" dir="ltr"></div>
       <div class="form-group"><label>ایتا</label><input type="text" name="social_eitaa" class="form-control" value="<?= h(sv('social_eitaa')) ?>" placeholder="آدرس یا شناسه" dir="ltr"></div>
     </div>
-    <div style="font-size:0.72rem;color:var(--text-muted);">فیلدهای خالی در فوتر نمایش داده نمی‌شوند. می‌توانید آدرس کامل (https://...) یا فقط شناسه (مثلاً <code dir="ltr">@myshop</code>) را وارد کنید.</div>
+    <div style="font-size:0.72rem;color:var(--text-muted);">فیلدهای خالی در فوتر نمایش داده نمی‌شوند. می‌توانید آدرس کامل (https://...) یا فقط شناسه (مثلا <code dir="ltr">@myshop</code>) را وارد کنید.</div>
   </div>
   <?php endif; ?>
 
@@ -560,7 +560,7 @@ require_once __DIR__ . '/layout-top.php';
 
     <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.9;">
       • <b>تیک‌خورده (پیشنهادی):</b> مشتری شماره را وارد می‌کند، کد ۵ رقمی پیامک می‌شود و تا کد را نزند وارد نمی‌شود.<br>
-      • <b>بدون تیک:</b> مرحلهٔ کد کاملاً حذف می‌شود؛ مشتری با زدن شمارهٔ موبایل بلافاصله وارد می‌شود (اگر حساب نداشته باشد، مثل قبل خودکار ساخته می‌شود).
+      • <b>بدون تیک:</b> مرحلهٔ کد کاملا حذف می‌شود؛ مشتری با زدن شمارهٔ موبایل بلافاصله وارد می‌شود (اگر حساب نداشته باشد، مثل قبل خودکار ساخته می‌شود).
       این گزینه به «حالت آزمایشی» پایین ربطی ندارد و مستقل از آن کار می‌کند.
     </div>
 
@@ -578,7 +578,7 @@ require_once __DIR__ . '/layout-top.php';
 
     <?php if (!$otpRequired): ?>
     <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:1rem;">
-      چون «تأیید شماره برای ورود» بالا خاموش است، این تنظیمات فعلاً برای ورود مشتریان به کار نمی‌رود؛ ذخیره می‌شود و به‌محض تیک‌زدنِ آن گزینه فعال می‌گردد.
+      چون «تأیید شماره برای ورود» بالا خاموش است، این تنظیمات فعلا برای ورود مشتریان به کار نمی‌رود؛ ذخیره می‌شود و به‌محض تیک‌زدن آن گزینه فعال می‌گردد.
     </div>
     <?php endif; ?>
 
@@ -594,7 +594,7 @@ require_once __DIR__ . '/layout-top.php';
 
     <div class="sms-bulk">
       <div class="form-group"><label>شمارهٔ خط (Line Number)</label>
-        <input type="text" name="sms_line_number" class="form-control" value="<?= h(sv('sms_line_number')) ?>" dir="ltr" placeholder="مثلاً 30007732xxxx"></div>
+        <input type="text" name="sms_line_number" class="form-control" value="<?= h(sv('sms_line_number')) ?>" dir="ltr" placeholder="مثلا 30007732xxxx"></div>
       <div class="form-group"><label>متن پیامک کد</label>
         <input type="text" name="sms_otp_text" class="form-control" value="<?= h(sv('sms_otp_text') ?: 'کد تأیید شما: {code}') ?>">
         <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">
@@ -622,9 +622,9 @@ require_once __DIR__ . '/layout-top.php';
     <?php endif; ?>
   </div>
 
-  <?php /* ---------- اطلاع‌رسانیِ پیامکیِ مراحلِ روند ارسال ----------
+  <?php /* ---------- اطلاع‌رسانی پیامکی مراحل روند ارسال ----------
            یک کلید اصلی (برای وقتی پنل شارژ ندارد) + یک متن برای هر مرحله.
-           متن‌ها از orderTrackSmsKeys() می‌آیند تا فهرستِ این صفحه و فرستنده
+           متن‌ها از orderTrackSmsKeys() می‌آیند تا فهرست این صفحه و فرستنده
            هیچ‌وقت از هم جدا نشوند. مرحله‌ای که ستونش ساخته نشده نشان داده
            نمی‌شود ولی متنش حفظ می‌ماند (کلیدش در $secTextKeys هست). */ ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
@@ -633,12 +633,12 @@ require_once __DIR__ . '/layout-top.php';
     <div class="form-group" style="margin-bottom:0.5rem;">
       <label class="cat-checkbox" style="font-size:0.9rem;">
         <input type="checkbox" name="sms_track_enabled" value="1" <?= $smsTrackOn ? 'checked' : '' ?>>
-        با ثبتِ هر مرحله در «روند ارسال سفارش»، برای مشتری پیامک فرستاده شود
+        با ثبت هر مرحله در «روند ارسال سفارش»، برای مشتری پیامک فرستاده شود
       </label>
     </div>
     <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.9;margin-bottom:1rem;">
       اگر پنل پیامک شارژ نداشت همین تیک را بردارید؛ مراحل مثل قبل ثبت و برای مشتری نمایش داده می‌شوند، فقط پیامکی ارسال نمی‌شود.
-      پیامک فقط <b>یک‌بار</b> و لحظهٔ تیک‌خوردنِ مرحله می‌رود (ذخیرهٔ دوبارهٔ همان مرحله پیامک تکراری نمی‌فرستد).
+      پیامک فقط <b>یک‌بار</b> و لحظهٔ تیک‌خوردن مرحله می‌رود (ذخیرهٔ دوبارهٔ همان مرحله پیامک تکراری نمی‌فرستد).
       این پیامک‌ها همیشه از «ارسال انبوه» استفاده می‌کنند، پس <b>کلید API</b> و <b>شمارهٔ خط</b> باید پر باشند.
     </div>
 
@@ -669,8 +669,8 @@ require_once __DIR__ . '/layout-top.php';
       <code dir="ltr">{site}</code> نام سایت ·
       <code dir="ltr">{code}</code> کد رهگیری پست ·
       <code dir="ltr">{courier}</code> نام و شمارهٔ پیک.<br>
-      متنِ هر مرحله را <b>خالی</b> بگذارید تا پیامکِ همان مرحله ارسال نشود (مثلاً فقط «تحویل به پست» و «ارسال شد» پیامک شوند).
-      گزارشِ ارسال‌ها در <code dir="ltr">storage/sms.log</code> ذخیره می‌شود.
+      متن هر مرحله را <b>خالی</b> بگذارید تا پیامک همان مرحله ارسال نشود (مثلا فقط «تحویل به پست» و «ارسال شد» پیامک شوند).
+      گزارش ارسال‌ها در <code dir="ltr">storage/sms.log</code> ذخیره می‌شود.
     </div>
   </div>
 
@@ -725,9 +725,9 @@ require_once __DIR__ . '/layout-top.php';
       </label>
     </div>
 
-    <h4 style="font-size:0.82rem;color:var(--text-muted);margin:1rem 0 0.5rem;">روش‌های ویژهٔ همکارانِ تأییدشده</h4>
+    <h4 style="font-size:0.82rem;color:var(--text-muted);margin:1rem 0 0.5rem;">روش‌های ویژهٔ همکاران تأییدشده</h4>
     <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.6rem;line-height:1.8;">
-      این دو روش فقط به حسابِ همکارِ تأییدشده نمایش داده می‌شوند — مشتریِ جزئی و همکارِ در انتظار تأیید آن‌ها را نمی‌بینند.
+      این دو روش فقط به حساب همکار تأییدشده نمایش داده می‌شوند — مشتری جزئی و همکار در انتظار تأیید آن‌ها را نمی‌بینند.
     </p>
     <div class="form-group" style="margin-bottom:0.35rem;">
       <label class="cat-checkbox" style="font-size:0.9rem;">
@@ -748,21 +748,21 @@ require_once __DIR__ . '/layout-top.php';
       <?php if ($chqSample !== ''): ?>
       <div class="image-preview" style="margin-bottom:0.5rem;"><img src="../uploads/settings/<?= h($chqSample) ?>" style="max-height:140px;border-radius:8px;"></div>
       <label style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.5rem;font-size:0.78rem;color:var(--text-muted);">
-        <input type="checkbox" name="cheque_sample_remove" value="1"> حذفِ عکسِ فعلی
+        <input type="checkbox" name="cheque_sample_remove" value="1"> حذف عکس فعلی
       </label>
       <?php endif; ?>
       <input type="file" name="cheque_sample" class="form-control" accept="image/*">
     </div>
 
-    <?php /* دیگر فرمِ ثبتِ بانک/شماره/تاریخ/مبلغِ چک نداریم (خواستهٔ کاربر) —
-             فقط یک پیغامِ تأییدِ سفارش + مهلتِ تحویلِ اصلِ چک، که همین‌جا
-             قابلِ تنظیم است. {days} در متن با عددِ زیر جایگزین می‌شود. */ ?>
-    <div class="form-group"><label>مهلتِ ارسال/تحویلِ اصلِ چک (روز)</label>
+    <?php /* دیگر فرم ثبت بانک/شماره/تاریخ/مبلغ چک نداریم (خواستهٔ کاربر) —
+             فقط یک پیغام تأیید سفارش + مهلت تحویل اصل چک، که همین‌جا
+             قابل تنظیم است. {days} در متن با عدد زیر جایگزین می‌شود. */ ?>
+    <div class="form-group"><label>مهلت ارسال/تحویل اصل چک (روز)</label>
       <input type="number" name="pay_cheque_deadline_days" class="form-control" style="width:140px;"
              value="<?= (int)(sv('pay_cheque_deadline_days') ?: 10) ?>" min="1" max="90"></div>
 
-    <div class="form-group"><label>متنِ پیغامِ تأییدِ سفارشِ چکی <span style="color:var(--text-muted);font-weight:400;font-size:0.72rem;">(به‌جایِ <code dir="ltr">{days}</code> عددِ بالا نوشته می‌شود)</span></label>
-      <textarea name="pay_cheque_note" class="form-control" rows="3"><?= h(sv('pay_cheque_note') ?: 'سفارش شما تأیید شد؛ اما اصلِ چک را هم باید برایمان تا {days} روزِ دیگر ارسال یا تحویل دهید. سفارش تا رسیدنِ فیزیکیِ چک «در انتظار دریافت چک» می‌ماند. ارسالِ سفارشِ شما انجام خواهد شد.') ?></textarea>
+    <div class="form-group"><label>متن پیغام تأیید سفارش چکی <span style="color:var(--text-muted);font-weight:400;font-size:0.72rem;">(به‌جای <code dir="ltr">{days}</code> عدد بالا نوشته می‌شود)</span></label>
+      <textarea name="pay_cheque_note" class="form-control" rows="3"><?= h(sv('pay_cheque_note') ?: 'سفارش شما تأیید شد؛ اما اصل چک را هم باید برایمان تا {days} روز دیگر ارسال یا تحویل دهید. سفارش تا رسیدن فیزیکی چک «در انتظار دریافت چک» می‌ماند. ارسال سفارش شما انجام خواهد شد.') ?></textarea>
     </div>
 
     <div class="form-group"><label>یادداشت «پرداخت در محل» (زیر گزینه در صفحهٔ تسویه)</label>
@@ -778,14 +778,14 @@ require_once __DIR__ . '/layout-top.php';
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group"><label>نام بانک</label>
-          <input type="text" name="pay_card_bank" class="form-control" value="<?= h(sv('pay_card_bank')) ?>" placeholder="مثلاً ملی / ملت"></div>
+          <input type="text" name="pay_card_bank" class="form-control" value="<?= h(sv('pay_card_bank')) ?>" placeholder="مثلا ملی / ملت"></div>
         <div class="form-group"><label>راهنمای پس از واریز</label>
           <input type="text" name="pay_card_note" class="form-control" value="<?= h(sv('pay_card_note')) ?>"></div>
       </div>
 
-      <div class="form-group"><label>توضیح بالای فرمِ «ثبت واریز» (اختیاری)</label>
+      <div class="form-group"><label>توضیح بالای فرم «ثبت واریز» (اختیاری)</label>
         <input type="text" name="pay_c2c_note" class="form-control" value="<?= h(sv('pay_c2c_note')) ?>"
-               placeholder="مثلاً: پس از واریز، اطلاعات زیر را پر کنید تا سفارش‌تان تأیید شود."></div>
+               placeholder="مثلا: پس از واریز، اطلاعات زیر را پر کنید تا سفارش‌تان تأیید شود."></div>
 
       <div class="auth-note" style="font-size:0.76rem;line-height:1.9;">
         <?= icon('info', 'ic-sm') ?>
@@ -802,7 +802,7 @@ require_once __DIR__ . '/layout-top.php';
       <h4 style="font-size:0.82rem;color:var(--text-muted);margin:0.75rem 0;">درگاه بانکی</h4>
       <div class="form-group"><label>انتخاب درگاه</label>
         <select name="pay_gateway" id="pay_gateway" class="form-control">
-          <?php /* درگاه اعتباری در این فهرست نمی‌آید: کارتِ خودش را دارد و
+          <?php /* درگاه اعتباری در این فهرست نمی‌آید: کارت خودش را دارد و
                    «درگاه بانکی اصلی» نیست (credit_only) */ ?>
           <?php foreach (paymentGateways() as $gk => $gd): if ($gd['kind'] !== 'online' || !empty($gd['credit_only'])) continue; ?>
           <option value="<?= h($gk) ?>" <?= $payGwSel === $gk ? 'selected' : '' ?>>
@@ -901,8 +901,8 @@ require_once __DIR__ . '/layout-top.php';
 
   <?php if ($sec === 'paycredit'): ?>
   <?php /* ---------- درگاه پرداخت اعتباری / اقساطی ----------
-           کارتِ جدا از درگاه بانکی، چون گزینهٔ مستقلی در صفحهٔ تسویه است (نه
-           جانشینِ درگاه اصلی): مشتری می‌تواند هم «پرداخت اینترنتی» ببیند و هم
+           کارت جدا از درگاه بانکی، چون گزینهٔ مستقلی در صفحهٔ تسویه است (نه
+           جانشین درگاه اصلی): مشتری می‌تواند هم «پرداخت اینترنتی» ببیند و هم
            «پرداخت اعتباری». پیش‌فرض خاموش است تا وقتی قرارداد بسته شود. */ ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('receipt') ?> پرداخت اعتباری / اقساطی</h3>
@@ -933,10 +933,10 @@ require_once __DIR__ . '/layout-top.php';
     <div class="pay-credit-fields">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group"><label>نام گزینه (همان که مشتری می‌بیند)</label>
-          <input type="text" name="pay_credit_label" class="form-control" value="<?= h(sv('pay_credit_label') ?: 'پرداخت اعتباری (اقساطی)') ?>" placeholder="مثلاً پرداخت اعتباری اسنپ‌پی"></div>
+          <input type="text" name="pay_credit_label" class="form-control" value="<?= h(sv('pay_credit_label') ?: 'پرداخت اعتباری (اقساطی)') ?>" placeholder="مثلا پرداخت اعتباری اسنپ‌پی"></div>
         <div class="form-group"><label>حداقل مبلغ سفارش (تومان)</label>
           <input type="text" name="pay_credit_min" class="form-control" value="<?= h(sv('pay_credit_min') ?: '0') ?>" dir="ltr" inputmode="numeric" placeholder="0">
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">۰ یعنی بدون حد؛ اگر ارائه‌دهنده حدِ پایین دارد همان را بگذارید تا مشتری بی‌جهت به درگاه نرود.</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">۰ یعنی بدون حد؛ اگر ارائه‌دهنده حد پایین دارد همان را بگذارید تا مشتری بی‌جهت به درگاه نرود.</div>
         </div>
       </div>
 
@@ -960,7 +960,7 @@ require_once __DIR__ . '/layout-top.php';
         <?= icon('info', 'ic-sm') ?>
         آدرس بازگشت را در پنل ارائه‌دهنده روی
         <code dir="ltr"><?= h(rtrim(SITE_URL, '/')) ?>/payment-callback.php?gw=credit</code> بگذارید.
-        درخواستِ ایجاد پرداخت به‌صورت JSON با فیلدهای
+        درخواست ایجاد پرداخت به‌صورت JSON با فیلدهای
         <code dir="ltr">merchant، amount، callbackUrl، description، orderId، mobile</code> فرستاده می‌شود
         و پاسخ می‌تواند توکن را در <code dir="ltr">token / trackId / authority</code> و آدرس را در
         <code dir="ltr">paymentUrl / redirectUrl / url</code> برگرداند.
@@ -970,7 +970,7 @@ require_once __DIR__ . '/layout-top.php';
   </div>
 
   <script>
-  /* بلوکِ فیلدهای پرداخت اعتباری تابع تیک فعال‌سازیِ خودش است */
+  /* بلوک فیلدهای پرداخت اعتباری تابع تیک فعال‌سازی خودش است */
   (function(){
     var crd = document.querySelector('input[name="pay_enable_credit"]');
     function upd(){
@@ -993,7 +993,7 @@ require_once __DIR__ . '/layout-top.php';
     </div>
     <?php endif; ?>
 
-    <?php /* تا وقتی این مهاجرت اجرا نشده، فهرست روش‌ها همان هشت روشِ ثابتِ کد است
+    <?php /* تا وقتی این مهاجرت اجرا نشده، فهرست روش‌ها همان هشت روش ثابت کد است
              و «افزودن/حذف روش»، «نرخ‌نامه» و «وزن محصول» در دسترس نیستند. صفحه
              خطا نمی‌دهد، فقط این سه امکان خاموش‌اند. */ ?>
     <?php if (!$shipTbl || !$shipRtOn || !$shipWtOn || !$shipRtU || !$shipCtOn): ?>
@@ -1022,30 +1022,30 @@ require_once __DIR__ . '/layout-top.php';
       اگر برای شهری نرخ ثبت نکرده باشید، روش <b>حذف نمی‌شود</b>؛ فقط به مشتری می‌گوییم
       «هزینهٔ ارسال پس از ثبت سفارش هماهنگ می‌شود» و مبلغی به سفارش اضافه نمی‌شود.
       <br>
-      تیکِ <b>پس‌کرایه</b> یعنی کرایه هنگام تحویل از مشتری گرفته می‌شود: برای آن روش
+      تیک <b>پس‌کرایه</b> یعنی کرایه هنگام تحویل از مشتری گرفته می‌شود: برای آن روش
       <b>هیچ محاسبه‌ای انجام نمی‌شود</b>، نرخ‌نامه نادیده گرفته می‌شود و به مشتری فقط
       کلمهٔ «پس‌کرایه» نشان داده می‌شود. تیک را بردارید تا کرایه <b>هنگام خرید</b> حساب و پرداخت شود.
       <br>
-      «ارسال با پیک (مشهد)» همیشه در فهرست نمایش داده می‌شود و فقط یادآوریِ «فقط برای شهر مشهد» می‌گیرد؛
-      بر اساس شهرِ انتخاب‌شدهٔ مشتری پنهان نمی‌شود تا سفارشی به اشتباه بسته نشود.
+      «ارسال با پیک (مشهد)» همیشه در فهرست نمایش داده می‌شود و فقط یادآوری «فقط برای شهر مشهد» می‌گیرد؛
+      بر اساس شهر انتخاب‌شدهٔ مشتری پنهان نمی‌شود تا سفارشی به اشتباه بسته نشود.
     </div>
 
-    <?php /* قاعدهٔ ارسال↔پرداخت از تیکِ «پرداخت در محل مجاز است» (ستون cod_only)
+    <?php /* قاعدهٔ ارسال↔پرداخت از تیک «پرداخت در محل مجاز است» (ستون cod_only)
              خوانده می‌شود و اینجا فقط توضیح داده می‌شود تا مدیر بداند چرا
              گزینه‌های پرداخت در صفحهٔ تسویه کم و زیاد می‌شوند. */ ?>
     <div class="auth-note" style="margin-bottom:1rem;font-size:0.78rem;line-height:1.9;">
       <?= icon('credit-card', 'ic-sm') ?>
       <b>قاعدهٔ ارسال و پرداخت:</b>
       روشی که تیک <b>«پرداخت در محل مجاز است»</b> دارد (پیش‌فرض: ارسال با پیک)، <b>هم</b> پرداخت در محل و
-      <b>هم</b> پرداخت اینترنتی و کارت‌به‌کارت را می‌پذیرد — چون ممکن است مشتریِ همان شهر بخواهد آنلاین پرداخت کند.
+      <b>هم</b> پرداخت اینترنتی و کارت‌به‌کارت را می‌پذیرد — چون ممکن است مشتری همان شهر بخواهد آنلاین پرداخت کند.
       روش‌های دیگر (پست، باربری، چاپار…) <b>پرداخت در محل ندارند</b> و مبلغ باید پیش از ارسال پرداخت شود.
       این قاعده هم در فرم و هم هنگام ثبت سفارش در سرور بررسی می‌شود.
       <?php if (!$shipPayOther): ?>
       <br>
       <span style="color:#FBBF24;">
         <?= icon('alert', 'ic-sm') ?>
-        در حال حاضر تنها روش پرداختِ فعال «پرداخت در محل» است، پس این قاعده برای روش‌های غیرِپیک اثری ندارد
-        (اگر اثر می‌کرد، مشتری هیچ راهی برای پرداخت نداشت). برای فعال‌شدنِ کامل قاعده، از بخش
+        در حال حاضر تنها روش پرداخت فعال «پرداخت در محل» است، پس این قاعده برای روش‌های غیرپیک اثری ندارد
+        (اگر اثر می‌کرد، مشتری هیچ راهی برای پرداخت نداشت). برای فعال‌شدن کامل قاعده، از بخش
         <b>درگاه پرداخت</b> دست‌کم یک روش دیگر — کارت‌به‌کارت یا پرداخت اینترنتی — را روشن کنید.
       </span>
       <?php endif; ?>
@@ -1053,7 +1053,7 @@ require_once __DIR__ . '/layout-top.php';
 
     <div class="form-group">
       <label>توضیح بالای انتخابگر ارسال (اختیاری)</label>
-      <input type="text" name="ship_desc" class="form-control ff-cap" value="<?= h(sv('ship_desc')) ?>" placeholder="مثلاً: هزینهٔ ارسال بر اساس روش انتخابی شما محاسبه می‌شود.">
+      <input type="text" name="ship_desc" class="form-control ff-cap" value="<?= h(sv('ship_desc')) ?>" placeholder="مثلا: هزینهٔ ارسال بر اساس روش انتخابی شما محاسبه می‌شود.">
     </div>
 
     <div class="tbl-scroll">
@@ -1162,7 +1162,7 @@ require_once __DIR__ . '/layout-top.php';
       این دو مقدار زیر گزینهٔ <b>باربری</b> در صفحهٔ تسویه به مشتری نشان داده می‌شود
       (فقط برای اطلاع‌رسانی). اگر مبلغ را صفر بگذارید فقط متن توضیح دیده می‌شود،
       و اگر توضیح را خالی بگذارید فقط مبلغ.
-      مبلغی که واقعاً به سفارش اضافه می‌شود همان نرخِ نرخ‌نامه است.
+      مبلغی که واقعا به سفارش اضافه می‌شود همان نرخ نرخ‌نامه است.
     </div>
 
     <div class="form-group">
@@ -1178,7 +1178,7 @@ require_once __DIR__ . '/layout-top.php';
     <div class="form-group">
       <label>توضیح باربری برای مشتری (اختیاری)</label>
       <textarea name="ship_barbari_desc" class="form-control ff-cap" rows="2"
-                placeholder="مثلاً: کرایهٔ باربری بر اساس وزن و مقصد محاسبه و هنگام تحویل دریافت می‌شود."><?= h(sv('ship_barbari_desc')) ?></textarea>
+                placeholder="مثلا: کرایهٔ باربری بر اساس وزن و مقصد محاسبه و هنگام تحویل دریافت می‌شود."><?= h(sv('ship_barbari_desc')) ?></textarea>
     </div>
   </div>
 
@@ -1188,9 +1188,9 @@ require_once __DIR__ . '/layout-top.php';
            خواستهٔ مدیر: «هر چی اضافه می‌کنم رو اضافه می‌کنه توی همون صفحه،
            این‌جوری صفحه در آینده خیلی بزرگ می‌شه… به‌صورت مرتب نشون بده که خیلی
            طولانی نشه و چیدمانش ریزتر باشه».
-           پس: یک جدولِ فشردهٔ یک‌خطی جای چند جدولِ جدا برای هر روش، داخل کادری
-           با ارتفاع محدود و اسکرولِ خودش — با هر شهرِ تازه صفحه بلندتر نمی‌شود —
-           به‌همراه فیلترِ روش و جستجوی شهر تا فهرستِ صد شهری هم قابل استفاده بماند. */ ?>
+           پس: یک جدول فشردهٔ یک‌خطی جای چند جدول جدا برای هر روش، داخل کادری
+           با ارتفاع محدود و اسکرول خودش — با هر شهر تازه صفحه بلندتر نمی‌شود —
+           به‌همراه فیلتر روش و جستجوی شهر تا فهرست صد شهری هم قابل استفاده بماند. */ ?>
   <?php if ($sec === 'shiprate'): ?>
   <div class="rt-card">
     <div class="rt-top">
@@ -1200,7 +1200,7 @@ require_once __DIR__ . '/layout-top.php';
         <b><?= (int)$rateCount ?></b> نرخ · <b><?= (int)$rateCityCount ?></b> شهر · <b><?= count($shipRates) ?></b> روش
       </span>
       <?php endif; ?>
-      <a href="#ratecrud" class="rt-jump"><?= icon('plus', 'ic-sm') ?> افزودن نرخِ شهر</a>
+      <a href="#ratecrud" class="rt-jump"><?= icon('plus', 'ic-sm') ?> افزودن نرخ شهر</a>
     </div>
 
     <?php if (!$shipRtOn): ?>
@@ -1209,8 +1209,8 @@ require_once __DIR__ . '/layout-top.php';
     </p>
     <?php elseif (!$rateRows): ?>
     <p class="rt-empty">
-      <?= icon('info', 'ic-sm') ?> هنوز هیچ نرخی ثبت نشده. از کادرِ
-      <a href="#ratecrud">افزودن نرخِ یک شهر</a> پایین همین صفحه شروع کنید.
+      <?= icon('info', 'ic-sm') ?> هنوز هیچ نرخی ثبت نشده. از کادر
+      <a href="#ratecrud">افزودن نرخ یک شهر</a> پایین همین صفحه شروع کنید.
     </p>
     <?php else: ?>
 
@@ -1275,7 +1275,7 @@ require_once __DIR__ . '/layout-top.php';
             </td>
             <td class="rt-c">
               <a href="settings.php?sec=shiprate&amp;rdel=<?= $rid ?>" class="rt-del"
-                 onclick="return confirm('نرخِ این شهر حذف شود؟');" title="حذف نرخِ «<?= h((string)$rr['city']) ?>»">
+                 onclick="return confirm('نرخ این شهر حذف شود؟');" title="حذف نرخ «<?= h((string)$rr['city']) ?>»">
                 <?= icon('trash', 'ic-sm') ?>
               </a>
             </td>
@@ -1288,9 +1288,9 @@ require_once __DIR__ . '/layout-top.php';
 
     <p class="rt-foot">
       <?= icon('info', 'ic-sm') ?>
-      تغییرِ ردیف‌های بالا با دکمهٔ <b>ذخیرهٔ تنظیمات</b> پایین ثبت می‌شود.
+      تغییر ردیف‌های بالا با دکمهٔ <b>ذخیرهٔ تنظیمات</b> پایین ثبت می‌شود.
       فیلتر و جستجو فقط نمایش را کم می‌کنند و ردیف‌های پنهان دست‌نخورده می‌مانند.
-      هر شهر برای هر روش یک نرخ دارد؛ اگر شهرِ ردیفی را به شهری عوض کنید که همان روش
+      هر شهر برای هر روش یک نرخ دارد؛ اگر شهر ردیفی را به شهری عوض کنید که همان روش
       از قبل برایش نرخ دارد، آن ردیف تغییر نمی‌کند.
     </p>
     <?php endif; ?>
@@ -1299,7 +1299,7 @@ require_once __DIR__ . '/layout-top.php';
       <label for="ship_rate_note">توضیح نرخ‌نامه برای مشتری در صفحهٔ سبد و تسویه (اختیاری)</label>
       <input type="text" id="ship_rate_note" name="ship_rate_note" class="form-control"
              value="<?= h(sv('ship_rate_note')) ?>"
-             placeholder="مثلاً: هزینهٔ دقیق پس از وزن‌کشی نهایی اعلام می‌شود.">
+             placeholder="مثلا: هزینهٔ دقیق پس از وزن‌کشی نهایی اعلام می‌شود.">
     </div>
 
     <details class="rt-help">
@@ -1313,13 +1313,13 @@ require_once __DIR__ . '/layout-top.php';
         سبد ۲٫۱ کیلویی ⇒ ۱۵۰٬۰۰۰. چند عدد از یک کالا، وزن و هزینه را هم چند برابر می‌کند.
         <br>
         وزن هر کالا در <b>محصولات ← ویرایش محصول ← وزن</b> ثبت می‌شود و به مشتری نشان داده نمی‌شود.
-        اگر وزنِ کالاهای سبد ثبت نشده باشد <b>یک واحد</b> حساب می‌شود تا مبلغ صفر نشود.
+        اگر وزن کالاهای سبد ثبت نشده باشد <b>یک واحد</b> حساب می‌شود تا مبلغ صفر نشود.
         <br>
         مقایسهٔ نام شهر ساده‌گیر است: «مشهد» با «مشهد مقدس» هم می‌خواند. اگر برای شهری نرخ
         ثبت نشده باشد روش <b>حذف نمی‌شود</b>؛ فقط به مشتری می‌گوییم «هزینهٔ ارسال پس از ثبت
         سفارش هماهنگ می‌شود» و مبلغی به سفارش اضافه نمی‌شود.
         <br>
-        خودِ روش‌های ارسال (نام، آیکون، نمایش، پس‌کرایه، پرداخت در محل) در بخش
+        خود روش‌های ارسال (نام، آیکون، نمایش، پس‌کرایه، پرداخت در محل) در بخش
         <a href="settings.php?sec=ship">روش‌های ارسال</a> تنظیم می‌شوند.
       </div>
     </details>
@@ -1339,10 +1339,10 @@ require_once __DIR__ . '/layout-top.php';
     <?php endif; ?>
 
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      مشتری پس از سبد خرید به صفحهٔ <b>بررسی عکس قطعه</b> می‌رود و چند عکس از زوایای مختلفِ قطعهٔ
+      مشتری پس از سبد خرید به صفحهٔ <b>بررسی عکس قطعه</b> می‌رود و چند عکس از زوایای مختلف قطعهٔ
       خودش می‌فرستد (یا این مرحله را رد می‌کند). شما در بخش <a href="part-checks.php">بررسی عکس قطعه</a>
       عکس‌ها را با کالای سبد مقایسه می‌کنید و همان‌جا موجودی را هم تأیید می‌کنید؛ تا تأیید نکنید، مشتری
-      در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند و کلیدِ «ثبت سفارش و پرداخت» برایش باز نمی‌شود —
+      در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند و کلید «ثبت سفارش و پرداخت» برایش باز نمی‌شود —
       حتی اگر مرحلهٔ عکس را رد کرده باشد.
     </p>
 
@@ -1353,18 +1353,18 @@ require_once __DIR__ . '/layout-top.php';
       <label for="partcheck_enabled" style="margin:0;cursor:pointer;">این مرحله فعال باشد (بررسی عکس + بررسی موجودی)</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      با برداشتن تیک، <b>هر دو صفحه</b> (بررسی عکس و در انتظار بررسی موجودی) کاملاً کنار گذاشته می‌شوند و
-      کلیدِ سبد خرید مثل قبل مستقیم به ثبت سفارش و پرداخت می‌رود.
+      با برداشتن تیک، <b>هر دو صفحه</b> (بررسی عکس و در انتظار بررسی موجودی) کاملا کنار گذاشته می‌شوند و
+      کلید سبد خرید مثل قبل مستقیم به ثبت سفارش و پرداخت می‌رود.
     </div>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
       <input type="checkbox" name="partcheck_require_stock" id="partcheck_require_stock" value="1"
              <?= getSettingRaw('partcheck_require_stock', '1') === '1' ? 'checked' : '' ?>
              style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-      <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأییدِ موجودی برای ادامه الزامی باشد</label>
+      <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأیید موجودی برای ادامه الزامی باشد</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      اگر مرحلهٔ بالا فعال بماند ولی این تیک برداشته شود: فقط تأییدِ مطابقتِ عکس کافی است و
+      اگر مرحلهٔ بالا فعال بماند ولی این تیک برداشته شود: فقط تأیید مطابقت عکس کافی است و
       «در انتظار بررسی موجودی» دیگر مشتری را معطل نمی‌کند — یعنی می‌توانید صفحهٔ بررسی عکس را نگه دارید
       ولی فقط صفحهٔ در-انتظار-موجودی را بردارید.
     </div>
@@ -1379,15 +1379,15 @@ require_once __DIR__ . '/layout-top.php';
     </div>
 
     <div class="form-group">
-      <label for="partcheck_notice">متنِ درشتِ بالای صفحه برای مشتری</label>
+      <label for="partcheck_notice">متن درشت بالای صفحه برای مشتری</label>
       <textarea name="partcheck_notice" id="partcheck_notice" class="form-control" rows="5"
-                placeholder="خالی = متن پیش‌فرض (دربارهٔ اینکه قطعه باید دقیقاً به خودرو بخورد و امکان مرجوعی نیست)"><?= h(sv('partcheck_notice')) ?></textarea>
+                placeholder="خالی = متن پیش‌فرض (دربارهٔ اینکه قطعه باید دقیقا به خودرو بخورد و امکان مرجوعی نیست)"><?= h(sv('partcheck_notice')) ?></textarea>
       <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">
         <?php if (trim(sv('partcheck_notice')) === ''): ?>
-        هم‌اکنون خالی است، پس این متنِ پیش‌فرض به مشتری نشان داده می‌شود:
+        هم‌اکنون خالی است، پس این متن پیش‌فرض به مشتری نشان داده می‌شود:
         <br><span style="color:var(--text-secondary);"><?= h(partCheckNotice()) ?></span>
         <?php else: ?>
-        متن بالا جای متنِ پیش‌فرض را گرفته است. اگر این کادر را خالی کنید، متنِ پیش‌فرضِ سایت برمی‌گردد.
+        متن بالا جای متن پیش‌فرض را گرفته است. اگر این کادر را خالی کنید، متن پیش‌فرض سایت برمی‌گردد.
         <?php endif; ?>
       </div>
     </div>
@@ -1406,11 +1406,11 @@ require_once __DIR__ . '/layout-top.php';
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('login') ?> ثبت سفارش و ورود مشتری</h3>
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      به‌طور پیش‌فرض، مشتریِ واردنشده برای زدنِ کلیدِ «ادامه» در سبد خرید باید وارد حساب شود
-      (با شمارهٔ موبایل و کد تأیید یا بدونش، بسته به تنظیمِ پیامک).
-      با روشن‌کردنِ گزینهٔ زیر، اگر مشتری نخواهد وارد/عضو شود، فقط شمارهٔ موبایلش را می‌گذارد —
-      بدون کدِ تأیید — و مستقیم به مراحلِ ثبتِ آدرس و تکمیلِ سفارش می‌رود؛ حسابش پشتِ صحنه و
-      خودکار ساخته می‌شود، دقیقاً مثلِ مشتری‌های دیگر در پنلِ سفارش‌ها دیده می‌شود.
+      به‌طور پیش‌فرض، مشتری واردنشده برای زدن کلید «ادامه» در سبد خرید باید وارد حساب شود
+      (با شمارهٔ موبایل و کد تأیید یا بدونش، بسته به تنظیم پیامک).
+      با روشن‌کردن گزینهٔ زیر، اگر مشتری نخواهد وارد/عضو شود، فقط شمارهٔ موبایلش را می‌گذارد —
+      بدون کد تأیید — و مستقیم به مراحل ثبت آدرس و تکمیل سفارش می‌رود؛ حسابش پشت صحنه و
+      خودکار ساخته می‌شود، دقیقا مثل مشتری‌های دیگر در پنل سفارش‌ها دیده می‌شود.
     </p>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
@@ -1420,7 +1420,7 @@ require_once __DIR__ . '/layout-top.php';
       <label for="allow_guest_checkout" style="margin:0;cursor:pointer;">خرید بدون ثبت‌نام (فقط شمارهٔ موبایل) مجاز باشد</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      با برداشتنِ تیک، رفتارِ قبلی برمی‌گردد: مشتریِ واردنشده برای ادامه به صفحهٔ ورود هدایت می‌شود.
+      با برداشتن تیک، رفتار قبلی برمی‌گردد: مشتری واردنشده برای ادامه به صفحهٔ ورود هدایت می‌شود.
     </div>
   </div>
   <?php endif; ?>
@@ -1430,17 +1430,17 @@ require_once __DIR__ . '/layout-top.php';
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('clipboard-list') ?> شرایط و قوانین سایت</h3>
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      این متن در صفحهٔ <a href="../terms.php" target="_blank">شرایط و قوانین</a> (لینکِ فوترِ سایت) به همه نمایش داده می‌شود.
+      این متن در صفحهٔ <a href="../terms.php" target="_blank">شرایط و قوانین</a> (لینک فوتر سایت) به همه نمایش داده می‌شود.
       هر پاراگراف را در یک خط بنویسید؛ خط‌های خالی هم حفظ می‌شوند.
     </p>
     <div class="form-group">
       <label for="terms_content">متن شرایط و قوانین</label>
       <textarea name="terms_content" id="terms_content" class="form-control" rows="18"
-                placeholder="مثلاً: شرایط ارسال، مهلت مرجوعی، حریم خصوصی، نحوهٔ پرداخت و ..."><?= h(sv('terms_content')) ?></textarea>
+                placeholder="مثلا: شرایط ارسال، مهلت مرجوعی، حریم خصوصی، نحوهٔ پرداخت و ..."><?= h(sv('terms_content')) ?></textarea>
     </div>
     <?php if (trim(sv('terms_content')) === ''): ?>
     <div class="flash" style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);color:#FBBF24;font-size:0.78rem;">
-      <?= icon('info', 'ic-sm') ?> هنوز متنی وارد نشده — صفحهٔ عمومی فعلاً پیامِ «به‌زودی» نشان می‌دهد.
+      <?= icon('info', 'ic-sm') ?> هنوز متنی وارد نشده — صفحهٔ عمومی فعلا پیام «به‌زودی» نشان می‌دهد.
     </div>
     <?php endif; ?>
   </div>
@@ -1450,10 +1450,10 @@ require_once __DIR__ . '/layout-top.php';
 </form>
 
 <?php /* ---------- فرم‌های «افزودن» — بیرون از فرم بزرگ ----------
-         HTML اجازهٔ فرمِ تودرتو نمی‌دهد، پس این فرم‌ها بعد از </form> بالا
-         می‌آیند. هیچ‌کدام کلید save_section را نمی‌فرستند تا بلوکِ ذخیرهٔ
-         بخش اجرا نشود و کلیدهای متنیِ این بخش خالی نشوند.
-         «افزودن روش ارسال» به بخش روش‌ها تعلق دارد و «افزودن نرخِ یک شهر» به
+         HTML اجازهٔ فرم تودرتو نمی‌دهد، پس این فرم‌ها بعد از </form> بالا
+         می‌آیند. هیچ‌کدام کلید save_section را نمی‌فرستند تا بلوک ذخیرهٔ
+         بخش اجرا نشود و کلیدهای متنی این بخش خالی نشوند.
+         «افزودن روش ارسال» به بخش روش‌ها تعلق دارد و «افزودن نرخ یک شهر» به
          بخش نرخ‌نامه‌ها. */ ?>
 <?php if ($sec === 'ship'): ?>
 <div id="shipcrud">
@@ -1467,7 +1467,7 @@ require_once __DIR__ . '/layout-top.php';
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;">
         <div class="form-group" style="margin:0;">
           <label>نام روش <span style="color:var(--red-light);">*</span></label>
-          <input type="text" name="new_label" class="form-control" placeholder="مثلاً: ماهکس" required>
+          <input type="text" name="new_label" class="form-control" placeholder="مثلا: ماهکس" required>
         </div>
         <div class="form-group" style="margin:0;">
           <label>آیکون</label>
@@ -1478,8 +1478,8 @@ require_once __DIR__ . '/layout-top.php';
           </select>
         </div>
         <div class="form-group" style="margin:0;">
-          <label>یادآوریِ محدودیت (اختیاری)</label>
-          <input type="text" name="new_badge" class="form-control" placeholder="مثلاً: فقط برای شهر مشهد">
+          <label>یادآوری محدودیت (اختیاری)</label>
+          <input type="text" name="new_badge" class="form-control" placeholder="مثلا: فقط برای شهر مشهد">
         </div>
         <div class="form-group" style="margin:0;">
           <label>کلید لاتین (اختیاری)</label>
@@ -1511,17 +1511,17 @@ require_once __DIR__ . '/layout-top.php';
 </div>
 <?php endif; ?>
 
-<?php /* ---------- بخش نرخ‌نامه: فرمِ افزودن + استپر + فهرست شهرها ---------- */ ?>
+<?php /* ---------- بخش نرخ‌نامه: فرم افزودن + استپر + فهرست شهرها ---------- */ ?>
 <?php if ($sec === 'shiprate'): ?>
 <div id="ratecrud">
 
-  <?php /* فرمِ افزودن، فشرده: همهٔ فیلدها در یک ردیفِ باریک تا کادر کوتاه بماند.
-           راهنمای بلندِ قبلی به <details> بالای صفحه («راهنمای محاسبه») منتقل شد. */ ?>
+  <?php /* فرم افزودن، فشرده: همهٔ فیلدها در یک ردیف باریک تا کادر کوتاه بماند.
+           راهنمای بلند قبلی به <details> بالای صفحه («راهنمای محاسبه») منتقل شد. */ ?>
   <?php if ($shipRtOn): ?>
   <div class="rt-card rt-add">
     <div class="rt-top">
-      <h3><?= icon('plus', 'ic-sm') ?> افزودن نرخِ یک شهر</h3>
-      <span class="rt-sum">هر شهر برای هر روش یک نرخ — شهرِ تکراری به‌روز می‌شود</span>
+      <h3><?= icon('plus', 'ic-sm') ?> افزودن نرخ یک شهر</h3>
+      <span class="rt-sum">هر شهر برای هر روش یک نرخ — شهر تکراری به‌روز می‌شود</span>
     </div>
 
     <form method="POST" action="settings.php?sec=shiprate" class="rt-form">
@@ -1551,17 +1551,17 @@ require_once __DIR__ . '/layout-top.php';
           </select>
         </div>
         <div class="rt-f">
-          <label>یا شهرِ تازه</label>
+          <label>یا شهر تازه</label>
           <input type="text" name="r_city_new" class="form-control" placeholder="اگر در فهرست نبود">
         </div>
         <div class="rt-f">
-          <label>استان شهرِ تازه</label>
+          <label>استان شهر تازه</label>
           <input type="text" name="r_province" class="form-control" placeholder="اختیاری">
         </div>
         <?php else: ?>
         <div class="rt-f">
           <label>شهر مقصد <span class="rt-req">*</span></label>
-          <input type="text" name="r_city_new" class="form-control" placeholder="مثلاً: تبریز" required>
+          <input type="text" name="r_city_new" class="form-control" placeholder="مثلا: تبریز" required>
           <i class="rt-hint" style="color:#FCD34D;">فهرست شهرها ساخته نشده — <code dir="ltr">migrate-cityrates.php</code> را یک‌بار باز کنید.</i>
         </div>
         <?php endif; ?>
@@ -1586,7 +1586,7 @@ require_once __DIR__ . '/layout-top.php';
   </div>
   <?php endif; ?>
 
-  <?php /* فهرستِ مشترکِ شهرها برای ورودی‌های متنیِ نرخ‌نامه (خودتکمیل) */ ?>
+  <?php /* فهرست مشترک شهرها برای ورودی‌های متنی نرخ‌نامه (خودتکمیل) */ ?>
   <?php if ($shipCityGroups): ?>
   <datalist id="ship-city-list">
     <?php foreach ($shipCityGroups as $cityList): foreach ($cityList as $cName): ?>
@@ -1595,8 +1595,8 @@ require_once __DIR__ . '/layout-top.php';
   </datalist>
   <?php endif; ?>
 
-  <?php /* استپرِ +/− واحد وزن. پلهٔ ۰٫۵ کیلوگرم، هرگز کمتر از ۰٫۵.
-           ارقام فارسیِ تایپ‌شده هم خوانده می‌شوند. */ ?>
+  <?php /* استپر +/− واحد وزن. پلهٔ ۰٫۵ کیلوگرم، هرگز کمتر از ۰٫۵.
+           ارقام فارسی تایپ‌شده هم خوانده می‌شوند. */ ?>
   <script>
   (function () {
     var FA = '۰۱۲۳۴۵۶۷۸۹', AR = '٠١٢٣٤٥٦٧٨٩';
@@ -1632,7 +1632,7 @@ require_once __DIR__ . '/layout-top.php';
   })();
   </script>
 
-  <?php /* فیلترِ سمت مرورگر برای جدولِ نرخ‌ها: تراشه‌های روش + جستجوی شهر.
+  <?php /* فیلتر سمت مرورگر برای جدول نرخ‌ها: تراشه‌های روش + جستجوی شهر.
            فقط نمایش را کم می‌کند؛ ردیف‌های پنهان همچنان با فرم ارسال می‌شوند
            (input‌ها داخل DOM می‌مانند) پس ذخیره چیزی را پاک نمی‌کند. */ ?>
   <script>
@@ -1643,7 +1643,7 @@ require_once __DIR__ . '/layout-top.php';
     var chips = [].slice.call(document.querySelectorAll('.rt-chip'));
     var none = document.getElementById('rt-none');
     var FA = '۰۱۲۳۴۵۶۷۸۹', AR = '٠١٢٣٤٥٦٧٨٩';
-    /* همان نرمال‌سازیِ shipNormCity در PHP: ی/ک عربی، اعراب و فاصله‌ها */
+    /* همان نرمال‌سازی shipNormCity در PHP: ی/ک عربی، اعراب و فاصله‌ها */
     function norm(s) {
       s = String(s == null ? '' : s).toLowerCase();
       var out = '';
@@ -1680,7 +1680,7 @@ require_once __DIR__ . '/layout-top.php';
         apply();
       });
     });
-    /* پرشِ نرم به فرمِ افزودن بدون تغییر آدرس */
+    /* پرش نرم به فرم افزودن بدون تغییر آدرس */
     var jump = document.querySelector('.rt-jump');
     if (jump) jump.addEventListener('click', function (e) {
       var box = document.getElementById('ratecrud');
