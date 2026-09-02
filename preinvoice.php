@@ -1,6 +1,6 @@
 <?php
 /* پیش‌فاکتور چاپی — صفحهٔ مستقل.
-   عمداً includes/header.php را لود نمی‌کند، چون header به‌صورت سراسری
+   عمدا includes/header.php را لود نمی‌کند، چون header به‌صورت سراسری
    handleCartAction() را اجرا می‌کند و POSTهای سبد دوباره پردازش می‌شوند. */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
