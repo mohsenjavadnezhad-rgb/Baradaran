@@ -190,16 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE products SET stock = ?, retail_price = ?, wholesale_price = ? WHERE id = ?")
                 ->execute([$totalStock, (int)($vRetail[0]??0), (int)($vWhole[0]??0), $pid]);
 
-            /* تیک «فروش ویژه» (بنر زیر بنر اصلی صفحهٔ اصلی) — جدا و محافظت‌شده
-               تا اگر ستون is_special نبود، ذخیرهٔ محصول به خطا نخورد. */
-            if (specialSaleReady()) {
-                $pdo->prepare("UPDATE products SET is_special = ? WHERE id = ?")
-                    ->execute([isset($_POST['is_special']) ? 1 : 0, $pid]);
-            }
-
             /* وزن محصول (کیلوگرم) — اختیاری و فقط برای نرخ‌نامهٔ ارسال. خالی
                گذاشتنش NULL می‌شود و صفحهٔ تسویه سراغ «نرخ پایه»ی شهر می‌رود، پس
-               لازم نیست وزن همهٔ محصولات یک‌جا وارد شود. مثل is_special جدا و
+               لازم نیست وزن همه محصولات یک‌جا وارد شود. مثل is_special جدا و
                محافظت‌شده نوشته می‌شود تا پیش از اجرای مهاجرت خطا ندهد. */
             if (shippingWeightReady()) {
                 $wRaw = trim(faToLatinDigits((string)($_POST['weight'] ?? '')));
@@ -210,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* سال تولید خودرو (شمسی، از/تا) — اختیاری و جدا/محافظت‌شده مثل
                weight، تا پیش از اجرای مهاجرت خطا ندهد. خالی‌گذاشتن یعنی این
-               قطعه محدودیت سالی ندارد (در فروشگاه برای همهٔ سال‌ها می‌آید).
+               قطعه محدودیت سالی ندارد (در فروشگاه برای همه سال‌ها می‌آید).
                فقط «از» پرشده باشد یعنی همان یک سال مشخص (از=تا). */
             if (productYearReady()) {
                 $yfRaw = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['year_from'] ?? '')));
@@ -377,10 +370,10 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
       </div>
     </div>
     <?php endif; ?>
-    <?php if (productYearReady()): ?>
+    <?php if (productYearReady() && productYearEnabled()): ?>
     <?php /* سال تولید خودرو (شمسی): در فروشگاه، مشتری بعد از انتخاب برند
             می‌تواند سال تولید خودروش را هم انتخاب کند تا فقط قطعات مناسب
-            همان سال ببیند. خالی‌گذاشتن یعنی این قطعه برای همهٔ سال‌ها مناسب
+            همان سال ببیند. خالی‌گذاشتن یعنی این قطعه برای همه سال‌ها مناسب
             است (خواستهٔ کاربر). */ ?>
     <div>
       <label>سال تولید خودرو (شمسی) — اختیاری</label>
@@ -394,7 +387,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
                value="<?= h($_POST['year_to'] ?? $product['year_to'] ?? '') ?>" style="width:110px;">
       </div>
       <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;max-width:320px;line-height:1.7;">
-        اگر این قطعه فقط برای یک سال مشخص است، فقط «از» را پر کنید. خالی‌گذاشتن هر دو یعنی محدودیت سالی ندارد و برای همهٔ سال‌ها نشان داده می‌شود.
+        اگر این قطعه فقط برای یک سال مشخص است، فقط «از» را پر کنید. خالی‌گذاشتن هر دو یعنی محدودیت سالی ندارد و برای همه سال‌ها نشان داده می‌شود.
       </div>
     </div>
     <?php endif; ?>
@@ -490,19 +483,9 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
     <?php endif; ?>
   </div>
 
-  <?php if (specialSaleReady()):
-      $spChecked = isset($_POST['name']) ? isset($_POST['is_special']) : !empty($product['is_special']); ?>
-  <div class="form-group">
-    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.6rem 0.8rem;border:1px solid <?= $spChecked ? 'rgba(220,38,38,0.4)' : 'var(--border-color)' ?>;border-radius:8px;background:<?= $spChecked ? 'rgba(220,38,38,0.08)' : 'var(--bg-secondary)' ?>;">
-      <input type="checkbox" name="is_special" value="1" <?= $spChecked ? 'checked' : '' ?> style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);cursor:pointer;">
-      <?= icon('flame', 'ic-sm') ?>
-      <span>فروش ویژه (نمایش در بنر «تخفیف ویژه» زیر بنر اصلی صفحهٔ اصلی)</span>
-    </label>
-    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.35rem;line-height:1.7;">
-      بنر به‌صورت خودکار از تصویر، نام و قیمت تخفیف‌دار همین محصول ساخته می‌شود. اگر چند محصول تیک داشته باشند، جدیدترین نمایش داده می‌شود.
-    </div>
-  </div>
-  <?php endif; ?>
+  <?php /* «فروش ویژه» (تیک is_special) از این فرم برداشته شد — خواستهٔ
+          کاربر: «آفر» (پایین‌تر در products.php کنار همین محصول) همین کار
+          را انجام می‌دهد و کافی است. */ ?>
   <?php /* انتخابگر مدل خودرو: گروه‌بندی زیر برند + جست‌وجو + نشان انتخاب‌شده‌ها.
            چک‌باکس‌ها همان name="categories[]" قبلی‌اند تا ذخیره و ساخت خودکار
            شمارهٔ فنی (که به رویداد change همین چک‌باکس‌ها گوش می‌دهد) دست‌نخورده بماند. */ ?>
