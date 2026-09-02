@@ -131,6 +131,7 @@ function settingsSections() {
            اگر کنار روش‌های ارسال بماند آن صفحه بی‌انتها بلند می‌شود. */
         'shiprate' => ['label' => 'نرخ‌نامه‌های ارسال', 'icon' => 'scale',     'title' => 'نرخ‌نامه‌های ارسال — شهر، واحد وزن و هزینه'],
         'pchk'   => ['label' => 'بررسی عکس قطعه',      'icon' => 'camera',      'title' => 'بررسی عکس نمونهٔ قطعه پیش از خرید'],
+        'checkout' => ['label' => 'ثبت سفارش / ورود', 'icon' => 'login',       'title' => 'ثبت سفارش و ورود مشتری'],
         'terms'  => ['label' => 'شرایط و قوانین',      'icon' => 'clipboard-list', 'title' => 'شرایط و قوانین سایت'],
     ];
 }
@@ -210,6 +211,15 @@ function requireCustomerLogin($returnTo = '') {
         $q = $returnTo !== '' ? ('?return=' . urlencode($returnTo)) : '';
         redirect('login.php' . $q);
     }
+}
+
+/* آیا «خرید بدون ثبت‌نام» روشن است؟ (پنل مدیریت ← تنظیمات ← ثبت سفارش/ورود)
+   با روشن‌بودن، کلیدِ «ادامه»ی سبد خرید برای مشتریِ واردنشده به‌جای اجبارِ
+   ورود/کدِ تأیید، فقط شمارهٔ موبایل می‌گیرد (guest-checkout.php) و بدون کدِ
+   پیامکی، بی‌صدا او را وارد می‌کند؛ از همان‌جا مسیرِ همیشگی ادامه پیدا می‌کند —
+   پس part-check.php/checkout.php/stock-check.php هیچ تغییری نمی‌خواهند. */
+function guestCheckoutEnabled() {
+    return getSettingRaw('allow_guest_checkout', '0') === '1';
 }
 
 function customerProfileComplete($c) {
