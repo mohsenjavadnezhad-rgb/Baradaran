@@ -49,7 +49,7 @@ if ($payOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_i
     }
 }
 
-/* تأیید واریزِ کارت به کارت از همین فهرست (صفِ بررسی).
+/* تأیید واریز کارت به کارت از همین فهرست (صف بررسی).
    مشتری چهار مورد را ثبت کرده و سفارش «در انتظار تأیید واریز» است؛ با تأیید
    مدیر پرداخت «پرداخت‌شده» و سفارش «تأیید شده» می‌شود. */
 $c2cOn = $payOn && paymentC2cReady();
@@ -63,16 +63,16 @@ if ($c2cOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['c2c_verify_
     }
 }
 
-/* «دریافت چک» از همین فهرست (صفِ بررسی) — همان الگوی بالا، با این تفاوت که
-   دریافتِ چک را «پرداخت‌شده» نمی‌کند، فقط زمانِ رسیدنِ چک را ثبت می‌کند. */
+/* «دریافت چک» از همین فهرست (صف بررسی) — همان الگوی بالا، با این تفاوت که
+   دریافت چک را «پرداخت‌شده» نمی‌کند، فقط زمان رسیدن چک را ثبت می‌کند. */
 $chqOn = $payOn && paymentChequeReady();
 $chqMsg = '';
 if ($chqOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cheque_receive_id'])) {
     $rid = (int)$_POST['cheque_receive_id'];
     if ($rid > 0) {
         $chqMsg = paymentChequeReceive($rid)
-                ? 'دریافتِ چکِ سفارش #' . $rid . ' ثبت شد.'
-                : 'ثبتِ دریافتِ چکِ سفارش #' . $rid . ' انجام نشد.';
+                ? 'دریافت چک سفارش #' . $rid . ' ثبت شد.'
+                : 'ثبت دریافت چک سفارش #' . $rid . ' انجام نشد.';
     }
 }
 
@@ -169,9 +169,9 @@ $statusLabels = [
         <?php endif; ?>
 
         <?php /* جدول با این‌همه ستون (شماره/مشتری/موبایل/مبلغ/وضعیت/پرداخت/ارسال/
-                تاریخ/عملیات) و چند خط توضیح داخل سلولِ پرداخت/ارسال، در قابِ
-                تنگِ صفحه فشرده و روی‌هم می‌افتاد. حالا مثلِ جدولِ نرخ‌نامه در
-                تنظیمات، خودِ جدول در قابِ اسکرول‌شوندهٔ خودش عرضِ لازم را
+                تاریخ/عملیات) و چند خط توضیح داخل سلول پرداخت/ارسال، در قاب
+                تنگ صفحه فشرده و روی‌هم می‌افتاد. حالا مثل جدول نرخ‌نامه در
+                تنظیمات، خود جدول در قاب اسکرول‌شوندهٔ خودش عرض لازم را
                 می‌گیرد و به‌جای فشرده‌شدن، فقط قاب اسکرول افقی می‌خورد. */ ?>
         <div class="tbl-scroll">
         <table class="admin-table orders-table">
@@ -205,7 +205,7 @@ $statusLabels = [
                         <?= paymentStatusBadgeFor((string)($o['payment_status'] ?? 'unpaid'), (string)($o['payment_method'] ?? 'cod')) ?>
                         <div style="color:var(--text-muted);font-size:0.7rem;margin-top:2px;"><?= h(paymentLabel((string)($o['payment_method'] ?? 'cod'))) ?></div>
                         <?php if ($c2cOn && paymentC2cAwaiting($o)): ?>
-                        <?php /* صفِ تأیید: مشتری واریز کارت‌به‌کارت را اعلام کرده و منتظر بررسی است */ ?>
+                        <?php /* صف تأیید: مشتری واریز کارت‌به‌کارت را اعلام کرده و منتظر بررسی است */ ?>
                         <div style="color:#FBBF24;font-size:0.7rem;margin-top:2px;"><?= icon('receipt', 'ic-sm') ?> واریز اعلام شد — بررسی کنید</div>
                         <?php endif; ?>
                         <?php if ($chqOn && paymentChequeAwaiting($o)): ?>
@@ -238,17 +238,17 @@ $statusLabels = [
                             <button type="submit" class="btn btn-primary btn-sm">تأیید واریز</button>
                         </form>
                         <?php elseif ($chqOn && paymentChequeAwaiting($o) && empty($o['cheque_received_at'])): ?>
-                        <form method="POST" onsubmit="return confirm('دریافتِ چکِ سفارش #<?= (int)$o['id'] ?> ثبت شود؟');">
+                        <form method="POST" onsubmit="return confirm('دریافت چک سفارش #<?= (int)$o['id'] ?> ثبت شود؟');">
                             <input type="hidden" name="cheque_receive_id" value="<?= (int)$o['id'] ?>">
                             <button type="submit" class="btn btn-primary btn-sm">دریافت چک</button>
                         </form>
                         <?php elseif ($payOn && ($o['payment_status'] ?? '') !== 'paid'
                                    && !in_array((string)($o['payment_method'] ?? ''), ['cheque', 'partner_month'], true)): ?>
-                        <?php /* چک و پرداختِ اول‌ماه عمداً از این دکمه بیرون‌اند: تسویهٔ واقعی‌شان
-                                (وصول‌شدنِ چک، حساب‌کتابِ ماهانه) در admin/partner-settlements.php
-                                پیگیری می‌شود، نه با یک کلیکِ «پرداخت شد» روی تک‌تک سفارش‌ها اینجا —
-                                خواستهٔ کاربر: خریدِ همکار نباید منتظرِ این تأییدِ اضافه بماند و باید
-                                جلو برود؛ اگر روزی واقعاً لازم شد، «تغییرِ دستیِ وضعیتِ پرداخت» در
+                        <?php /* چک و پرداخت اول‌ماه عمدا از این دکمه بیرون‌اند: تسویهٔ واقعی‌شان
+                                (وصول‌شدن چک، حساب‌کتاب ماهانه) در admin/partner-settlements.php
+                                پیگیری می‌شود، نه با یک کلیک «پرداخت شد» روی تک‌تک سفارش‌ها اینجا —
+                                خواستهٔ کاربر: خرید همکار نباید منتظر این تأیید اضافه بماند و باید
+                                جلو برود؛ اگر روزی واقعا لازم شد، «تغییر دستی وضعیت پرداخت» در
                                 admin/order-detail.php هنوز در دسترس است. */ ?>
                         <form method="POST" onsubmit="return confirm('سفارش #<?= (int)$o['id'] ?> به‌عنوان پرداخت‌شده ثبت شود؟');">
                             <input type="hidden" name="pay_order_id" value="<?= (int)$o['id'] ?>">
