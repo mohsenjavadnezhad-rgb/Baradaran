@@ -2,8 +2,8 @@
 /* ------------------------------------------------------------------
    مدیریت نظرها و پرسش‌وپاسخ محصولات
    ------------------------------------------------------------------
-   نظر و پرسشِ مشتری به‌صورت pending ثبت می‌شود و تا تأیید این‌جا دیده
-   نمی‌شود. پاسخ فروشگاه (این صفحه یا فرمِ صفحهٔ محصول برای ادمینِ
+   نظر و پرسش مشتری به‌صورت pending ثبت می‌شود و تا تأیید این‌جا دیده
+   نمی‌شود. پاسخ فروشگاه (این صفحه یا فرم صفحهٔ محصول برای ادمین
    واردشده) خودکار تأیید و منتشر می‌شود.
    ------------------------------------------------------------------ */
 require_once __DIR__ . '/../includes/config.php';
@@ -66,7 +66,7 @@ if ($ready) {
                     (product_id, parent_id, customer_id, is_admin, author_name, body, status)
                     VALUES (?,?,NULL,1,'فروشگاه',?, 'approved')")
                 ->execute([(int)$qProduct, $parentId, $body]);
-            /* پرسشِ بی‌پاسخ با ثبت پاسخ، خودش هم منتشر شود */
+            /* پرسش بی‌پاسخ با ثبت پاسخ، خودش هم منتشر شود */
             $pdo->prepare("UPDATE product_qa SET status = 'approved' WHERE id = ? AND status = 'pending'")
                 ->execute([$parentId]);
         }
@@ -133,7 +133,7 @@ require_once __DIR__ . '/layout-top.php';
 
 <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
     <h2 style="font-size:1rem;color:var(--text-primary);"><?= icon('message', 'ic-sm') ?> نظرها و پرسش‌وپاسخ محصولات</h2>
-    <span style="font-size:0.75rem;color:var(--text-muted);">نظر و پرسشِ مشتری تا تأیید شما در سایت دیده نمی‌شود.</span>
+    <span style="font-size:0.75rem;color:var(--text-muted);">نظر و پرسش مشتری تا تأیید شما در سایت دیده نمی‌شود.</span>
 </div>
 
 <div class="dash-cards" style="margin-bottom:1.25rem;">
