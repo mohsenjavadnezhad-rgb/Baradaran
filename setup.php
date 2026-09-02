@@ -124,7 +124,7 @@ session_start();";
             </div>
             <div class="form-group">
                 <label>رمز عبور</label>
-                <input type="text" name="db_pass" placeholder="در هاست‌های اشتراکی ایران معمولاً خالی است">
+                <input type="text" name="db_pass" placeholder="در هاست‌های اشتراکی ایران معمولا خالی است">
             </div>
             <div class="form-group">
                 <label>نام دیتابیس</label>
