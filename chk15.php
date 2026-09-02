@@ -1,5 +1,5 @@
 <?php
-/* بررسی موقت — بنرهای زیرِ بنر اصلی + اسلایدرِ آفر زمان‌دار.
+/* بررسی موقت — بنرهای زیر بنر اصلی + اسلایدر آفر زمان‌دار.
    یک‌بارمصرف و با کلید محافظت‌شده؛ پس از استفاده با _404stub.php بی‌اثر می‌شود. */
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
@@ -36,7 +36,7 @@ echo "\n=== بازهٔ چرخش (settings) ===\n";
 $before = getSettingRaw('offer_slide_seconds', '(absent)');
 say('current value', $before);
 say('offerSlideSeconds()', offerSlideSeconds());
-/* رفت‌وبرگشتِ نوشتن — همان مسیری که فرم ادمین استفاده می‌کند */
+/* رفت‌وبرگشت نوشتن — همان مسیری که فرم ادمین استفاده می‌کند */
 setSetting('offer_slide_seconds', '9');  getAllSettings(true);
 say('after write 9', offerSlideSeconds() === 9 ? 'YES (9)' : 'no (' . offerSlideSeconds() . ')');
 setSetting('offer_slide_seconds', '999'); getAllSettings(true);
@@ -73,12 +73,12 @@ say('offer_slide_seconds input', yn(has($ab, 'name="offer_slide_seconds"')));
 say('save_offer_slide handler', yn(has($ab, "isset(\$_POST['save_offer_slide'])")));
 say('save_offer_slide button', yn(has($ab, 'name="save_offer_slide"')));
 say('omsg slide message', yn(has($ab, "'slide' =>")));
-say('heading updated', yn(has($ab, 'آفر زمان‌دار (بنرِ زیرِ بنر اصلی)')));
-say('NO عمودی/چپ wording', yn(!has($ab, 'بنر عمودی') && !has($ab, 'سمت <b>چپِ</b>')));
+say('heading updated', yn(has($ab, 'آفر زمان‌دار (بنر زیر بنر اصلی)')));
+say('NO عمودی/چپ wording', yn(!has($ab, 'بنر عمودی') && !has($ab, 'سمت <b>چپ</b>')));
 $ap = src('admin/products.php');
-say('products.php hint updated', yn(has($ap, 'زیرِ بنر اصلی') && !has($ap, 'بنر عمودی')));
+say('products.php hint updated', yn(has($ap, 'زیر بنر اصلی') && !has($ap, 'بنر عمودی')));
 $pe = src('admin/product-edit.php');
-say('product-edit hint updated', yn(has($pe, 'زیرِ بنر اصلی') && !has($pe, 'بنر عمودی')));
+say('product-edit hint updated', yn(has($pe, 'زیر بنر اصلی') && !has($pe, 'بنر عمودی')));
 
 echo "\n=== نسخهٔ فایل‌های استاتیک ===\n";
 foreach (['includes/header.php', 'includes/footer.php', 'admin/layout-top.php', 'admin/orders.php',
