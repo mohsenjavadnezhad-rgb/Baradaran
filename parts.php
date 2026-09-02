@@ -224,9 +224,13 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearO
         $pf = ['part_category_id' => (int)$current['id'], 'brand_id' => $brandId];
         if ($year) $pf['year'] = $year;
         $products = getProducts($pf);
-        if (!$products && !$year) {
-            // اگر محصولی مستقیما به این زیرشاخه وصل نشده بود، جست‌وجوی نامی به‌عنوان جایگزین (فقط بدون فیلتر سال، تا معنایش عوض نشود)
+        if (!$products) {
+            /* اگر محصولی مستقیما به این زیرشاخه وصل نشده بود، جست‌وجوی نامی
+               جایگزین می‌شود — فیلتر سال هم اینجا اعمال می‌شود (خواستهٔ کاربر:
+               نتیجه با انتخاب سال نباید ناگهان خالی شود، چون هر دو مسیر باید
+               یک قاعدهٔ یکسان داشته باشند). */
             $pf2 = ['search' => $current['name'], 'brand_id' => $brandId];
+            if ($year) $pf2['year'] = $year;
             $products = getProducts($pf2);
         }
     }
