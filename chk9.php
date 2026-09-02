@@ -1,7 +1,7 @@
 <?php
 /* ------------------------------------------------------------------
-   بررسیِ زمان‌اجرای «دو بنر کناری» (گروه ج).
-   یک محصولِ «فروش ویژه» و یک آفر زمان‌دارِ آزمایشی داخل یک تراکنش
+   بررسی زمان‌اجرای «دو بنر کناری» (گروه ج).
+   یک محصول «فروش ویژه» و یک آفر زمان‌دار آزمایشی داخل یک تراکنش
    می‌سازد، صفحه‌ها را رندر می‌کند و بعد ROLLBACK می‌کند (هیچ ردی نمی‌ماند).
    یک‌بارمصرف — سپس به ۴۰۴ خنثی شود.
    اجرا: http://yadakii.ir/chk9.php?key=c9chk5183
@@ -20,7 +20,7 @@ function say($k, $v) { global $out; $out[] = $k . ': ' . $v; }
 function yn($b) { return $b ? 'YES' : 'NO'; }
 function dump() { global $out; echo implode("\n", $out), "\n"; }
 
-/* ---------- ۱) گاردها و شِمای جدول ---------- */
+/* ---------- ۱) گاردها و شمای جدول ---------- */
 say('specialSaleReady', yn(specialSaleReady()));
 say('timedOffersReady', yn(timedOffersReady()));
 
@@ -45,12 +45,12 @@ $offerId = 0;
 try {
     $pdo->beginTransaction();
 
-    /* --- ۲الف) محصولِ فروش ویژه (با تخفیف، تا شاخهٔ تخفیف هم آزمایش شود) --- */
+    /* --- ۲الف) محصول فروش ویژه (با تخفیف، تا شاخهٔ تخفیف هم آزمایش شود) --- */
     $spId = (int)$pdo->query("SELECT id FROM products WHERE is_active = 1 ORDER BY id DESC LIMIT 1")->fetchColumn();
     say('special test product id', $spId);
     $pdo->prepare("UPDATE products SET is_special = 1, retail_discount = 20 WHERE id = ?")->execute([$spId]);
 
-    /* همان SQL توگلِ admin/products.php */
+    /* همان SQL توگل admin/products.php */
     $pdo->prepare("UPDATE products SET is_special = 1 - is_special WHERE id = ?")->execute([$spId]);
     $st = $pdo->prepare("SELECT is_special FROM products WHERE id = ?"); $st->execute([$spId]);
     say('toggle sql off', yn((int)$st->fetchColumn() === 0));
