@@ -1,9 +1,9 @@
 <?php
-/* گزارش چاپی/اکسلِ «برندها و مدل‌ها» — برای هر برند و هر مدلِ زیر آن، تعداد
-   محصولاتِ متصل (از جدول product_categories) نشان داده می‌شود. جمعِ هر برند،
-   محصولاتِ خودِ برند + همهٔ مدل‌های زیرش است.
+/* گزارش چاپی/اکسل «برندها و مدل‌ها» — برای هر برند و هر مدل زیر آن، تعداد
+   محصولات متصل (از جدول product_categories) نشان داده می‌شود. جمع هر برند،
+   محصولات خود برند + همهٔ مدل‌های زیرش است.
    الگوی جعبه/چاپ از admin/invoice.php گرفته شده (toolbar + window.print())،
-   با پیشوند کلاسِ جدا (rp-) تا با استایل فاکتور تداخل نکند. */
+   با پیشوند کلاس جدا (rp-) تا با استایل فاکتور تداخل نکند. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -157,7 +157,7 @@ tr.rp-sub-row td{background:#F9FAFB;color:#374151;font-weight:600}
   </table>
 </div>
 
-<div class="rp-total">جمع کل محصولاتِ دسته‌بندی‌شده: <b><?= number_format($grandProducts) ?></b></div>
+<div class="rp-total">جمع کل محصولات دسته‌بندی‌شده: <b><?= number_format($grandProducts) ?></b></div>
 
 </body>
 </html>
