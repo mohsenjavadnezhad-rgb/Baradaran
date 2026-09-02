@@ -31,7 +31,7 @@ $trackError = '';
    تیک‌خورده و خالی → مهر NOW()؛ تیک‌خورده و مهردار → دست‌نخورده (زمان اصلی حفظ می‌شود)؛
    بدون تیک → NULL. سپس هم‌گام‌سازی ملایم با ENUM وضعیت (بدون دست‌زدن به «لغو شده»).
    مرحله‌هایی که همین حالا از خالی به مهردار رفتند در $justDone جمع می‌شوند تا
-   بعد از UPDATE برایشان پیامک برود (فقط یک‌بار — تیکِ قبلاً زده‌شده دوباره پیامک نمی‌کند). */
+   بعد از UPDATE برایشان پیامک برود (فقط یک‌بار — تیک قبلا زده‌شده دوباره پیامک نمی‌کند). */
 if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_save'])) {
     $checked = (array)($_POST['track'] ?? []);
     $sets = [];
@@ -45,17 +45,17 @@ if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_sav
             $sets[] = "`$col` = NULL";
         }
     }
-    /* نام و شمارهٔ پیک، دقیقاً مثل کد رهگیریِ پست، به مرحلهٔ خودش گره خورده است:
-       با برداشتنِ تیکِ «تحویل به پیک» پاک می‌شوند تا مشخصاتِ پیکِ بی‌صاحب در
-       روند سفارشِ مشتری نماند. */
+    /* نام و شمارهٔ پیک، دقیقا مثل کد رهگیری پست، به مرحلهٔ خودش گره خورده است:
+       با برداشتن تیک «تحویل به پیک» پاک می‌شوند تا مشخصات پیک بی‌صاحب در
+       روند سفارش مشتری نماند. */
     $hasCourier = isset($checked['track_courier_at']);
     $sets[] = "courier_name = ?";
     $params[] = $hasCourier ? trim($_POST['courier_name'] ?? '') : '';
     $sets[] = "courier_phone = ?";
     $params[] = $hasCourier ? trim(faToLatinDigits($_POST['courier_phone'] ?? '')) : '';
 
-    /* کد رهگیریِ پست: فقط وقتی ستونش ساخته شده. با برداشتنِ تیکِ «تحویل به پست»
-       کد هم پاک می‌شود تا کدِ بی‌صاحب در تایم‌لاین نماند. */
+    /* کد رهگیری پست: فقط وقتی ستونش ساخته شده. با برداشتن تیک «تحویل به پست»
+       کد هم پاک می‌شود تا کد بی‌صاحب در تایم‌لاین نماند. */
     $postCode = '';
     if ($trackPost) {
         $postCode = trim(faToLatinDigits((string)($_POST['post_tracking_code'] ?? '')));
@@ -78,9 +78,9 @@ if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_sav
         $params[] = $id;
         $pdo->prepare("UPDATE orders SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
 
-        /* پیامکِ مراحلِ تازه‌ثبت‌شده. با ردیفِ به‌روزشده فرستاده می‌شود تا
-           {code} و {courier} مقدارِ همین ذخیره را داشته باشند. شکستِ پیامک
-           هرگز ثبتِ مرحله را برنمی‌گرداند — فقط در storage/sms.log می‌ماند. */
+        /* پیامک مراحل تازه‌ثبت‌شده. با ردیف به‌روزشده فرستاده می‌شود تا
+           {code} و {courier} مقدار همین ذخیره را داشته باشند. شکست پیامک
+           هرگز ثبت مرحله را برنمی‌گرداند — فقط در storage/sms.log می‌ماند. */
         $smsSent = 0;
         if ($justDone && smsTrackEnabled()) {
             $fresh = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
@@ -90,8 +90,8 @@ if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_sav
                 $vis = orderTrackStepsVisible($fresh);
                 foreach ($justDone as $col) {
                     /* مرحله‌ای که برای این سفارش به مشتری نشان داده نمی‌شود،
-                       پیامک هم ندارد؛ وگرنه از پیکی خبر می‌داد که در روندِ
-                       سفارشِ خودش وجود ندارد. */
+                       پیامک هم ندارد؛ وگرنه از پیکی خبر می‌داد که در روند
+                       سفارش خودش وجود ندارد. */
                     if (!isset($vis[$col])) continue;
                     $r = smsNotifyTrackStep($fresh, $col);
                     if (!empty($r['ok'])) $smsSent++;
@@ -106,11 +106,11 @@ if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_sav
     }
 }
 
-/* ---- کدام مرحله‌ها را مشتریِ همین سفارش می‌بیند؟ ----
-   تصمیم از روی روشِ ارسالِ خودِ سفارش گرفته می‌شود (orderDeliveryMode()):
-   سفارشِ پستی/باربری دو مرحلهٔ پیک را نمی‌بیند و سفارشِ پیکِ درون‌شهری مرحلهٔ
-   «تحویل به پست» را. همهٔ مرحله‌ها سرِ جای خودشان در همین فهرستِ تیک می‌مانند —
-   فیلتر فقط برای چشمِ مشتری است. */
+/* ---- کدام مرحله‌ها را مشتری همین سفارش می‌بیند؟ ----
+   تصمیم از روی روش ارسال خود سفارش گرفته می‌شود (orderDeliveryMode()):
+   سفارش پستی/باربری دو مرحلهٔ پیک را نمی‌بیند و سفارش پیک درون‌شهری مرحلهٔ
+   «تحویل به پست» را. همهٔ مرحله‌ها سر جای خودشان در همین فهرست تیک می‌مانند —
+   فیلتر فقط برای چشم مشتری است. */
 $trackVisible  = $trackOn ? orderTrackStepsVisible($order) : [];
 $trackMode     = $trackOn ? orderDeliveryMode($order) : '';
 $trackCity     = $trackOn ? orderDestCity($order) : '';
@@ -123,7 +123,7 @@ if ($trackMode === 'ship') {
         . ' ارسال می‌شود و پیک درون‌شهری ندارد، پس دو مرحلهٔ «در حال جستجوی پیک» و «تحویل به پیک»'
         . ' فقط برای شما دیده می‌شود و پیامکی هم برای آن‌ها نمی‌رود.';
 } elseif ($trackMode === 'courier') {
-    $trackModeNote = 'این سفارش با پیکِ درون‌شهری'
+    $trackModeNote = 'این سفارش با پیک درون‌شهری'
         . ($trackCity !== '' ? ' («' . $trackCity . '»)' : '')
         . ' تحویل می‌شود، پس مرحلهٔ «تحویل به پست» فقط برای شما دیده می‌شود.';
 }
@@ -133,7 +133,7 @@ $payMethod = $payOn ? (string)($order['payment_method'] ?? 'cod') : '';
 $payStatus = $payOn ? (string)($order['payment_status'] ?? 'unpaid') : '';
 $attempts  = $payOn ? paymentAttempts($id) : [];
 
-/* ---- تأیید واریزِ کارت به کارت ----
+/* ---- تأیید واریز کارت به کارت ----
    مشتری چهار مورد را ثبت کرده (شناسهٔ واریز، مبلغ، چهار رقم آخر کارت و زمان)
    و سفارش «در انتظار تأیید واریز» مانده است. هیچ پرداختی خودکار تأیید نمی‌شود؛
    فقط با همین دکمه پرداخت «پرداخت‌شده» و سفارش «تأیید شده» می‌شود. */
@@ -150,9 +150,9 @@ if ($c2cOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['c2c_verify'
 }
 
 /* ---- «دریافت چک» ----
-   همکار بانک/شماره/تاریخ/مبلغِ چک را ثبت کرده؛ این دکمه فقط زمانِ دریافتِ
-   فیزیکیِ چک را ثبت می‌کند — با «پرداخت شد» (که خودش جدا و پایین‌تر است) یکی
-   نیست، چون رسیدنِ چک به معنیِ وصول‌شدنش نیست. */
+   همکار بانک/شماره/تاریخ/مبلغ چک را ثبت کرده؛ این دکمه فقط زمان دریافت
+   فیزیکی چک را ثبت می‌کند — با «پرداخت شد» (که خودش جدا و پایین‌تر است) یکی
+   نیست، چون رسیدن چک به معنی وصول‌شدنش نیست. */
 $chqOn   = $payOn && paymentChequeReady();
 $chqWait = $chqOn && paymentChequeAwaiting($order);
 
@@ -163,11 +163,11 @@ if ($chqOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cheque_rece
 }
 
 /* ---- روش ارسال ----
-   مدیر می‌تواند روشِ انتخابیِ مشتری و هزینهٔ آن را اصلاح کند (مثلاً وقتی
+   مدیر می‌تواند روش انتخابی مشتری و هزینهٔ آن را اصلاح کند (مثلا وقتی
    مشتری «پیک مشهد» را برای شهری دیگر انتخاب کرده، یا هزینهٔ «پس‌کرایه»
-   بعداً مشخص شده). مبلغ کل سفارش = جمع کالاها + هزینهٔ ارسال، پس با تغییر
+   بعدا مشخص شده). مبلغ کل سفارش = جمع کالاها + هزینهٔ ارسال، پس با تغییر
    هزینه، total_amount هم بازمحاسبه می‌شود.
-   استثناء: سفارشِ پرداخت‌شده مبلغش عوض نمی‌شود (فقط روشش قابل اصلاح است). */
+   استثناء: سفارش پرداخت‌شده مبلغش عوض نمی‌شود (فقط روشش قابل اصلاح است). */
 $shipOn     = shippingReady();
 $shipError  = '';
 $shipLocked = $payOn && $payStatus === 'paid';
@@ -182,7 +182,7 @@ if ($shipOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_save'
         $raw = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['shipping_cost'] ?? '')));
         $newCost = $raw === '' ? 0 : (int)$raw;
     }
-    /* جمع کالاها ثابت است؛ فقط سهمِ ارسال از مبلغ کل جابه‌جا می‌شود */
+    /* جمع کالاها ثابت است؛ فقط سهم ارسال از مبلغ کل جابه‌جا می‌شود */
     $goods    = max(0, (int)$order['total_amount'] - $oldCost);
     $newTotal = $goods + $newCost;
 
@@ -284,7 +284,7 @@ if ($pchk && !empty($pchk['product_id'])) {
         <?php /* ---------- عکس نمونهٔ قطعه که مشتری پیش از خرید فرستاده ---------- */ ?>
         <?php if ($pchk): $pcSt = (string)$pchk['status']; ?>
         <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
-            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('camera') ?> عکس نمونهٔ قطعه (ارسالِ مشتری پیش از خرید)</h3>
+            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('camera') ?> عکس نمونهٔ قطعه (ارسال مشتری پیش از خرید)</h3>
 
             <div class="pchk-panel-head">
                 <span class="pchk-badge <?= ['pending' => 'is-wait', 'approved' => 'is-ok', 'rejected' => 'is-no'][$pcSt] ?? 'is-wait' ?>">
@@ -367,7 +367,7 @@ if ($pchk && !empty($pchk['product_id'])) {
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
                 <div>
-                    <p style="margin-bottom:0.5rem;"><strong>انتخابِ مشتری:</strong>
+                    <p style="margin-bottom:0.5rem;"><strong>انتخاب مشتری:</strong>
                         <?php if ($shipMethod !== ''): ?>
                         <?= icon(shippingIcon($shipMethod), 'ic-sm') ?> <?= h(shippingLabel($shipMethod)) ?>
                         <?php else: ?>
@@ -432,7 +432,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                 <form method="POST" action="order-detail.php?id=<?= $id ?>">
                     <input type="hidden" name="track_save" value="1">
                     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem;">
-                        هر مرحله را که انجام شد تیک بزنید؛ زمانِ تیک به‌صورت خودکار ثبت می‌شود.
+                        هر مرحله را که انجام شد تیک بزنید؛ زمان تیک به‌صورت خودکار ثبت می‌شود.
                         با برداشتن تیک، آن مرحله پاک می‌شود.
                     </p>
                     <?php if ($trackModeNote !== ''): ?>
@@ -444,8 +444,8 @@ if ($pchk && !empty($pchk['product_id'])) {
                         <?php foreach ($trackDefs as $col => $def):
                             $at = $order[$col] ?? null;
                             $adminOnly = !isset($trackVisible[$col]);
-                            /* هر مرحله‌ای که فیلدِ زیرِ خودش دارد، کادرش را با data-reveal
-                               باز/بسته می‌کند: کد رهگیری برای «تحویل به پست» و مشخصاتِ پیک
+                            /* هر مرحله‌ای که فیلد زیر خودش دارد، کادرش را با data-reveal
+                               باز/بسته می‌کند: کد رهگیری برای «تحویل به پست» و مشخصات پیک
                                برای «تحویل به پیک». */
                             $reveal = !empty($def['code']) ? 'trk-code' : ($col === 'track_courier_at' ? 'trk-courier' : '');
                         ?>
@@ -460,19 +460,19 @@ if ($pchk && !empty($pchk['product_id'])) {
                             <span class="track-admin-time"><?= !empty($at) ? h(jDate($at, true)) : '—' ?></span>
                         </label>
 
-                        <?php /* کادرِ کد رهگیری، دقیقاً زیرِ همان مرحله. با تیک‌خوردن باز می‌شود؛
-                                 بدونِ جاوااسکریپت هم اگر مرحله از قبل تیک‌دار باشد باز است. */ ?>
+                        <?php /* کادر کد رهگیری، دقیقا زیر همان مرحله. با تیک‌خوردن باز می‌شود؛
+                                 بدون جاوااسکریپت هم اگر مرحله از قبل تیک‌دار باشد باز است. */ ?>
                         <?php if (!empty($def['code'])): ?>
                         <div class="track-reveal" id="trk-code"<?= empty($at) ? ' hidden' : '' ?>>
                             <label for="post_tracking_code"><?= icon('receipt', 'ic-sm') ?> کد رهگیری مرسولهٔ پست</label>
                             <input type="text" name="post_tracking_code" id="post_tracking_code" class="form-control" dir="ltr" inputmode="numeric" autocomplete="off"
-                                   value="<?= h($order[$def['code']] ?? '') ?>" placeholder="مثلاً 123456789012345678">
-                            <i>این کد در روند سفارشِ مشتری نمایش داده می‌شود و اگر رقمی باشد به رهگیریِ سایت پست لینک می‌شود.<?= smsTrackEnabled() ? ' متنِ پیامکِ این مرحله هم می‌تواند با {code} همین کد را بفرستد.' : '' ?></i>
+                                   value="<?= h($order[$def['code']] ?? '') ?>" placeholder="مثلا 123456789012345678">
+                            <i>این کد در روند سفارش مشتری نمایش داده می‌شود و اگر رقمی باشد به رهگیری سایت پست لینک می‌شود.<?= smsTrackEnabled() ? ' متن پیامک این مرحله هم می‌تواند با {code} همین کد را بفرستد.' : '' ?></i>
                         </div>
                         <?php endif; ?>
 
-                        <?php /* مشخصاتِ پیک، زیرِ تیکِ «تحویل به پیک» — همان الگوی کادرِ کد رهگیری.
-                                 با برداشتنِ تیک، هنگام ذخیره پاک می‌شوند. */ ?>
+                        <?php /* مشخصات پیک، زیر تیک «تحویل به پیک» — همان الگوی کادر کد رهگیری.
+                                 با برداشتن تیک، هنگام ذخیره پاک می‌شوند. */ ?>
                         <?php if ($col === 'track_courier_at'): ?>
                         <div class="track-reveal" id="trk-courier"<?= empty($at) ? ' hidden' : '' ?>>
                             <label><?= icon('user', 'ic-sm') ?> مشخصات پیک</label>
@@ -480,7 +480,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                                 <div>
                                     <label for="courier_name" style="display:block;font-size:0.72rem;color:var(--text-muted);margin-bottom:0.25rem;">نام و نام خانوادگی پیک</label>
                                     <input type="text" name="courier_name" id="courier_name" class="form-control" style="font-family:inherit;"
-                                           value="<?= h($order['courier_name'] ?? '') ?>" placeholder="مثلاً علی رضایی">
+                                           value="<?= h($order['courier_name'] ?? '') ?>" placeholder="مثلا علی رضایی">
                                 </div>
                                 <div>
                                     <label for="courier_phone" style="display:block;font-size:0.72rem;color:var(--text-muted);margin-bottom:0.25rem;">شمارهٔ تماس پیک</label>
@@ -488,7 +488,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                                            value="<?= h($order['courier_phone'] ?? '') ?>" placeholder="09xxxxxxxxx">
                                 </div>
                             </div>
-                            <i>این نام و شماره در روند سفارشِ مشتری، زیرِ همین مرحله نمایش داده می‌شود.<?= smsTrackEnabled() ? ' متنِ پیامکِ این مرحله هم می‌تواند با {courier} همین‌ها را بفرستد.' : '' ?></i>
+                            <i>این نام و شماره در روند سفارش مشتری، زیر همین مرحله نمایش داده می‌شود.<?= smsTrackEnabled() ? ' متن پیامک این مرحله هم می‌تواند با {courier} همین‌ها را بفرستد.' : '' ?></i>
                         </div>
                         <?php endif; ?>
                         <?php endforeach; ?>
@@ -503,7 +503,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                         <?php if (smsTrackEnabled()): ?>
                             اطلاع‌رسانی پیامکی <b>روشن</b> است؛ با ذخیره، برای هر مرحلهٔ تازه‌تیک‌خورده یک پیامک به مشتری می‌رود.
                             <?php if (getSettingRaw('sms_test_mode', '1') === '1'): ?>
-                            <b style="color:#FBBF24;">حالت آزمایشیِ پیامک روشن است</b> — پیامک واقعی ارسال نمی‌شود.
+                            <b style="color:#FBBF24;">حالت آزمایشی پیامک روشن است</b> — پیامک واقعی ارسال نمی‌شود.
                             <?php endif; ?>
                         <?php else: ?>
                             اطلاع‌رسانی پیامکی <b>خاموش</b> است؛ مراحل ثبت می‌شوند ولی پیامکی ارسال نمی‌شود.
@@ -519,9 +519,9 @@ if ($pchk && !empty($pchk['product_id'])) {
             </div>
         </div>
 
-        <?php /* باز/بسته‌شدنِ کادرِ زیرِ هر مرحله با تیکِ همان مرحله (کد رهگیریِ پست و
-                 مشخصاتِ پیک). data-reveal روی چک‌باکس، id همان مقدار روی کادر. بدون این
-                 اسکریپت هم صفحه کار می‌کند: کادرِ مرحلهٔ تیک‌دار از سمت سرور باز رندر شده. */ ?>
+        <?php /* باز/بسته‌شدن کادر زیر هر مرحله با تیک همان مرحله (کد رهگیری پست و
+                 مشخصات پیک). data-reveal روی چک‌باکس، id همان مقدار روی کادر. بدون این
+                 اسکریپت هم صفحه کار می‌کند: کادر مرحلهٔ تیک‌دار از سمت سرور باز رندر شده. */ ?>
         <script>
         (function () {
             var boxes = document.querySelectorAll('.track-admin-row input[data-reveal]');
@@ -584,7 +584,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                     </form>
                     <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.5rem;">
                         برای پرداخت در محل، پس از دریافت مبلغ اینجا «پرداخت‌شده» را ثبت کنید.
-                        <?php if ($c2cOn && $payMethod === 'card'): ?>واریزِ کارت‌به‌کارت را از کادر پایین تأیید کنید.<?php endif; ?>
+                        <?php if ($c2cOn && $payMethod === 'card'): ?>واریز کارت‌به‌کارت را از کادر پایین تأیید کنید.<?php endif; ?>
                         <?php if ($chqOn && $payMethod === 'cheque'): ?>اطلاعات چک را از کادر پایین ببینید؛ «دریافت چک» با «پرداخت‌شده» فرق دارد.<?php endif; ?>
                         پرداخت‌های آنلاین خودکار توسط درگاه ثبت می‌شوند.
                     </div>
@@ -595,7 +595,7 @@ if ($pchk && !empty($pchk['product_id'])) {
             <?php /* اطلاعاتی که مشتری خودش پس از واریز ثبت کرده + دکمهٔ تأیید */ ?>
             <?php $hasC2c = trim((string)($order['c2c_ref'] ?? '')) !== ''; ?>
             <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
-                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> واریزِ اعلام‌شدهٔ مشتری</h4>
+                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> واریز اعلام‌شدهٔ مشتری</h4>
 
                 <?php if (isset($_GET['c2csaved'])): ?>
                 <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> واریز تأیید شد؛ پرداخت «پرداخت‌شده» و سفارش «تأیید شده» ثبت شد.</div>
@@ -638,16 +638,16 @@ if ($pchk && !empty($pchk['product_id'])) {
 
             <?php if ($chqOn && $payMethod === 'cheque'): ?>
             <?php /* از ۲۰۲۶-۰۸-۲۹ همکار دوباره بانک/سریال/تاریخ/مبلغ/در وجه/شناسهٔ
-                    صیادِ چک را در تسویه‌حساب تایپ می‌کند (خواستهٔ تازهٔ کاربر). دکمهٔ
-                    «دریافت چک» هم‌چنان همیشه در دسترس است، چون رسیدنِ فیزیکیِ چک
-                    مستقل از پرشدنِ این فرم است (سفارش‌های قدیمی‌تر که این ستون‌ها
+                    صیاد چک را در تسویه‌حساب تایپ می‌کند (خواستهٔ تازهٔ کاربر). دکمهٔ
+                    «دریافت چک» هم‌چنان همیشه در دسترس است، چون رسیدن فیزیکی چک
+                    مستقل از پرشدن این فرم است (سفارش‌های قدیمی‌تر که این ستون‌ها
                     را ندارند هم بدون خطا کار می‌کنند). */ ?>
             <?php $hasChq = trim((string)($order['cheque_number'] ?? '')) !== ''; ?>
             <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
                 <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</h4>
 
                 <?php if (isset($_GET['chqsaved'])): ?>
-                <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> دریافتِ چک ثبت شد.</div>
+                <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> دریافت چک ثبت شد.</div>
                 <?php endif; ?>
 
                 <?php if ($hasChq): ?>
@@ -671,17 +671,17 @@ if ($pchk && !empty($pchk['product_id'])) {
                     <?php endif; ?>
                 </div>
                 <?php else: ?>
-                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.75rem;">مهلتِ ارسال/تحویلِ اصلِ چک: <b><?= (int)paymentChequeDeadlineDays() ?> روز</b> از زمانِ ثبتِ سفارش.</p>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.75rem;">مهلت ارسال/تحویل اصل چک: <b><?= (int)paymentChequeDeadlineDays() ?> روز</b> از زمان ثبت سفارش.</p>
                 <?php endif; ?>
 
                 <?php if (!empty($order['cheque_received_at'])): ?>
                 <p style="margin:0;color:var(--green);"><?= icon('check-circle', 'ic-sm') ?> <strong>چک دریافت شد</strong> — <?= date('Y/m/d H:i', strtotime($order['cheque_received_at'])) ?></p>
                 <?php else: ?>
                 <form method="POST" action="order-detail.php?id=<?= $id ?>"
-                      onsubmit="return confirm('دریافتِ این چک ثبت شود؟ (این کار پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده است.)');">
+                      onsubmit="return confirm('دریافت این چک ثبت شود؟ (این کار پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده است.)');">
                     <input type="hidden" name="cheque_receive" value="1">
-                    <button type="submit" class="btn btn-primary"><?= icon('check-circle', 'ic-sm') ?> ثبتِ دریافتِ چک</button>
-                    <span style="color:var(--text-muted);font-size:0.72rem;margin-inline-start:0.5rem;">وقتی چک واقعاً وصول شد، از فرمِ «ثبت وضعیت پرداخت» بالا «پرداخت‌شده» را بزنید.</span>
+                    <button type="submit" class="btn btn-primary"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت چک</button>
+                    <span style="color:var(--text-muted);font-size:0.72rem;margin-inline-start:0.5rem;">وقتی چک واقعا وصول شد، از فرم «ثبت وضعیت پرداخت» بالا «پرداخت‌شده» را بزنید.</span>
                 </form>
                 <?php endif; ?>
             </div>
