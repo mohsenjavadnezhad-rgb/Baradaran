@@ -75,7 +75,7 @@ say('stars متن «2 نظر»', yn(has($zzStars, '2 نظر')));
 say('stars base+fill', yn(has($zzStars, 'rstars-base') && has($zzStars, 'rstars-fill')));
 $zzCard = productCardStars($zzPid);
 say('card pc-stars + (2)', yn(has($zzCard, 'pc-stars') && has($zzCard, '(2)')));
-say('card محصولِ بی‌نظر خالی', yn(productCardStars(999999) === ''));
+say('card محصول بی‌نظر خالی', yn(productCardStars(999999) === ''));
 say('approved reviews = 2', yn(count(getProductReviews($zzPid)) === 2));
 say('all reviews = 3', yn(count(getProductReviews($zzPid, '')) === 3));
 $zzQa = getProductQa($zzPid);
@@ -110,7 +110,7 @@ say('نقشهٔ پیام‌ها = 9', yn(isset($prMsgMap) && count($prMsgMap) ==
 say('کلیدهای پیام کامل', yn(isset($prMsgMap) && !array_diff(
         ['review','question','answer','answered','dup','short','badrating','noq','failed'], array_keys($prMsgMap))));
 
-echo "\n=== 5) product.php — مشتریِ واردشده + پیام PRG ===\n";
+echo "\n=== 5) product.php — مشتری واردشده + پیام PRG ===\n";
 $_SESSION['customer_id'] = $zzCid;
 unset($GLOBALS['__customer_cache']);
 $_GET = ['id' => $zzPid, 'msg' => 'review'];
