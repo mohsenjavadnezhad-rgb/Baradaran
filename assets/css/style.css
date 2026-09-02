@@ -167,11 +167,11 @@ a:hover {
 
 .search-btn:hover { background: var(--red-hover); }
 
-/* ---------- جستجوی زندهٔ نوارِ بالا (assets/js/search.js) ----------
-   .search-live-wrap را خودِ اسکریپت به‌جای .header-search اضافه می‌کند
-   (position:relative لازم است تا دراپ‌داون دقیقاً زیرِ همین نوار بنشیند،
-   نه وسطِ صفحه). دراپ‌داون position:absolute است، پس با flex-بودنِ
-   .header-search تداخلی ندارد — عضوِ چیدمانِ flex نمی‌شود. */
+/* ---------- جستجوی زندهٔ نوار بالا (assets/js/search.js) ----------
+   .search-live-wrap را خود اسکریپت به‌جای .header-search اضافه می‌کند
+   (position:relative لازم است تا دراپ‌داون دقیقا زیر همین نوار بنشیند،
+   نه وسط صفحه). دراپ‌داون position:absolute است، پس با flex-بودن
+   .header-search تداخلی ندارد — عضو چیدمان flex نمی‌شود. */
 .search-live-wrap { position: relative; }
 .search-drop {
     position: absolute;
@@ -500,8 +500,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
     transform: translateY(-2px);
 }
 
-/* یک خط، هم‌اندازه با هم — اسمِ بلند به‌جای دو-خط‌شدن و کجی‌کردنِ کارت،
-   با «...» بریده می‌شود، پس همهٔ کارت‌ها دقیقاً هم‌ارتفاع می‌مانند. */
+/* یک خط، هم‌اندازه با هم — اسم بلند به‌جای دو-خط‌شدن و کجی‌کردن کارت،
+   با «...» بریده می‌شود، پس همهٔ کارت‌ها دقیقا هم‌ارتفاع می‌مانند. */
 .parts-cat-tile-name {
     font-size: 0.9rem;
     font-weight: 600;
@@ -510,11 +510,11 @@ a.mm-part-head:hover { color: var(--red-hover); }
     white-space: nowrap;
 }
 
-/* فهرستِ سرشاخه‌ها (parts.php بدونِ cat؟) — «موتور و قطعات موتوری»-وار،
-   بدونِ شمارهٔ زیرشاخه، فقط اسمِ برند وسط‌چین. کارتِ سرشاخهٔ باز و کارتِ
+/* فهرست سرشاخه‌ها (parts.php بدون cat؟) — «موتور و قطعات موتوری»-وار،
+   بدون شمارهٔ زیرشاخه، فقط اسم برند وسط‌چین. کارت سرشاخهٔ باز و کارت
    زیرشاخه‌دار (که هنوز شمارهٔ کالا دارد) هر دو از همین .parts-cat-tile
-   می‌آیند، پس این حالت با یک کلاسِ کمکی روی گرید جدا شده، نه با تغییرِ
-   خودِ .parts-cat-tile عمومی. */
+   می‌آیند، پس این حالت با یک کلاس کمکی روی گرید جدا شده، نه با تغییر
+   خود .parts-cat-tile عمومی. */
 .parts-cat-grid--top .parts-cat-tile { justify-content: center; }
 .parts-cat-grid--top .parts-cat-tile-name { text-align: center; }
 
@@ -840,9 +840,9 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 
 /* Product Detail
-   ستونِ تصویر عرضِ محدود و مشخصی دارد و شبکه align-items:start است؛ وگرنه
-   (حالت پیش‌فرضِ stretch) اسلات تصویر تا ارتفاعِ ستونِ گزینه‌ها کشیده می‌شد و
-   با اضافه‌شدنِ گزینه‌ها/واریانت‌ها تصویر بی‌اندازه بزرگ می‌شد. */
+   ستون تصویر عرض محدود و مشخصی دارد و شبکه align-items:start است؛ وگرنه
+   (حالت پیش‌فرض stretch) اسلات تصویر تا ارتفاع ستون گزینه‌ها کشیده می‌شد و
+   با اضافه‌شدن گزینه‌ها/واریانت‌ها تصویر بی‌اندازه بزرگ می‌شد. */
 .product-detail {
     display: grid;
     grid-template-columns: minmax(0, clamp(240px, 32%, 360px)) minmax(0, 1fr);
@@ -863,8 +863,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
     justify-content: center;
     font-size: 8rem;
     color: var(--text-muted);
-    /* ابعادِ ثابتِ مربعی: نه با عوض‌شدنِ تصویرِ کاروسل صفحه می‌پرد و نه ارتفاعِ
-       تصویر به بلندیِ ستونِ گزینه‌ها گره می‌خورد. */
+    /* ابعاد ثابت مربعی: نه با عوض‌شدن تصویر کاروسل صفحه می‌پرد و نه ارتفاع
+       تصویر به بلندی ستون گزینه‌ها گره می‌خورد. */
     aspect-ratio: 1 / 1;
     min-height: 220px;
     overflow: hidden;
@@ -891,8 +891,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
     margin-bottom: 0.75rem;
 }
 
-/* دو انتخابگرِ کشور/شرکت کنارِ هم‌اند (چیدمانشان در includes/header.php است)؛
-   این‌جا فقط فاصلهٔ اضافیِ زیرشان برداشته می‌شود تا پنل جمع‌وجور بماند. */
+/* دو انتخابگر کشور/شرکت کنار هم‌اند (چیدمانشان در includes/header.php است)؛
+   این‌جا فقط فاصلهٔ اضافی زیرشان برداشته می‌شود تا پنل جمع‌وجور بماند. */
 .variant-selects .form-group { margin-bottom: 0; }
 
 .product-detail-cats {
@@ -1061,8 +1061,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
     margin-bottom: 1rem;
 }
 
-/* صفحهٔ «شرایط و قوانین» — متنِ آزادِ مدیر، فقط با nl2br خط‌شکسته می‌شود؛
-   قابِ ساده و عریضِ خواندنی، هم‌رنگ با بقیهٔ کارت‌های سایت. */
+/* صفحهٔ «شرایط و قوانین» — متن آزاد مدیر، فقط با nl2br خط‌شکسته می‌شود؛
+   قاب ساده و عریض خواندنی، هم‌رنگ با بقیهٔ کارت‌های سایت. */
 .terms-page {
     max-width: 840px;
     margin: 0 auto;
@@ -1170,10 +1170,10 @@ a.mm-part-head:hover { color: var(--red-hover); }
 .brand-tags-wrap .brand-tag .brand-fa { display: inline; }
 .brand-tags-wrap .brand-tag .brand-en { display: none; text-transform: capitalize; }
 
-/* حالتِ نمایشِ نامِ انگلیسی از admin/categories.php می‌آید (brandEnMode())
-   و کلاسِ ben-off/ben-hover/ben-always روی خودِ .brand-tags-wrap می‌نشیند.
+/* حالت نمایش نام انگلیسی از admin/categories.php می‌آید (brandEnMode())
+   و کلاس ben-off/ben-hover/ben-always روی خود .brand-tags-wrap می‌نشیند.
    پیش‌فرض 'off' است — دیگر هیچ رفتاری اضافه نمی‌شود و برچسب همیشه فارسی
-   می‌ماند. قبلاً این هاور بدونِ هیچ کلیدی همیشه روشن بود. */
+   می‌ماند. قبلا این هاور بدون هیچ کلیدی همیشه روشن بود. */
 .brand-tags-wrap.ben-hover .brand-tag:hover .brand-fa { display: none; }
 .brand-tags-wrap.ben-hover .brand-tag:hover .brand-en { display: inline; }
 
@@ -1199,11 +1199,11 @@ a.mm-part-head:hover { color: var(--red-hover); }
     visibility: visible;
 }
 
-/* وقتی محو شد: همهٔ تگ‌های ردیفِ بالا، حتیِ خودِ برندِ فعال/sticky، پنهان
-   می‌شوند — تگِ فعال دیگر اینجا لازم نیست چون همان اسم، خودش را کنارِ دکمهٔ
-   «همه برندها» به‌صورتِ #modelsTitle نشان می‌دهد (.brand-tag.active
-   .models-title، بالاتر) و نگه‌داشتنِ هر دو یعنی یک برچسبِ تکراری روی صفحه.
-   قبلاً :not(.is-sticky) نگهش می‌داشت — [[batch9-fixes]]. */
+/* وقتی محو شد: همهٔ تگ‌های ردیف بالا، حتی خود برند فعال/sticky، پنهان
+   می‌شوند — تگ فعال دیگر اینجا لازم نیست چون همان اسم، خودش را کنار دکمهٔ
+   «همه برندها» به‌صورت #modelsTitle نشان می‌دهد (.brand-tag.active
+   .models-title، بالاتر) و نگه‌داشتن هر دو یعنی یک برچسب تکراری روی صفحه.
+   قبلا :not(.is-sticky) نگهش می‌داشت — [[batch9-fixes]]. */
 .brand-tags-wrap.is-faded .brand-tag:not([data-id="0"]) {
     opacity: 0;
     transform: scale(0.85) translateY(-6px);
@@ -1265,11 +1265,11 @@ a.mm-part-head:hover { color: var(--red-hover); }
     margin-bottom: 0.75rem;
 }
 
-/* از یک <span> ساده به یک تگِ برندِ واقعی (.brand-tag.active) تغییر کرد تا
-   برندِ انتخاب‌شده واقعاً «بیاید و کنارِ دکمهٔ همه‌برندها بنشیند» و ثابت
-   بماند، نه این‌که فقط یک متنِ خام باشد — قبلاً حرکتِ پروازیِ کلیک (در
-   assets/js/main.js) به اینجا می‌رسید ولی بعد از رفرشِ صفحه به شکلِ متنِ
-   ساده دیده می‌شد، انگار برگشته سرجایش. cursor پیش‌فرضِ .brand-tag (pointer)
+/* از یک <span> ساده به یک تگ برند واقعی (.brand-tag.active) تغییر کرد تا
+   برند انتخاب‌شده واقعا «بیاید و کنار دکمهٔ همه‌برندها بنشیند» و ثابت
+   بماند، نه این‌که فقط یک متن خام باشد — قبلا حرکت پروازی کلیک (در
+   assets/js/main.js) به اینجا می‌رسید ولی بعد از رفرش صفحه به شکل متن
+   ساده دیده می‌شد، انگار برگشته سرجایش. cursor پیش‌فرض .brand-tag (pointer)
    اینجا گمراه‌کننده است چون این عنصر کلیک‌پذیر نیست. */
 .models-title {
     font-weight: bold;
@@ -1337,11 +1337,11 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 
 /* Cart */
-/* table-layout:fixed + عرضِ ثابت روی هر ستون — بدونش، با هر تغییرِ تعداد
-   (کم/زیاد از استپر) طولِ رقمِ «جمع» یا برچسبِ جزئی/کلی عوض می‌شد و کل جدول
-   عرضِ ستون‌ها را دوباره حساب می‌کرد؛ نتیجه‌اش پرشِ آزاردهندهٔ ردیف (به‌خصوص
-   ستونِ محصول) بود، نه فقط جابه‌جاییِ همان عدد. عرضِ ستون‌ها اینجا و در
-   .cart-table th/td نگه داشته می‌شود؛ ستونِ محصول تنها ستونِ بی‌عرضِ ثابت است و
+/* table-layout:fixed + عرض ثابت روی هر ستون — بدونش، با هر تغییر تعداد
+   (کم/زیاد از استپر) طول رقم «جمع» یا برچسب جزئی/کلی عوض می‌شد و کل جدول
+   عرض ستون‌ها را دوباره حساب می‌کرد؛ نتیجه‌اش پرش آزاردهندهٔ ردیف (به‌خصوص
+   ستون محصول) بود، نه فقط جابه‌جایی همان عدد. عرض ستون‌ها اینجا و در
+   .cart-table th/td نگه داشته می‌شود؛ ستون محصول تنها ستون بی‌عرض ثابت است و
    باقی‌ماندهٔ عرض را می‌گیرد. */
 .cart-table {
     width: 100%;
@@ -1353,22 +1353,22 @@ a.mm-part-head:hover { color: var(--red-hover); }
     border: 1px solid var(--border-color);
 }
 
-/* ستونِ ۵ («حذف») یک دکمهٔ متنی است، نه فقط آیکون — عرضِ قبلی (56px) برایش
-   کم بود و با overflow:hidden پایین‌تر نصفه دیده می‌شد. عرضش را از ستونِ
+/* ستون ۵ («حذف») یک دکمهٔ متنی است، نه فقط آیکون — عرض قبلی (56px) برایش
+   کم بود و با overflow:hidden پایین‌تر نصفه دیده می‌شد. عرضش را از ستون
    قیمت/جمع (که برای عددهای معمولی به آن عرض نیاز نداشتند) قرض گرفتیم.
-   ستونِ «قیمت واحد» هم بعداً عریض‌تر شد (130→190): با قیمت‌های هفت‌رقمی +
-   واحدِ «تومان» + نشانِ جزئی/کلیِ بزرگ‌تر، ۱۳۰px کافی نبود و نشان به سطرِ
-   بعد پرت می‌شد. برای جبران، ستونِ «جمع» به ۱۰۰px تنگ شده بود — ولی جمع
-   بولد است (پهن‌تر از عددِ معمولی) و در ۱۰۰px با overflow:hidden، خودِ
-   واحدِ «تومان» بی‌صدا قطع می‌شد. پس «جمع» را هم به‌جای تنگ‌کردن، عریض نگه
-   داشتیم و آن اضافه‌عرض یک‌سره از ستونِ محصول گرفته شد. */
+   ستون «قیمت واحد» هم بعدا عریض‌تر شد (130→190): با قیمت‌های هفت‌رقمی +
+   واحد «تومان» + نشان جزئی/کلی بزرگ‌تر، ۱۳۰px کافی نبود و نشان به سطر
+   بعد پرت می‌شد. برای جبران، ستون «جمع» به ۱۰۰px تنگ شده بود — ولی جمع
+   بولد است (پهن‌تر از عدد معمولی) و در ۱۰۰px با overflow:hidden، خود
+   واحد «تومان» بی‌صدا قطع می‌شد. پس «جمع» را هم به‌جای تنگ‌کردن، عریض نگه
+   داشتیم و آن اضافه‌عرض یک‌سره از ستون محصول گرفته شد. */
 .cart-table th:nth-child(2), .cart-table td:nth-child(2) { width: 190px; }
 .cart-table th:nth-child(3), .cart-table td:nth-child(3) { width: 160px; }
 .cart-table th:nth-child(4), .cart-table td:nth-child(4) { width: 140px; }
 .cart-table th:nth-child(5), .cart-table td:nth-child(5) { width: 96px; }
 
-/* شمارهٔ قیمت + نشانِ جزئی/کلی همیشه در یک سطر، با فاصلهٔ کمِ ثابت — بجای
-   دو <span> پشتِ‌سرِهم که وقتی جا کم می‌آمد نشان به سطرِ بعد می‌پرید. */
+/* شمارهٔ قیمت + نشان جزئی/کلی همیشه در یک سطر، با فاصلهٔ کم ثابت — بجای
+   دو <span> پشت‌سرهم که وقتی جا کم می‌آمد نشان به سطر بعد می‌پرید. */
 .cart-price-wrap { display: flex; align-items: baseline; flex-wrap: nowrap; gap: 0.35rem; }
 
 .cart-table th {
@@ -1385,11 +1385,11 @@ a.mm-part-head:hover { color: var(--red-hover); }
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
 }
-/* عمداً overflow:hidden روی خودِ <td> گذاشته نشده: دو بار (ستونِ حذف، بعد
-   ستونِ جمع) باعث شد بخشی از محتوا — دکمهٔ حذف، بعد واحدِ «تومان» — به‌جای
+/* عمدا overflow:hidden روی خود <td> گذاشته نشده: دو بار (ستون حذف، بعد
+   ستون جمع) باعث شد بخشی از محتوا — دکمهٔ حذف، بعد واحد «تومان» — به‌جای
    دیده‌شدن، بی‌صدا قطع و پنهان شود. table-layout:fixed به‌تنهایی برای
-   جلوگیری از پرشِ ستون‌ها کافی است؛ اگر محتوای یک سلول به‌ندرت از عرضش
-   بیشتر شود، بهتر است کمی رویِ سلولِ کناری بریزد تا این‌که ناپدید شود. */
+   جلوگیری از پرش ستون‌ها کافی است؛ اگر محتوای یک سلول به‌ندرت از عرضش
+   بیشتر شود، بهتر است کمی روی سلول کناری بریزد تا این‌که ناپدید شود. */
 
 .cart-unit-price, .cart-subtotal { white-space: nowrap; }
 
@@ -1430,8 +1430,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
 /* در فاصلهٔ رفت‌وبرگشت درخواست، کلیک دوباره پذیرفته نشود */
 .cart-stepper.is-busy { opacity: 0.55; pointer-events: none; }
 
-/* دکمهٔ پیش‌فرضِ نامرئیِ فرم: Enter داخل فیلد باید تعدادِ تایپ‌شده را اعمال کند،
-   نه دکمهٔ «−» را (اولین دکمهٔ submit، پیش‌فرضِ فرم است). */
+/* دکمهٔ پیش‌فرض نامرئی فرم: Enter داخل فیلد باید تعداد تایپ‌شده را اعمال کند،
+   نه دکمهٔ «−» را (اولین دکمهٔ submit، پیش‌فرض فرم است). */
 .cart-enter-submit {
     position: absolute;
     width: 1px;
@@ -1515,8 +1515,8 @@ a.mm-part-head:hover { color: var(--red-hover); }
 
 /* ===== جمع‌بندی سه‌ردیفهٔ سبد =====
    «جمع کالاها + هزینهٔ ارسال = مبلغ قابل پرداخت»، همان‌جا که مشتری روش ارسال
-   را انتخاب می‌کند تا تغییرِ مبلغ را ببیند. مبلغ قابل پرداخت رنگ سومی دارد
-   (طلایی) که نه رنگ جمع کالاها است و نه رنگ سبزِ هزینهٔ ارسال. */
+   را انتخاب می‌کند تا تغییر مبلغ را ببیند. مبلغ قابل پرداخت رنگ سومی دارد
+   (طلایی) که نه رنگ جمع کالاها است و نه رنگ سبز هزینهٔ ارسال. */
 .cart-sum {
     min-width: 268px;
     background: var(--bg-card);
@@ -1627,7 +1627,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
 /* رنگ سبز برای رقم‌ها (خواستهٔ مدیر: «رنگ متن های قیمتش رو سبز کن») */
 .cart-ship-row em { font-style: normal; font-weight: 700; color: #4ADE80; margin-inline-start: auto; }
 .cart-ship-row em.is-soft { font-weight: 400; color: var(--text-muted); }
-/* نشانِ محدودیت («مشهد») — زرد، با آیکن لوکیشن */
+/* نشان محدودیت («مشهد») — زرد، با آیکن لوکیشن */
 .cart-ship-row i.csr-badge {
     display: inline-flex;
     align-items: center;
@@ -1647,15 +1647,15 @@ a.mm-part-head:hover { color: var(--red-hover); }
 /* روشی که نرخ معلومی ندارد ولی محدود است: جای رقم را نشانش می‌گیرد */
 .cart-ship-row.is-nocost .csr-price { display: none; }
 .cart-ship-row.is-nocost i.csr-badge { margin-inline-start: auto; }
-/* بعد از .is-best نوشته شده تا انتخابِ مشتری بر «کم‌ترین هزینه» بچربد */
+/* بعد از .is-best نوشته شده تا انتخاب مشتری بر «کم‌ترین هزینه» بچربد */
 .cart-ship-row.is-on {
     border-color: var(--red-primary);
     background: linear-gradient(180deg, rgba(220, 38, 38, 0.10), rgba(220, 38, 38, 0.03));
 }
-/* روشی که به یک شهر محدود است و با شهرِ پروفایلِ مشتری نمی‌خواند: دیده می‌شود
+/* روشی که به یک شهر محدود است و با شهر پروفایل مشتری نمی‌خواند: دیده می‌شود
    ولی انتخاب‌شدنی نیست (رادیوی داخلش disabled است، پس کلیک هم نمی‌گیرد) —
    خواستهٔ مدیر: «باید گزینه ارسال با پیک(مشهد) برایم غیر فعال نشون داده بشه».
-   بعد از .is-on آمده تا انتخابِ قدیمیِ همین روش رنگِ «انتخاب‌شده» نگیرد. */
+   بعد از .is-on آمده تا انتخاب قدیمی همین روش رنگ «انتخاب‌شده» نگیرد. */
 .cart-ship-row.is-off {
     opacity: 0.45;
     cursor: not-allowed;
@@ -1676,7 +1676,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
 .cart-ship-note > .ic { flex: 0 0 auto; margin-top: 0.25rem; }
 .cart-ship-note a { color: var(--red-light); }
 .cart-ship-note b { color: var(--text-secondary); }
-/* دلیلِ غیرفعال‌بودنِ روشِ محدود به شهر — همان قرمزِ ملایمِ .pay-off-note */
+/* دلیل غیرفعال‌بودن روش محدود به شهر — همان قرمز ملایم .pay-off-note */
 .cart-ship-note.is-off { color: #FCA5A5; }
 
 @media (max-width: 560px) {
@@ -1686,9 +1686,9 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 
 /* Checkout */
-/* چیدمان دوستونه (خواستهٔ کاربر): خلاصهٔ سفارش تمام‌عرضِ بالا، بعد دو ستون —
+/* چیدمان دوستونه (خواستهٔ کاربر): خلاصهٔ سفارش تمام‌عرض بالا، بعد دو ستون —
    راست «مشخصات و آدرس»، چپ «روش پرداخت». روش ارسال از این صفحه برداشته شده و
-   در سبد انتخاب می‌شود، پس دکمهٔ ثبت هم به انتهای همان ستونِ چپ آمده تا صفحه
+   در سبد انتخاب می‌شود، پس دکمهٔ ثبت هم به انتهای همان ستون چپ آمده تا صفحه
    از پایین کشیده نشود. */
 .checkout-form {
     max-width: 1040px;
@@ -1705,7 +1705,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
     align-items: start;
     margin-bottom: 0;
 }
-/* در RTL اولین فرزندِ گرید سمت راست می‌نشیند، پس ستون مشخصات باید اول بیاید */
+/* در RTL اولین فرزند گرید سمت راست می‌نشیند، پس ستون مشخصات باید اول بیاید */
 .checkout-box {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -1722,7 +1722,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
     margin-bottom: 0.75rem;
 }
 .checkout-box .form-group:last-child { margin-bottom: 0; }
-/* دکمهٔ ثبت بعد از کارتِ پرداخت می‌آید و فاصلهٔ خودش را دارد */
+/* دکمهٔ ثبت بعد از کارت پرداخت می‌آید و فاصلهٔ خودش را دارد */
 .checkout-col-side > .pay-picker { margin-bottom: 0; }
 /* استان/شهر کنار هم */
 .form-row-2 {
@@ -1787,10 +1787,10 @@ textarea.form-control {
     color: var(--text-muted);
 }
 
-/* «انتخاب فایل» سفارشی — بجای متنِ انگلیسیِ مرورگر («No file chosen»/«Choose
-   File»)، خودِ input واقعی نامرئی و دقیقاً روی یک جعبهٔ استایل‌خورده کشیده
-   می‌شود (کلیک/کیبورد هنوز خودِ input را می‌زند، پس همه‌جا کار می‌کند).
-   با اسکریپتِ enhanceFilePickers در پایینِ صفحه (هم در admin/layout-bottom.php
+/* «انتخاب فایل» سفارشی — بجای متن انگلیسی مرورگر («No file chosen»/«Choose
+   File»)، خود input واقعی نامرئی و دقیقا روی یک جعبهٔ استایل‌خورده کشیده
+   می‌شود (کلیک/کیبورد هنوز خود input را می‌زند، پس همه‌جا کار می‌کند).
+   با اسکریپت enhanceFilePickers در پایین صفحه (هم در admin/layout-bottom.php
    هم در includes/footer.php) خودکار روی هر input[type=file] اعمال می‌شود. */
 .file-pick { position: relative; display: block; width: 100%; }
 .file-pick-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
@@ -1864,11 +1864,11 @@ textarea.form-control {
     padding: 1rem;
 }
 
-/* admin/orders.php: با عرضِ ۱۲۰۰px، جدولِ ۱۴۰۰px-عریضِ .orders-table داخلِ
-   .tbl-scroll آرام آرام اسکرول می‌شد و ستونِ عملیات (کلیدهای «جزئیات»/
-   «فاکتور»/«پرداخت شد») همیشه بیرون از دیدِ اول می‌ماند — کاربر بدونِ
-   اسکرولِ افقیِ آگاهانه اصلاً کلیدها را نمی‌دید. با این کلاسِ کمکی، خودِ
-   قابِ صفحه (نه فقط جدول) عریض‌تر می‌شود تا جدول معمولاً بدونِ اسکرول جا شود. */
+/* admin/orders.php: با عرض ۱۲۰۰px، جدول ۱۴۰۰px-عریض .orders-table داخل
+   .tbl-scroll آرام آرام اسکرول می‌شد و ستون عملیات (کلیدهای «جزئیات»/
+   «فاکتور»/«پرداخت شد») همیشه بیرون از دید اول می‌ماند — کاربر بدون
+   اسکرول افقی آگاهانه اصلا کلیدها را نمی‌دید. با این کلاس کمکی، خود
+   قاب صفحه (نه فقط جدول) عریض‌تر می‌شود تا جدول معمولا بدون اسکرول جا شود. */
 .admin-layout.admin-layout--wide {
     max-width: 1500px;
 }
@@ -1937,9 +1937,9 @@ textarea.form-control {
     background: rgba(220, 38, 38, 0.05);
 }
 
-/* تب‌های سربرگِ فهرست (مثلاً «همه/پرداخت‌شده/...» در admin/orders.php).
-   این کلاس‌ها اصلاً در style.css نبودند — فقط در <style> درون‌خطیِ
-   admin/layout-top.php تعریف شده بودند، پس هر صفحهٔ ادمینِ مستقل (بدونِ
+/* تب‌های سربرگ فهرست (مثلا «همه/پرداخت‌شده/...» در admin/orders.php).
+   این کلاس‌ها اصلا در style.css نبودند — فقط در <style> درون‌خطی
+   admin/layout-top.php تعریف شده بودند، پس هر صفحهٔ ادمین مستقل (بدون
    layout-top.php، مثل admin/orders.php که <!DOCTYPE> خودش را دارد) این
    کلاس‌ها را بی‌استایل، همه روی یک خط، نشان می‌داد. همان تعریف اینجا هم
    تکرار شده تا هر دو دسته صفحه درست دیده شوند. */
@@ -1949,27 +1949,27 @@ textarea.form-control {
 .cust-tab.active { background: var(--red-primary); border-color: var(--red-primary); color: #fff; }
 .cust-tab-n { background: rgba(0, 0, 0, 0.25); border-radius: 999px; padding: 0 0.4rem; font-size: 0.72rem; }
 
-/* جدولِ پهن داخل قاب خودش اسکرول شود، نه کلِ صفحه */
+/* جدول پهن داخل قاب خودش اسکرول شود، نه کل صفحه */
 .tbl-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
 /* جدول روش‌های ارسال و نرخ‌نامه: ستون‌ها جای نفس‌کشیدن داشته باشند
-   («صفحشو کشیده تر کن خیلی رفته توی هم توی هم»). این min-width با قابِ
-   ۷۰۰ پیکسلیِ .admin-form-full جا نمی‌شد و نوار اسکرول می‌ساخت؛ حالا بخشِ
+   («صفحشو کشیده تر کن خیلی رفته توی هم توی هم»). این min-width با قاب
+   ۷۰۰ پیکسلی .admin-form-full جا نمی‌شد و نوار اسکرول می‌ساخت؛ حالا بخش
    ارسال کلاس ff-wide دارد (admin/layout-top.php) و قاب تا ۱۳۲۰ باز می‌شود،
-   پس اسکرول فقط روی پنجره‌های واقعاً باریک می‌ماند. */
+   پس اسکرول فقط روی پنجره‌های واقعا باریک می‌ماند. */
 .ship-mtable,
 .ship-rtable { min-width: 680px; }
 
-/* جدولِ فهرستِ سفارش‌ها: ۹ ستون، بعضی‌شان (پرداخت/ارسال) چند خط توضیحِ کوچک
-   هم دارند و ستونِ عملیات چند دکمه/فرم کنارِ هم. یک min-width ساده کافی
-   نبود — چیدمانِ auto هنوز عرض را از ستون‌های کوتاه (وضعیت/پرداخت) به نفعِ
+/* جدول فهرست سفارش‌ها: ۹ ستون، بعضی‌شان (پرداخت/ارسال) چند خط توضیح کوچک
+   هم دارند و ستون عملیات چند دکمه/فرم کنار هم. یک min-width ساده کافی
+   نبود — چیدمان auto هنوز عرض را از ستون‌های کوتاه (وضعیت/پرداخت) به نفع
    ستون‌های بلندتر (مشتری/موبایل) می‌گرفت و «در انتظار بررسی» را دو خط
-   می‌کرد. حالا table-layout:fixed با عرضِ صریحِ هر ستون (کلاس‌های ot-*،
+   می‌کرد. حالا table-layout:fixed با عرض صریح هر ستون (کلاس‌های ot-*،
    نه nth-child، چون پرداخت/ارسال شرطی‌اند و ترتیبشان ثابت نیست) — فقط
-   ستونِ «مشتری» عرضِ ثابت ندارد و باقی‌ماندهٔ عرض را می‌گیرد. قابش هم
+   ستون «مشتری» عرض ثابت ندارد و باقی‌ماندهٔ عرض را می‌گیرد. قابش هم
    .tbl-scroll است، پس در پنجرهٔ باریک به‌جای فشرده‌شدن، اسکرول افقی می‌خورد. */
 /* .ot-actions باز هم عریض‌تر شد: بدترین حالت سه دکمه‌ست («جزئیات» + «فاکتور»
    با آیکون + یکی از «تأیید واریز»/«دریافت چک»/«پرداخت شد» — این آخری‌ها
@@ -1983,19 +1983,19 @@ textarea.form-control {
 .orders-table .ot-ship   { width: 150px; }
 .orders-table .ot-date   { width: 120px; }
 .orders-table .ot-actions { width: 340px; }
-/* عمداً overflow:hidden رویِ کلِ سلول‌ها گذاشته نمی‌شود — طبق تجربهٔ همین
-   هفته با جدولِ سبد خرید ([[batch9-fixes]])، این ترکیب بدونِ white-space:
-   nowrap عملاً کاری نمی‌کند ولی جایی که واقعاً کاری هم بکند، محتوای واقعی
-   را بی‌صدا قطع می‌کند. فقط سلول‌های تک‌خطیِ کوتاه (شماره/موبایل/مبلغ/تاریخ)
-   nowrap می‌گیرند؛ اگر همان‌ها هم به‌ندرت جا کم آوردند، رویِ ستونِ کنار
+/* عمدا overflow:hidden روی کل سلول‌ها گذاشته نمی‌شود — طبق تجربهٔ همین
+   هفته با جدول سبد خرید ([[batch9-fixes]])، این ترکیب بدون white-space:
+   nowrap عملا کاری نمی‌کند ولی جایی که واقعا کاری هم بکند، محتوای واقعی
+   را بی‌صدا قطع می‌کند. فقط سلول‌های تک‌خطی کوتاه (شماره/موبایل/مبلغ/تاریخ)
+   nowrap می‌گیرند؛ اگر همان‌ها هم به‌ندرت جا کم آوردند، روی ستون کنار
    می‌ریزند، نه این‌که ناپدید شوند. */
 .orders-table .ot-no, .orders-table .ot-mobile,
 .orders-table .ot-amount, .orders-table .ot-date { white-space: nowrap; }
 
-/* ستونِ عملیات: دکمه‌ها (لینک‌های <a> با آیکون + دکمه‌های داخلِ فرم) پیش‌تر
-   inline-flex بودند و روی خطِ متن هم‌تراز می‌شدند — دکمه‌ای که آیکون داشت
+/* ستون عملیات: دکمه‌ها (لینک‌های <a> با آیکون + دکمه‌های داخل فرم) پیش‌تر
+   inline-flex بودند و روی خط متن هم‌تراز می‌شدند — دکمه‌ای که آیکون داشت
    (فاکتور) کمی بالاتر/پایین‌تر از دکمهٔ ساده (جزئیات) می‌نشست («کلیدها هم
-   تراز نیست»). با یک ردیفِ flex به‌جای تکیه‌کردن به baseline، همه از وسط
+   تراز نیست»). با یک ردیف flex به‌جای تکیه‌کردن به baseline، همه از وسط
    هم‌تراز می‌شوند. */
 .ot-actions-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; }
 .ot-actions-row form { margin: 0; }
@@ -2009,7 +2009,7 @@ textarea.form-control {
 .ship-mtable .cat-checkbox,
 .ship-rtable .cat-checkbox { line-height: 1.7; }
 
-/* استپرِ واحد وزن در نرخ‌نامه (کم/زیاد با + و −) */
+/* استپر واحد وزن در نرخ‌نامه (کم/زیاد با + و −) */
 .wt-stepper {
     display: flex;
     align-items: stretch;
@@ -2058,8 +2058,8 @@ textarea.form-control {
 /* ===== بخش «نرخ‌نامه‌های ارسال» (settings.php?sec=shiprate) =====
    خواستهٔ مدیر: «هر چی اضافه می‌کنم رو اضافه می‌کنه توی همون صفحه، این‌جوری
    صفحه خیلی در آینده بزرگ می‌شه… به‌صورت مرتب نشون بده که خیلی طولانی نشه و
-   چیدمانش ریزتر باشه». پس این مقیاس عمداً ریز است و ارتفاعِ فهرست با
-   .rt-scroll سقف دارد تا افزودنِ صد شهر هم صفحه را بلند نکند. */
+   چیدمانش ریزتر باشه». پس این مقیاس عمدا ریز است و ارتفاع فهرست با
+   .rt-scroll سقف دارد تا افزودن صد شهر هم صفحه را بلند نکند. */
 .rt-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -2175,7 +2175,7 @@ textarea.form-control {
 
 .rt-chip > .ic { width: 0.9rem; height: 0.9rem; }
 
-/* قابِ فهرست: ارتفاع سقف‌دار، پس صفحه با هر شهرِ تازه بلندتر نمی‌شود */
+/* قاب فهرست: ارتفاع سقف‌دار، پس صفحه با هر شهر تازه بلندتر نمی‌شود */
 .rt-scroll {
     max-height: 27rem;
     overflow: auto;
@@ -2234,7 +2234,7 @@ textarea.form-control {
     font-size: 0.66rem;
 }
 
-/* ورودی‌های ریزِ درون‌جدولی */
+/* ورودی‌های ریز درون‌جدولی */
 .rt-in {
     padding: 0.3rem 0.45rem !important;
     font-size: 0.78rem !important;
@@ -2263,7 +2263,7 @@ textarea.form-control {
 
 .rt-del:hover { opacity: 1; }
 
-/* استپرِ ریزِ درون‌جدولی */
+/* استپر ریز درون‌جدولی */
 .wt-mini { max-width: 108px; }
 .wt-mini .wt-btn { flex: 0 0 24px; font-size: 0.85rem; }
 .wt-mini .wt-field { padding: 0.28rem 0.15rem !important; font-size: 0.78rem !important; }
@@ -2319,7 +2319,7 @@ textarea.form-control {
 
 .rt-help a { color: var(--red-primary); text-decoration: none; }
 
-/* فرمِ افزودن: همهٔ فیلدها در یک ردیفِ فشرده */
+/* فرم افزودن: همهٔ فیلدها در یک ردیف فشرده */
 .rt-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -2529,7 +2529,7 @@ textarea.form-control {
 /* Footer — social + hours */
 .footer-about h4 .logo-icon { color: var(--red-primary); }
 .footer-hours { color: var(--text-secondary) !important; }
-/* کاشی‌های پیام‌رسان: همیشه در یک خط (nowrap) و دقیقاً هم‌اندازه.
+/* کاشی‌های پیام‌رسان: همیشه در یک خط (nowrap) و دقیقا هم‌اندازه.
    flex:0 1 34px + aspect-ratio:1 → همه با هم و به یک نسبت کوچک می‌شوند، پس هیچ‌وقت اختلاف اندازه ندارند. */
 .footer-social {
     display: flex; flex-flow: row nowrap; align-items: center;
@@ -2615,7 +2615,7 @@ textarea.form-control {
     100% { transform: translateX(-45vw) scaleX(-1); }
 }
 
-/* نوار جادهٔ متحرک (هم‌تراز با خط زمینِ ماشین) */
+/* نوار جادهٔ متحرک (هم‌تراز با خط زمین ماشین) */
 .home-decor .decor-road {
     position: absolute; left: 0; right: 0; bottom: clamp(48px, 11vh, 150px);
     height: 4px; overflow: hidden;
@@ -2781,8 +2781,8 @@ textarea.form-control {
         table-layout: auto;
     }
 
-    /* عرض‌های ثابتِ دسکتاپ (برای جلوگیری از پرشِ ستون‌ها) اینجا معنی ندارند —
-       هر ردیف در موبایل خودش یک بلوکِ مستقل و تمام‌عرض می‌شود، نه ستونِ جدول. */
+    /* عرض‌های ثابت دسکتاپ (برای جلوگیری از پرش ستون‌ها) اینجا معنی ندارند —
+       هر ردیف در موبایل خودش یک بلوک مستقل و تمام‌عرض می‌شود، نه ستون جدول. */
     .cart-table td:nth-child(2), .cart-table td:nth-child(3),
     .cart-table td:nth-child(4), .cart-table td:nth-child(5) {
         width: auto;
@@ -2826,7 +2826,7 @@ textarea.form-control {
     .cart-update-form { flex: 0 0 auto; }
 
     /* کاشی‌های پیام‌رسان در موبایل ستون پهن‌تری دارند → می‌توانند بزرگ‌تر بمانند
-       (هم‌وزنِ قانون پایه، وگرنه به آن می‌بازد) */
+       (هم‌وزن قانون پایه، وگرنه به آن می‌بازد) */
     .footer-social .social-chip { flex: 0 1 40px; width: 40px; }
 
     .product-grid {
@@ -2922,7 +2922,7 @@ input::-webkit-inner-spin-button {
     object-fit: cover;
 }
 
-/* جای‌گیرِ خالی (وقتی تصویری آپلود نشده) */
+/* جای‌گیر خالی (وقتی تصویری آپلود نشده) */
 .banner.is-empty {
     border-style: dashed;
     border-color: var(--border-light);
@@ -3020,11 +3020,11 @@ input::-webkit-inner-spin-button {
 .badge-retail  { background: rgba(148,163,184,0.15); color: #CBD5E1; border: 1px solid rgba(148,163,184,0.3); }
 .badge-pending { background: rgba(234,179,8,0.15); color: #FBBF24; border: 1px solid rgba(234,179,8,0.35); }
 
-/* ---------- صفحهٔ پیگیریِ تسویهٔ همکاران (admin/partner-settlements.php) ----------
-   هر همکار یک ردیفِ بازشونده — با ترفندِ چک‌باکس (نه details/summary) چون
-   داخلِ سطرِ خلاصه یک لینکِ واقعی («پروندهٔ همکار») هم هست؛ در details تو در تو
-   کلیک روی آن لینک هم‌زمان جمع/بازشدنِ سطر را هم فعال می‌کرد (تجربهٔ
-   part-categories.php — [[part-categories-admin-crud]]). این‌جا لینک بیرونِ
+/* ---------- صفحهٔ پیگیری تسویهٔ همکاران (admin/partner-settlements.php) ----------
+   هر همکار یک ردیف بازشونده — با ترفند چک‌باکس (نه details/summary) چون
+   داخل سطر خلاصه یک لینک واقعی («پروندهٔ همکار») هم هست؛ در details تو در تو
+   کلیک روی آن لینک هم‌زمان جمع/بازشدن سطر را هم فعال می‌کرد (تجربهٔ
+   part-categories.php — [[part-categories-admin-crud]]). این‌جا لینک بیرون
    <label> است، پس فقط خودش کار می‌کند. */
 .pset-row { border-bottom: 1px solid var(--border-color); }
 .pset-row:last-child { border-bottom: none; }
@@ -3062,7 +3062,7 @@ input::-webkit-inner-spin-button {
 .qty-hint b { color: inherit; }
 
 /* استپر تعداد: فیلد بزرگ‌تر + دکمهٔ کم/زیاد.
-   فیلد از نوع text است (نه number) تا ارقام فارسیِ تایپ‌شده هم خوانده و لاتین شوند. */
+   فیلد از نوع text است (نه number) تا ارقام فارسی تایپ‌شده هم خوانده و لاتین شوند. */
 .qty-stepper {
     display: inline-flex;
     align-items: stretch;
@@ -3101,7 +3101,7 @@ input::-webkit-inner-spin-button {
 .qty-step:hover { background: var(--red-primary); color: #fff; }
 .qty-step:active { transform: scale(0.94); }
 
-/* دکمهٔ میان‌بُر «تعداد را به حداقل کلی برسان» */
+/* دکمهٔ میان‌بر «تعداد را به حداقل کلی برسان» */
 .qty-jump {
     display: inline-flex;
     align-items: center;
@@ -3137,7 +3137,7 @@ input::-webkit-inner-spin-button {
 .qty-total.is-wholesale { border-color: rgba(16, 185, 129, 0.45); background: rgba(16, 185, 129, 0.08); }
 .qty-total.is-wholesale .qty-total-num { color: #4ADE80; }
 
-/* نشانِ «این قیمت اعمال شد» درون جعبهٔ فعال (ارتفاع ثابت تا جعبه‌ها نپرند) */
+/* نشان «این قیمت اعمال شد» درون جعبهٔ فعال (ارتفاع ثابت تا جعبه‌ها نپرند) */
 .price-box-state {
     display: flex;
     align-items: center;
@@ -3207,20 +3207,20 @@ input::-webkit-inner-spin-button {
 .pay-opt-body b { font-size: 0.88rem; color: var(--text-primary); }
 .pay-opt-body small { font-size: 0.75rem; color: var(--text-muted); line-height: 1.7; }
 
-/* شماره‌کارت/به‌نامِ گزینهٔ «کارت به کارت» — قبلاً یک جملهٔ تک‌خطی بود که با
+/* شماره‌کارت/به‌نام گزینهٔ «کارت به کارت» — قبلا یک جملهٔ تک‌خطی بود که با
    دو نشان (badge) وسطش (یکی dir=ltr) روی موبایل و در کنار بقیهٔ متن به‌هم
    می‌ریخت. حالا هر مقدار روی سطر خودش، به شکل برچسب/مقدار. */
 .pay-card-mini { display: flex; flex-direction: column; gap: 0.2rem; margin: 0.05rem 0 0.1rem; }
 .pay-card-mini-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; }
-/* عرضِ ثابت روی برچسب («شمارهٔ کارت» بلندتر از «به نام») تا نشانِ مقدار در
-   هر دو سطر از یک نقطه شروع شود؛ قبلاً هرکدام با عرضِ متغیرِ متنِ کنارش
+/* عرض ثابت روی برچسب («شمارهٔ کارت» بلندتر از «به نام») تا نشان مقدار در
+   هر دو سطر از یک نقطه شروع شود؛ قبلا هرکدام با عرض متغیر متن کنارش
    می‌رفت جلو و «نامیزون» به نظر می‌رسید. */
 .pay-card-mini-row > span { color: var(--text-muted); flex: 0 0 4.3rem; }
 .pay-card-mini-row > b { font-size: 0.75rem; padding: 0.02rem 0.28rem; }
 
-/* قاعدهٔ «ارسال ↔ پرداخت»: روش‌های پرداختِ ناسازگار با روش ارسالِ انتخاب‌شده
+/* قاعدهٔ «ارسال ↔ پرداخت»: روش‌های پرداخت ناسازگار با روش ارسال انتخاب‌شده
    کم‌رنگ و غیرفعال می‌شوند (رادیوی داخلشان disabled است، پس کلیک هم نمی‌گیرند)
-   و فقط همان‌ها یک خط توضیحِ کوچک نشان می‌دهند. */
+   و فقط همان‌ها یک خط توضیح کوچک نشان می‌دهند. */
 .pay-rule {
     display: flex;
     align-items: flex-start;
@@ -3240,10 +3240,10 @@ input::-webkit-inner-spin-button {
 .pay-off-note { display: none; }
 .pay-opt.is-off .pay-off-note { display: block; color: #FCA5A5; }
 
-/* ===== خلاصهٔ سفارش: نام روشِ ارسالِ انتخاب‌شده در سبد + لینک تغییر =====
-   انتخابِ روش ارسال از این صفحه برداشته شده (خواستهٔ مدیر: «از توی صفحه بعد
+/* ===== خلاصهٔ سفارش: نام روش ارسال انتخاب‌شده در سبد + لینک تغییر =====
+   انتخاب روش ارسال از این صفحه برداشته شده (خواستهٔ مدیر: «از توی صفحه بعد
    ثبت سفارش بردار که دیگه صفحه بعد فقط ثبت سفارش نهایی باشه»)، پس این‌جا فقط
-   نامِ روش و یک راهِ برگشت به سبد نشان داده می‌شود. */
+   نام روش و یک راه برگشت به سبد نشان داده می‌شود. */
 .cs-name {
     font-style: normal;
     margin-inline-start: 0.35rem;
@@ -3266,10 +3266,10 @@ input::-webkit-inner-spin-button {
 .cs-edit:hover { color: var(--red-light); border-bottom-color: var(--red-light); }
 .cs-edit > .ic { width: 0.8rem; height: 0.8rem; }
 
-/* ===== اطلاعات واریزِ کارت به کارت، در همین صفحه =====
+/* ===== اطلاعات واریز کارت به کارت، در همین صفحه =====
    خواستهٔ مدیر: «یک گزینه کارت به کارت رو هم بذار که بتونه اطلاعات پرداخت رو
    وارد کنه … 4 رقم آخر کارت . مبلغ و تاریخ». کادر فقط با انتخاب همان گزینه باز
-   می‌شود و در دو ستونِ فشرده می‌نشیند تا صفحه بلند نشود. */
+   می‌شود و در دو ستون فشرده می‌نشیند تا صفحه بلند نشود. */
 .pay-c2c {
     margin-top: 0.6rem;
     padding: 0.6rem 0.7rem;
@@ -3318,10 +3318,10 @@ input::-webkit-inner-spin-button {
     .pc2-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ===== تقویم شمسیِ «تاریخ واریز» و انتخابگر ساعت =====
+/* ===== تقویم شمسی «تاریخ واریز» و انتخابگر ساعت =====
    خواستهٔ مدیر: «تاریخ رو از روی تقویم فارسی بهم بده / و زمان رو هم با یک ساعت
-   و دقیقه قابل انتخاب». هیچ کتابخانه‌ای در کار نیست؛ این فقط شکل‌دادن به کادرِ
-   بازشوی تقویم و به دو انتخابگرِ ساعت/دقیقه است. */
+   و دقیقه قابل انتخاب». هیچ کتابخانه‌ای در کار نیست؛ این فقط شکل‌دادن به کادر
+   بازشوی تقویم و به دو انتخابگر ساعت/دقیقه است. */
 .jdp { position: relative; display: flex; align-items: stretch; gap: 0.3rem; }
 .jdp .form-control { flex: 1 1 auto; min-width: 0; }
 .jdp-btn {
@@ -3338,7 +3338,7 @@ input::-webkit-inner-spin-button {
     transition: var(--transition);
 }
 .jdp-btn:hover { color: #FBBF24; border-color: rgba(234, 179, 8, 0.5); }
-/* کادرِ بازشو روی بقیهٔ فرم شناور است تا کارتِ واریز کوتاه بماند */
+/* کادر بازشو روی بقیهٔ فرم شناور است تا کارت واریز کوتاه بماند */
 .jdp-pop {
     position: absolute;
     z-index: 40;
@@ -3375,7 +3375,7 @@ input::-webkit-inner-spin-button {
 }
 .jdp-nav:hover { color: var(--text-primary); border-color: var(--border-light); }
 .jdp-nav > .ic { width: 0.85rem; height: 0.85rem; }
-/* هفت ستون؛ در RTL خودِ مرورگر «ش» را سمت راست می‌گذارد */
+/* هفت ستون؛ در RTL خود مرورگر «ش» را سمت راست می‌گذارد */
 .jdp-w, .jdp-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.15rem; }
 .jdp-w { margin-bottom: 0.2rem; }
 .jdp-w i {
@@ -3422,14 +3422,14 @@ input::-webkit-inner-spin-button {
     transition: var(--transition);
 }
 .jdp-f button:hover { color: var(--text-primary); border-color: var(--border-light); }
-/* ساعت:دقیقه چپ‌به‌راست خوانده می‌شود (۱۸:۳۰)، پس جهتِ همین تکه ltr است */
+/* ساعت:دقیقه چپ‌به‌راست خوانده می‌شود (۱۸:۳۰)، پس جهت همین تکه ltr است */
 .jtp { display: flex; align-items: center; gap: 0.25rem; direction: ltr; }
 .jtp .form-control { flex: 1 1 0; min-width: 0; text-align: center; }
 .jtp-sep { flex: 0 0 auto; font-weight: 700; color: var(--text-muted); }
 
 /* ===== دکمهٔ ثبت سفارش =====
    خواستهٔ مدیر: «کلید ثبت سفارش رو هم کوچکتر کن … خیلی کشیده شده». دکمه از
-   ردیفِ تمام‌عرضِ پایینِ صفحه به انتهای همین ستون آمده و اندازهٔ معمولی دارد. */
+   ردیف تمام‌عرض پایین صفحه به انتهای همین ستون آمده و اندازهٔ معمولی دارد. */
 .checkout-actions {
     display: flex;
     align-items: center;
@@ -3450,7 +3450,7 @@ input::-webkit-inner-spin-button {
 }
 .checkout-back:hover { color: var(--text-primary); }
 
-/* «هزینه‌های باربری» از تنظیمات ادمین — فقط زیر روشِ باربری و فقط اطلاع‌رسانی */
+/* «هزینه‌های باربری» از تنظیمات ادمین — فقط زیر روش باربری و فقط اطلاع‌رسانی */
 .ship-barbari {
     margin-top: 0.5rem;
     padding: 0.55rem 0.65rem;
@@ -3548,7 +3548,7 @@ input::-webkit-inner-spin-button {
 .pay-card-info b.pay-pan { font-size: 1rem; letter-spacing: 1px; user-select: all; }
 .pay-card-note { color: var(--text-muted); font-size: 0.75rem; line-height: 1.8; margin: 0.5rem 0 0; }
 
-/* شمارهٔ کارتِ مقصد، درون گزینهٔ «کارت به کارت» در صفحهٔ تسویه */
+/* شمارهٔ کارت مقصد، درون گزینهٔ «کارت به کارت» در صفحهٔ تسویه */
 .pay-pan-inline {
     display: inline-block;
     letter-spacing: 1px;
@@ -3560,9 +3560,9 @@ input::-webkit-inner-spin-button {
     padding: 0.05rem 0.3rem;
 }
 
-/* نامِ صاحب کارت، کنارِ همان شمارهٔ کارت — سفید و پُررنگ‌تر از متنِ توضیح
-   تا مشتری نامِ مقصدِ واریز را با یک نگاه ببیند. همان قابِ .pay-pan-inline را
-   دارد ولی letter-spacing ندارد؛ آن فقط برای ارقام لاتینِ شمارهٔ کارت است. */
+/* نام صاحب کارت، کنار همان شمارهٔ کارت — سفید و پررنگ‌تر از متن توضیح
+   تا مشتری نام مقصد واریز را با یک نگاه ببیند. همان قاب .pay-pan-inline را
+   دارد ولی letter-spacing ندارد؛ آن فقط برای ارقام لاتین شمارهٔ کارت است. */
 .pay-holder-inline {
     display: inline-block;
     font-weight: 700;
@@ -3573,10 +3573,10 @@ input::-webkit-inner-spin-button {
     padding: 0.05rem 0.3rem;
 }
 
-/* ===== ثبت واریزِ کارت به کارت (صفحهٔ پس از ثبت سفارش) =====
+/* ===== ثبت واریز کارت به کارت (صفحهٔ پس از ثبت سفارش) =====
    چهار موردی که مشتری پر می‌کند: شناسهٔ واریز، مبلغ، چهار رقم آخر کارت مبدأ و
-   زمان واریز. جعبه از رنگ سبزِ «در انتظار تأیید» استفاده می‌کند تا با جعبهٔ
-   آبیِ «اطلاعات کارت برای واریز» بالای خودش اشتباه نشود. */
+   زمان واریز. جعبه از رنگ سبز «در انتظار تأیید» استفاده می‌کند تا با جعبهٔ
+   آبی «اطلاعات کارت برای واریز» بالای خودش اشتباه نشود. */
 .c2c-box {
     text-align: right;
     max-width: 560px;
@@ -3608,10 +3608,10 @@ input::-webkit-inner-spin-button {
 .c2c-msg > .ic { flex-shrink: 0; margin-top: 0.25rem; }
 .c2c-msg.is-ok   { color: var(--green); background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
 .c2c-msg.is-bad  { color: var(--red-light); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
-/* یادآوریِ خنثی (نه خطا، نه تأییدِ کامل) — مثلِ «چک را هم باید ارسال کنید».
-   هم‌رنگِ کادرهای زردِ .pay-c2c در checkout.php تا زبانِ رنگیِ سایت یکدست بماند.
-   فونتِ بزرگ‌تر از بقیهٔ .c2c-msg (خواستهٔ کاربر) چون این پیام مهلتِ ارسالِ اصلِ
-   چک را می‌گوید و باید در نگاهِ اول خوانده شود؛ فقط همین حالت را عوض می‌کند تا
+/* یادآوری خنثی (نه خطا، نه تأیید کامل) — مثل «چک را هم باید ارسال کنید».
+   هم‌رنگ کادرهای زرد .pay-c2c در checkout.php تا زبان رنگی سایت یکدست بماند.
+   فونت بزرگ‌تر از بقیهٔ .c2c-msg (خواستهٔ کاربر) چون این پیام مهلت ارسال اصل
+   چک را می‌گوید و باید در نگاه اول خوانده شود؛ فقط همین حالت را عوض می‌کند تا
    پیام‌های is-ok/is-bad جای دیگر دست‌نخورده بمانند. */
 .c2c-msg.is-note { color: var(--text-secondary); background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); font-size: 1rem; line-height: 2; }
 .c2c-note {
@@ -3644,9 +3644,9 @@ input::-webkit-inner-spin-button {
 .c2c-grid .form-group { margin-bottom: 0; }
 .c2c-grid label { font-size: 0.78rem; }
 
-/* عکسِ نمونهٔ چک — راهنمای بصری بالای فرمِ اطلاعاتِ چک (هم در checkout.php هم
-   order-success.php؛ همین یک کلاس هر دو جا استفاده می‌شود). عمداً «تمیز»:
-   قابِ ساده، سایهٔ ملایم، بدون تزئینِ اضافه — خواستهٔ کاربر. */
+/* عکس نمونهٔ چک — راهنمای بصری بالای فرم اطلاعات چک (هم در checkout.php هم
+   order-success.php؛ همین یک کلاس هر دو جا استفاده می‌شود). عمدا «تمیز»:
+   قاب ساده، سایهٔ ملایم، بدون تزئین اضافه — خواستهٔ کاربر. */
 .pc2-sample {
     display: flex;
     flex-direction: column;
@@ -3679,7 +3679,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* ===== روند پیگیری سفارش (تایم‌لاین مشتری + فهرست تیک ادمین) ===== */
-/* جمع‌شدنیِ «پیگیری سفارش» درون کارت سفارش در حساب کاربری */
+/* جمع‌شدنی «پیگیری سفارش» درون کارت سفارش در حساب کاربری */
 .order-track {
     margin-top: 0.6rem;
     padding-top: 0.6rem;
@@ -3800,7 +3800,7 @@ input::-webkit-inner-spin-button {
 }
 .track-courier a { color: var(--red-light); text-decoration: none; }
 .track-courier a:hover { text-decoration: underline; }
-/* کد رهگیریِ پست زیر مرحلهٔ «تحویل به پست» — همان قاب، با تأکید روی خودِ کد */
+/* کد رهگیری پست زیر مرحلهٔ «تحویل به پست» — همان قاب، با تأکید روی خود کد */
 .track-code b {
     font-family: monospace;
     font-size: 0.84rem;
@@ -3848,8 +3848,8 @@ input::-webkit-inner-spin-button {
     white-space: nowrap;
 }
 
-/* کادرِ کد رهگیری: با تیکِ «تحویل به پست» باز می‌شود و به همان ردیف چسبیده
-   می‌ماند (تورفتگی + خطِ کناری) تا معلوم باشد متعلق به کدام مرحله است. */
+/* کادر کد رهگیری: با تیک «تحویل به پست» باز می‌شود و به همان ردیف چسبیده
+   می‌ماند (تورفتگی + خط کناری) تا معلوم باشد متعلق به کدام مرحله است. */
 .track-reveal {
     margin: -0.1rem 0 0.15rem;
     margin-inline-start: 1.6rem;
@@ -3885,7 +3885,7 @@ input::-webkit-inner-spin-button {
     line-height: 1.7;
 }
 
-/* یادداشتِ وضعیت پیامک زیر دکمهٔ ذخیره */
+/* یادداشت وضعیت پیامک زیر دکمهٔ ذخیره */
 .track-sms-note {
     display: flex;
     align-items: center;
@@ -3912,14 +3912,14 @@ input::-webkit-inner-spin-button {
     .track-sms-note a { margin-inline-start: 0; }
 }
 
-/* ===================== سه بنرِ مجزا زیرِ بنرِ اصلی =====================
-   ردیفِ سه‌کارتی: جمعِ عرضِ سه کارت دقیقاً به عرضِ بنر اصلی است و فاصلهٔ
-   بین‌شان آن‌ها را از هم جدا نگه می‌دارد. بنر اصلی خودش تمام‌عرضِ کانتینر
+/* ===================== سه بنر مجزا زیر بنر اصلی =====================
+   ردیف سه‌کارتی: جمع عرض سه کارت دقیقا به عرض بنر اصلی است و فاصلهٔ
+   بین‌شان آن‌ها را از هم جدا نگه می‌دارد. بنر اصلی خودش تمام‌عرض کانتینر
    و دست‌نخورده می‌ماند — هیچ‌چیز کنارش نمی‌نشیند و از عرضش کم نمی‌کند.
-   کارت‌ها عمداً جمع‌وجورند (ارتفاع و فونت‌های کوچک‌تر) چون در یک‌سومِ
-   عرضِ کانتینر می‌نشینند.
+   کارت‌ها عمدا جمع‌وجورند (ارتفاع و فونت‌های کوچک‌تر) چون در یک‌سوم
+   عرض کانتینر می‌نشینند.
    auto-fit: روی نمایشگر متوسط به دو ستون و روی موبایل به یک ستون می‌رسد.
-   min(100%,300px): روی نمایشگر باریک هم ستون از عرضِ صفحه بیرون نمی‌زند. */
+   min(100%,300px): روی نمایشگر باریک هم ستون از عرض صفحه بیرون نمی‌زند. */
 .promo-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
@@ -3927,7 +3927,7 @@ input::-webkit-inner-spin-button {
     align-items: stretch;
 }
 
-/* ---------- اسلایدرِ آفرها ---------- */
+/* ---------- اسلایدر آفرها ---------- */
 .promo-slider {
     position: relative;
     display: flex;
@@ -3940,7 +3940,7 @@ input::-webkit-inner-spin-button {
    انتخابگر فرزندی است تا از display:grid ی که .promo-card می‌دهد قوی‌تر بماند. */
 .promo-slider > .promo-slide { display: none; }
 .promo-slider > .promo-slide.is-active { display: grid; animation: pcIn 0.45s ease; }
-/* fill-mode ندارد تا پس از پایان انیمیشن، transformِ hover آزاد بماند */
+/* fill-mode ندارد تا پس از پایان انیمیشن، transform hover آزاد بماند */
 @keyframes pcIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: none; }
@@ -3966,7 +3966,7 @@ input::-webkit-inner-spin-button {
 }
 .promo-dot:hover { background: var(--text-muted); }
 .promo-dot.is-active { background: rgba(251, 191, 36, 0.22); }
-/* نشانگرِ فعال، همگام با بازهٔ چرخش پر می‌شود (--promo-ms از سرور می‌آید) */
+/* نشانگر فعال، همگام با بازهٔ چرخش پر می‌شود (--promo-ms از سرور می‌آید) */
 .promo-dot.is-active::after {
     content: '';
     position: absolute;
@@ -3979,7 +3979,7 @@ input::-webkit-inner-spin-button {
 @keyframes pcDot { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .promo-slider:hover .promo-dot.is-active::after { animation-play-state: paused; }
 
-/* ---------- کارتِ بنر (هر سه اسلات) ---------- */
+/* ---------- کارت بنر (هر سه اسلات) ---------- */
 .promo-card {
     position: relative;
     display: grid;
@@ -3999,7 +3999,7 @@ input::-webkit-inner-spin-button {
 .promo-special:hover { border-color: var(--red-primary); }
 .promo-offer:hover   { border-color: rgba(251, 191, 36, 0.55); }
 
-/* اسلاتِ خالیِ ردیف — همان زبانِ کادرِ خط‌چینِ بقیهٔ اسلات‌های این صفحه.
+/* اسلات خالی ردیف — همان زبان کادر خط‌چین بقیهٔ اسلات‌های این صفحه.
    نه هاور دارد و نه درخشش، چون لینک نیست. */
 .promo-empty {
     border-style: dashed;
@@ -4009,7 +4009,7 @@ input::-webkit-inner-spin-button {
 .promo-empty::after { content: none; }
 .promo-empty .pc-title { color: var(--text-secondary); font-weight: 600; }
 
-/* هالهٔ رنگیِ پشتِ محتوا (پشتِ متن، رویِ پس‌زمینهٔ کارت) */
+/* هالهٔ رنگی پشت محتوا (پشت متن، روی پس‌زمینهٔ کارت) */
 .pc-glow {
     position: absolute;
     inset: -40% -10% auto -10%;
@@ -4021,7 +4021,7 @@ input::-webkit-inner-spin-button {
 .promo-special .pc-glow {
     background: radial-gradient(58% 58% at 76% 10%, rgba(220, 38, 38, 0.22), transparent 70%);
 }
-/* درخششی که با hover یک‌بار از روی کارت رد می‌شود (چپ‌به‌راستِ فیزیکی) */
+/* درخششی که با hover یک‌بار از روی کارت رد می‌شود (چپ‌به‌راست فیزیکی) */
 .promo-card::after {
     content: '';
     position: absolute;
@@ -4056,7 +4056,7 @@ input::-webkit-inner-spin-button {
 .pc-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .pc-noimg { color: var(--text-muted); opacity: 0.45; }
 .pc-noimg .ic { width: 1.7rem; height: 1.7rem; }
-/* قابِ تصویرِ اسلاتِ خالی: تخت و خط‌چین، بدون توپُری */
+/* قاب تصویر اسلات خالی: تخت و خط‌چین، بدون توپری */
 .promo-empty .pc-media {
     background: transparent;
     border: 1px dashed var(--border-color);
@@ -4078,14 +4078,14 @@ input::-webkit-inner-spin-button {
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45);
 }
 
-/* ---------- ستونِ متن ---------- */
+/* ---------- ستون متن ---------- */
 .pc-body {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
     min-width: 0;
 }
-/* فاصله‌گیرِ کشسان: هرچه بالای آن بماند بالا، بقیه به پایینِ کارت می‌چسبد */
+/* فاصله‌گیر کشسان: هرچه بالای آن بماند بالا، بقیه به پایین کارت می‌چسبد */
 .pc-fill { flex: 1 1 auto; min-height: 0.15rem; }
 
 .pc-tag {
@@ -4108,7 +4108,7 @@ input::-webkit-inner-spin-button {
     background: rgba(234, 179, 8, 0.13);
     border: 1px solid rgba(234, 179, 8, 0.34);
 }
-/* تپشِ ملایمِ عقربه تا حسِ گذرِ زمان بدهد */
+/* تپش ملایم عقربه تا حس گذر زمان بدهد */
 .promo-offer .pc-tag .ic { animation: pcTick 2.4s ease-in-out infinite; }
 @keyframes pcTick { 0%, 100% { transform: none; } 50% { transform: scale(1.18); } }
 
@@ -4178,14 +4178,14 @@ input::-webkit-inner-spin-button {
     color: var(--text-secondary);
     direction: rtl;
 }
-/* خانهٔ ثانیه نفس می‌کشد تا زنده‌بودنِ شمارنده دیده شود */
+/* خانهٔ ثانیه نفس می‌کشد تا زنده‌بودن شمارنده دیده شود */
 .pc-cd.is-sec { animation: pcSec 1s ease-in-out infinite; }
 @keyframes pcSec {
     0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09); }
     50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 0 12px rgba(251, 191, 36, 0.4); }
 }
 
-/* نوارِ زمانِ باقی‌مانده (نسبتِ زمانِ مانده به کلِ بازهٔ آفر) */
+/* نوار زمان باقی‌مانده (نسبت زمان مانده به کل بازهٔ آفر) */
 .pc-bar {
     display: block;
     height: 3px;
@@ -4217,19 +4217,19 @@ input::-webkit-inner-spin-button {
     border: 1px solid rgba(220, 38, 38, 0.3);
 }
 .pc-over .ic { width: 0.8rem; height: 0.8rem; }
-/* با پایانِ آفر: شمارنده و نوار می‌روند، پیامِ پایان می‌آید */
+/* با پایان آفر: شمارنده و نوار می‌روند، پیام پایان می‌آید */
 .pc-count.is-over,
 .pc-count.is-over ~ .pc-bar { display: none; }
 .pc-count.is-over ~ .pc-over,
 .pc-over.is-shown { display: flex; }
-/* برچسبِ «زمان باقی‌مانده» پیش از شمارنده است و با انتخابگرِ خواهر قابلِ
-   دسترسی نیست؛ در رندرِ سرور با همین کلاس پنهان می‌شود. */
+/* برچسب «زمان باقی‌مانده» پیش از شمارنده است و با انتخابگر خواهر قابل
+   دسترسی نیست؛ در رندر سرور با همین کلاس پنهان می‌شود. */
 .pc-cap.is-hidden { display: none; }
 
-/* ---------- مهرِ «فروخته شد» ----------
-   گوشهٔ چپِ بالای تصویرِ بنر. صفحه RTL است، پس inset-inline-end یعنی «چپ»
-   (قابِ ‎.pc-off‎ با inset-inline-start در گوشهٔ راست است). چرخشِ کوچک و قابِ
-   ضخیم ظاهرِ مهرِ لاستیکی می‌دهد. */
+/* ---------- مهر «فروخته شد» ----------
+   گوشهٔ چپ بالای تصویر بنر. صفحه RTL است، پس inset-inline-end یعنی «چپ»
+   (قاب ‎.pc-off‎ با inset-inline-start در گوشهٔ راست است). چرخش کوچک و قاب
+   ضخیم ظاهر مهر لاستیکی می‌دهد. */
 .pc-sold {
     position: absolute;
     top: 0.4rem;
@@ -4250,7 +4250,7 @@ input::-webkit-inner-spin-button {
     transform: rotate(-11deg);
 }
 .pc-sold .ic { width: 0.72rem; height: 0.72rem; }
-/* آفرِ تمام‌شده: تصویر خاکستری‌تر و کلیدِ خرید آرام‌تر تا با آفرهای زنده اشتباه نشود */
+/* آفر تمام‌شده: تصویر خاکستری‌تر و کلید خرید آرام‌تر تا با آفرهای زنده اشتباه نشود */
 .promo-card.is-sold .pc-media img { filter: grayscale(0.6) brightness(0.82); }
 .promo-card.is-done .pc-cta {
     background: linear-gradient(135deg, #4B5563, #374151);
@@ -4274,10 +4274,10 @@ input::-webkit-inner-spin-button {
     box-shadow: 0 5px 14px rgba(220, 38, 38, 0.26);
     transition: filter var(--transition);
 }
-/* بنرهای آفر: تمِ مشکی-طلایی (خواستهٔ کاربر) بجای گرادیانِ کهربایی-قرمزِ قبلی
-   که با رنگ‌بندیِ سایت نمی‌خواند. طلاییِ دقیق #FFBE00 همان کدی است که کاربر
+/* بنرهای آفر: تم مشکی-طلایی (خواستهٔ کاربر) بجای گرادیان کهربایی-قرمز قبلی
+   که با رنگ‌بندی سایت نمی‌خواند. طلایی دقیق #FFBE00 همان کدی است که کاربر
    داده؛ پس‌زمینه مشکی/تیره و متن+آیکون طلایی (آیکون از currentColor رنگ
-   می‌گیرد، پس فقط با تغییرِ color روی خودِ .pc-cta هم‌رنگ می‌شود). */
+   می‌گیرد، پس فقط با تغییر color روی خود .pc-cta هم‌رنگ می‌شود). */
 .promo-offer .pc-cta {
     background: linear-gradient(135deg, #1c1c1c, #000);
     border: 1px solid rgba(255, 190, 0, 0.55);
@@ -4315,8 +4315,8 @@ input::-webkit-inner-spin-button {
 }
 
 /* ===================== کاروسل تصاویر محصول =====================
-   ستون چپِ .product-detail: اسلات بزرگ + نوار بندانگشتی زیر آن.
-   اسلات بزرگ ارتفاعِ باقی‌ماندهٔ ستون را می‌گیرد و تصویر با
+   ستون چپ .product-detail: اسلات بزرگ + نوار بندانگشتی زیر آن.
+   اسلات بزرگ ارتفاع باقی‌ماندهٔ ستون را می‌گیرد و تصویر با
    object-fit:cover آن را پر می‌کند؛ پس با عوض‌شدن src هیچ ابعادی
    تغییر نمی‌کند و صفحه جابه‌جا نمی‌شود. */
 .product-gallery {
@@ -4324,7 +4324,7 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     gap: 0.6rem;
     min-width: 0;
-    /* ارتفاعِ گالری از محتوای خودش می‌آید، نه از ستونِ بلندِ گزینه‌ها */
+    /* ارتفاع گالری از محتوای خودش می‌آید، نه از ستون بلند گزینه‌ها */
     align-self: start;
 }
 .product-gallery > .product-detail-image { flex: 0 0 auto; }
@@ -4411,7 +4411,7 @@ input::-webkit-inner-spin-button {
 /* ===================== امتیاز ستاره‌ای · نظرها · پرسش‌وپاسخ =====================
    ستاره‌ها دو لایه‌اند: پایهٔ خاکستری + لایهٔ کهربایی که با width درصدی بریده
    می‌شود. در چیدمان راست‌به‌چپ ابتدای لایه (inset-inline-start) سمت راست است،
-   پس بُرش از همان ستارهٔ اول شروع می‌شود و کسرِ امتیاز دقیق دیده می‌شود. */
+   پس برش از همان ستارهٔ اول شروع می‌شود و کسر امتیاز دقیق دیده می‌شود. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 .rstars { position: relative; display: inline-flex; line-height: 1; vertical-align: -0.16em; white-space: nowrap; }
@@ -4460,7 +4460,7 @@ input::-webkit-inner-spin-button {
 .pr-login { margin-top: 1rem; padding: 0.8rem 1rem; background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.25); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary); }
 .pr-login a { color: var(--red-light); font-weight: 600; }
 
-/* انتخابگر ستاره — کاملاً CSS، بدون JS.
+/* انتخابگر ستاره — کاملا CSS، بدون JS.
    رادیوها در DOM به ترتیب ۵..۱ می‌آیند؛ row-reverse در RTL ستارهٔ «۱» را سمت
    راست می‌گذارد و «~» فقط برادرهای بعدی (امتیازهای کمتر) را رنگ می‌کند. */
 .star-input { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 0.1rem; margin-bottom: 0.8rem; }
@@ -4503,12 +4503,12 @@ input::-webkit-inner-spin-button {
 }
 
 /* ===================== بررسی عکس نمونهٔ قطعه (part-check.php) =====================
-   مرحلهٔ میانِ سبد خرید و ثبت سفارش. مشتری عکسِ قطعهٔ خودش را می‌فرستد،
+   مرحلهٔ میان سبد خرید و ثبت سفارش. مشتری عکس قطعهٔ خودش را می‌فرستد،
    کارشناس مطابقت و موجودی را تأیید می‌کند. کلاس‌های همین بخش در پنل ادمین
    (admin/part-checks.php و admin/order-detail.php) هم استفاده می‌شوند، چون
    هر دو همین شیت را بار می‌کنند. */
 
-/* دو کلیدِ عمومی که تا امروز نداشتیم */
+/* دو کلید عمومی که تا امروز نداشتیم */
 .btn-lg { padding: 0.8rem 1.6rem; font-size: 0.95rem; font-weight: 600; }
 .btn-ghost {
     background: transparent;
@@ -4518,7 +4518,7 @@ input::-webkit-inner-spin-button {
 .btn-ghost:hover { color: var(--text-primary); border-color: var(--text-muted); background: var(--bg-input); }
 .btn.is-locked { pointer-events: none; opacity: 0.45; }
 
-/* ---------- نشانگرِ سه‌گامِ خرید ---------- */
+/* ---------- نشانگر سه‌گام خرید ---------- */
 .pchk-steps {
     display: flex;
     flex-wrap: wrap;
@@ -4560,8 +4560,8 @@ input::-webkit-inner-spin-button {
 }
 .pchk-steps li.is-now span { background: var(--red-primary); color: #fff; }
 
-/* گام‌هایی که قابلِ بازگشت‌اند (سبد/بررسیِ عکس) یک <a> دارند — با مارجینِ
-   منفی، کلِ حبهٔ li کلیک‌پذیر می‌شود، نه فقط متن. */
+/* گام‌هایی که قابل بازگشت‌اند (سبد/بررسی عکس) یک <a> دارند — با مارجین
+   منفی، کل حبهٔ li کلیک‌پذیر می‌شود، نه فقط متن. */
 .pchk-steps li a {
     display: inline-flex;
     align-items: center;
@@ -4574,9 +4574,9 @@ input::-webkit-inner-spin-button {
 }
 .pchk-steps li a:hover { background: var(--bg-input); }
 
-/* ---------- پیغامِ درشتِ بالای صفحه ----------
-   خواستهٔ مدیر: مشتری حتماً آن را ببیند، پس قابِ پررنگ و متنِ بزرگ‌تر از
-   متنِ معمولِ صفحه. نوارِ سرخِ سمتِ شروع (در RTL = راست) چشم را می‌گیرد. */
+/* ---------- پیغام درشت بالای صفحه ----------
+   خواستهٔ مدیر: مشتری حتما آن را ببیند، پس قاب پررنگ و متن بزرگ‌تر از
+   متن معمول صفحه. نوار سرخ سمت شروع (در RTL = راست) چشم را می‌گیرد. */
 .pchk-notice {
     display: flex;
     gap: 0.9rem;
@@ -4625,7 +4625,7 @@ input::-webkit-inner-spin-button {
 .pchk-notice-list li .ic { flex: 0 0 auto; margin-top: 0.35rem; color: var(--red-light); }
 .pchk-notice-list b { color: var(--text-primary); }
 
-/* ---------- کارتِ وضعیت ---------- */
+/* ---------- کارت وضعیت ---------- */
 .pchk-panel {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -4673,10 +4673,10 @@ input::-webkit-inner-spin-button {
     margin-inline-start: auto;
 }
 
-/* ---------- کادرِ بزرگِ «در انتظار بررسی موجودی» ----------
-   گیتِ کاملاً مسدودکننده (خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰): بزرگ، وسط‌چین، با یک
-   حلقهٔ نورِ محو-و-پررنگ‌شونده پشتِ آیکون و برچسبی که مثل چراغ چشمک می‌زند،
-   تا واضح باشد صفحه «زنده» است و منتظرِ رخدادی از سمتِ ادمین می‌ماند. */
+/* ---------- کادر بزرگ «در انتظار بررسی موجودی» ----------
+   گیت کاملا مسدودکننده (خواستهٔ کاربر ۲۰۲۶-۰۸-۳۰): بزرگ، وسط‌چین، با یک
+   حلقهٔ نور محو-و-پررنگ‌شونده پشت آیکون و برچسبی که مثل چراغ چشمک می‌زند،
+   تا واضح باشد صفحه «زنده» است و منتظر رخدادی از سمت ادمین می‌ماند. */
 .pchk-panel-big {
     position: relative;
     text-align: center;
@@ -4702,10 +4702,10 @@ input::-webkit-inner-spin-button {
     color: #4ADE80;
     animation: pchkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-/* پیش‌تر با inset/height ثابت جا افتاده بود (بسته به ارتفاعِ کارت، مرکزِ
-   هاله بالاتر از مرکزِ آیکون می‌ایستاد — «از بالا و پایین نامیزون»). حالا
-   دقیقاً روی مرکزِ خودِ آیکون قفل است: padding-top ی کارت (2.25rem) + نصفِ
-   ارتفاعِ آیکون (72px/2) = فاصلهٔ مرکزِ آیکون از بالای کارت. */
+/* پیش‌تر با inset/height ثابت جا افتاده بود (بسته به ارتفاع کارت، مرکز
+   هاله بالاتر از مرکز آیکون می‌ایستاد — «از بالا و پایین نامیزون»). حالا
+   دقیقا روی مرکز خود آیکون قفل است: padding-top ی کارت (2.25rem) + نصف
+   ارتفاع آیکون (72px/2) = فاصلهٔ مرکز آیکون از بالای کارت. */
 .pchk-wait-glow {
     position: absolute;
     top: calc(2.25rem + 36px);
@@ -4720,8 +4720,8 @@ input::-webkit-inner-spin-button {
 .pchk-badge-blink { animation: pchkBlink 1.6s ease-in-out infinite; }
 
 @keyframes pchkGlow {
-    /* translate(-50%,-50%) باید همراهِ هر فریم تکرار شود، وگرنه انیمیشن
-       آن را از transformِ ثابتِ عنصر پاک می‌کند و هاله از مرکزِ آیکون می‌پرد */
+    /* translate(-50%,-50%) باید همراه هر فریم تکرار شود، وگرنه انیمیشن
+       آن را از transform ثابت عنصر پاک می‌کند و هاله از مرکز آیکون می‌پرد */
     0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.92); }
     50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.08); }
 }
@@ -4743,7 +4743,7 @@ input::-webkit-inner-spin-button {
     .pchk-wait-glow, .pchk-badge-blink, .pchk-wait-icon.is-ok, .pchk-panel-pop { animation: none; }
 }
 
-/* ---------- دو خطِ تأیید: مطابقت قطعه و موجودی ---------- */
+/* ---------- دو خط تأیید: مطابقت قطعه و موجودی ---------- */
 .pchk-confirm { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.9rem; }
 .pchk-confirm-row {
     display: flex;
@@ -4787,7 +4787,7 @@ input::-webkit-inner-spin-button {
 .pchk-adminnote b { color: var(--text-primary); }
 .pchk-adminnote.is-no { border-color: rgba(220, 38, 38, 0.4); background: rgba(220, 38, 38, 0.07); }
 
-/* ---------- بلوکِ عکس‌های ارسالی (includes/partcheck-photos.php) ---------- */
+/* ---------- بلوک عکس‌های ارسالی (includes/partcheck-photos.php) ---------- */
 .pchk-sent {
     padding: 0.85rem 0.9rem;
     border-radius: var(--radius-sm);
@@ -4824,7 +4824,7 @@ input::-webkit-inner-spin-button {
     background: var(--bg-input);
 }
 
-/* شبکهٔ بندانگشتی — با تعدادِ عکس (۳ تا ۸) خودش تنظیم می‌شود */
+/* شبکهٔ بندانگشتی — با تعداد عکس (۳ تا ۸) خودش تنظیم می‌شود */
 .pchk-thumbs {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
@@ -4854,12 +4854,12 @@ input::-webkit-inner-spin-button {
     background: rgba(17, 24, 39, 0.72);
 }
 
-/* ---------- ردیفِ کلیدها ---------- */
+/* ---------- ردیف کلیدها ---------- */
 .pchk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
 .pchk-skip-form { display: inline-flex; margin: 0; }
 .pchk-skip { font-size: 0.8rem; }
 
-/* ---------- فرمِ آپلود ---------- */
+/* ---------- فرم آپلود ---------- */
 .pchk-form {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -4906,9 +4906,9 @@ input::-webkit-inner-spin-button {
 }
 .pchk-hint .ic { flex: 0 0 auto; margin-top: 0.3rem; }
 
-/* کادرهای مربعیِ آپلود عکس — کلیک روی هر کادر، انتخابگرِ فایلِ نامرئیِ همان
-   کادر را باز می‌کند (همان ترفندِ .file-pick)؛ با انتخاب عکس، خودِ تصویر به‌جای
-   آیکونِ دوربین در کادر نمایش داده می‌شود. رجوع کنید به قسمتِ اسکریپت در
+/* کادرهای مربعی آپلود عکس — کلیک روی هر کادر، انتخابگر فایل نامرئی همان
+   کادر را باز می‌کند (همان ترفند .file-pick)؛ با انتخاب عکس، خود تصویر به‌جای
+   آیکون دوربین در کادر نمایش داده می‌شود. رجوع کنید به قسمت اسکریپت در
    part-check.php. */
 .pc-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 0.6rem; margin-bottom: 0.4rem; }
 .pc-shot {
@@ -4949,12 +4949,12 @@ input::-webkit-inner-spin-button {
 .pc-shot-add .pc-shot-ph { color: var(--red-light); }
 .pc-shot-add:hover { border-color: var(--red-primary); background: rgba(220, 38, 38, 0.06); }
 
-/* ---------- جعبهٔ ردکردنِ مرحله ----------
-   قبلاً یک قابِ کم‌رنگِ خط‌چین در پایینِ صفحه (زیرِ فرمِ کامل) بود — خواستهٔ
-   کاربر: بالای صفحه و واضح‌تر. حالا بلافاصله بعد از پیغامِ درشتِ بالای صفحه
-   می‌آید (کنارِ همان تصمیمی که مشتری تازه در حالِ گرفتنش است) و به‌جای
-   خط‌چینِ محو، قابِ توپر با نوارِ رنگیِ کهربایی و آیکونِ بزرگ دارد — هم‌خانواده
-   با .pchk-notice ولی رنگش جداست تا با هشدارِ قرمزِ «مرجوعی نیست» قاطی نشود. */
+/* ---------- جعبهٔ ردکردن مرحله ----------
+   قبلا یک قاب کم‌رنگ خط‌چین در پایین صفحه (زیر فرم کامل) بود — خواستهٔ
+   کاربر: بالای صفحه و واضح‌تر. حالا بلافاصله بعد از پیغام درشت بالای صفحه
+   می‌آید (کنار همان تصمیمی که مشتری تازه در حال گرفتنش است) و به‌جای
+   خط‌چین محو، قاب توپر با نوار رنگی کهربایی و آیکون بزرگ دارد — هم‌خانواده
+   با .pchk-notice ولی رنگش جداست تا با هشدار قرمز «مرجوعی نیست» قاطی نشود. */
 .pchk-skipbox {
     display: flex;
     flex-wrap: wrap;
@@ -4987,7 +4987,7 @@ input::-webkit-inner-spin-button {
     .pchk-skip-form .btn { width: 100%; }
 }
 
-/* ---------- سمتِ ادمین: صفِ بررسی و بلوکِ جزئیات سفارش ---------- */
+/* ---------- سمت ادمین: صف بررسی و بلوک جزئیات سفارش ---------- */
 .pcadm-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.15rem; }
 .pcadm-tab {
     display: inline-flex;
@@ -5050,7 +5050,7 @@ input::-webkit-inner-spin-button {
 .pcadm-f b { color: var(--text-primary); font-weight: 600; }
 .pcadm-f a { color: var(--red-light); }
 
-/* فرمِ داوری: تأیید/رد + یادداشت + تأییدِ موجودی، همه در یک جا */
+/* فرم داوری: تأیید/رد + یادداشت + تأیید موجودی، همه در یک جا */
 .pcadm-review {
     margin-top: 0.9rem;
     padding: 0.9rem 1rem;
@@ -5108,9 +5108,9 @@ input::-webkit-inner-spin-button {
     .pcadm-acts .btn { flex: 1 1 100%; }
 }
 
-/* ===== جعبهٔ «این آفر زنده نیست» در فرمِ ویرایشِ آفر (admin/banners.php) =====
-   کهربایی، هم‌رنگِ هشدارهای دیگرِ همین صفحه، تا ادمین بفهمد تیک‌ها از پیش برای
-   برگرداندنِ آفر چیده شده‌اند. */
+/* ===== جعبهٔ «این آفر زنده نیست» در فرم ویرایش آفر (admin/banners.php) =====
+   کهربایی، هم‌رنگ هشدارهای دیگر همین صفحه، تا ادمین بفهمد تیک‌ها از پیش برای
+   برگرداندن آفر چیده شده‌اند. */
 .offer-back-box {
     display: flex;
     flex-direction: column;
