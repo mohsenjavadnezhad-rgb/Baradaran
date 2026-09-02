@@ -3,17 +3,18 @@ require_once 'includes/header.php';
 
 /* ==========================================================================
    صفحهٔ دسته‌بندی قطعات (part_categories).
-     parts.php               → فهرست همهٔ سرشاخه‌ها
+     parts.php               → فهرست همه سرشاخه‌ها
      parts.php?cat=<سرشاخه>  → زیرشاخه‌ها + همین‌جا مرحلهٔ برند/سال، سپس محصولات
      parts.php?cat=<زیرشاخه> → همین مرحلهٔ برند/سال برای محصولات آن زیرشاخه
    ---------------------------------------------------------------------
-   مرحلهٔ برند/سال (خواستهٔ کاربر): بعد از انتخاب یک دستهٔ قطعه، اول باید
-   برند خودرو انتخاب شود (کاشی‌های بزرگ)؛ با انتخاب برند، یک انتخابگر
-   بزرگ «سال تولید» کنارش ظاهر می‌شود. سال تولید اختیاری است — همان لحظه که
-   برند انتخاب شده (بدون انتخاب سال) همهٔ محصولات آن برند دیده می‌شوند؛
-   دکمهٔ «نمایش همهٔ سال‌ها» هم برای برگشتن از یک سال انتخاب‌شده به همین
-   حالت است. محصولی که سالی برایش ثبت نشده («از/تا» خالی)، برای همهٔ
-   سال‌ها مناسب حساب می‌شود (productYearReady()/getProducts() را ببینید).
+   مرحله برند/سال (خواسته کاربر): بعد از انتخاب یک دسته قطعه، اول باید
+   برند خودرو انتخاب شود (کاشی‌های بزرگ)؛ با انتخاب برند، چیپ‌های بزرگ
+   «سال تولید» کنارش ظاهر می‌شوند (نه نوار کشویی — خواسته صریح کاربر).
+   سال تولید اختیاری است — همان لحظه که برند انتخاب شده (بدون انتخاب سال)
+   همه محصولات آن برند دیده می‌شوند؛ چیپ «همه سال‌ها» هم برای برگشتن از
+   یک سال انتخاب‌شده به همین حالت است. محصولی که سالی برایش ثبت نشده
+   («از/تا» خالی)، برای همه سال‌ها مناسب حساب می‌شود
+   (productYearReady()/getProducts() را ببینید).
    ========================================================================== */
 
 $catId   = (int)($_GET['cat'] ?? 0);
@@ -70,7 +71,7 @@ function partsProductCard($p) {
 
 /* مرحلهٔ برند + سال — یک تابع مشترک چون هم صفحهٔ سرشاخه و هم صفحهٔ زیرشاخه
    دقیقا همین قدم را لازم دارند. $baseQs = پارامترهای ثابت صفحه (cat=...)
-   که در همهٔ لینک‌های این بخش باید بماند. */
+   که در همه لینک‌های این بخش باید بماند. */
 function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearOptions, $baseQs) {
     ?>
     <div class="pby-box">
@@ -101,39 +102,25 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearO
                 <a href="parts.php?<?= $baseQs ?>" class="pby-change"><?= icon('refresh', 'ic-sm') ?> تغییر برند</a>
             </div>
 
-            <?php /* انتخابگر سال تولید — «کلید بزرگ و زیبا» (خواستهٔ کاربر):
-                    select بزرگ‌رنگی که با تغییر خودش ارسال می‌شود (progressive
-                    enhancement با جاوااسکریپت پایین)، به‌همراه دکمهٔ صریح
-                    «اعمال» برای حالت بدون جاوااسکریپت. */ ?>
+            <?php /* انتخابگر سال تولید — به‌جای نوار کشویی (select)، چیپ‌های
+                    بزرگ کلیک‌پذیر (خواستهٔ کاربر: «نوار کشویی نباشه، یک طرح
+                    زیباتر»)؛ هر چیپ خودش یک لینک ساده است، پس بدون جاوااسکریپت
+                    هم کامل کار می‌کند. چیپ «همه سال‌ها» همیشه اول است، هم برای
+                    انتخاب صریح و هم برای برگشتن از یک سال انتخاب‌شده. */ ?>
             <?php if ($yearOptions): ?>
-            <form method="GET" action="parts.php" class="pby-yearform" id="pbyYearForm">
-                <?php foreach (explode('&', $baseQs) as $kv): if ($kv === '') continue; list($k, $v) = array_pad(explode('=', $kv, 2), 2, ''); ?>
-                <input type="hidden" name="<?= h($k) ?>" value="<?= h(urldecode($v)) ?>">
-                <?php endforeach; ?>
-                <input type="hidden" name="brand" value="<?= (int)$brandId ?>">
-                <label for="pbyYearSel" class="pby-yearlabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</label>
-                <select name="year" id="pbyYearSel" class="pby-yearselect">
-                    <option value="0" <?= $year === 0 ? 'selected' : '' ?>>همهٔ سال‌ها</option>
+            <div class="pby-years">
+                <div class="pby-yearslabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</div>
+                <div class="pby-yearchips">
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>" class="pby-yearchip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>
                     <?php foreach ($yearOptions as $y): ?>
-                    <option value="<?= $y ?>" <?= $year === $y ? 'selected' : '' ?>><?= $y ?></option>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&year=<?= $y ?>" class="pby-yearchip <?= $year === $y ? 'is-on' : '' ?>"><?= $y ?></a>
                     <?php endforeach; ?>
-                </select>
-                <button type="submit" class="btn btn-primary pby-yearbtn"><?= icon('check', 'ic-sm') ?> اعمال</button>
-                <?php if ($year): ?>
-                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>" class="pby-allyears"><?= icon('layers', 'ic-sm') ?> نمایش همهٔ سال‌ها</a>
-                <?php endif; ?>
-            </form>
+                </div>
+            </div>
             <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>
-    <script>
-    (function(){
-        var sel = document.getElementById('pbyYearSel');
-        var frm = document.getElementById('pbyYearForm');
-        if (sel && frm) sel.addEventListener('change', function(){ frm.submit(); });
-    })();
-    </script>
     <?php
 }
 ?>
