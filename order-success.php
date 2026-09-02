@@ -1,13 +1,13 @@
 <?php
-/* هندلرِ ثبت واریز پیش از هدر اجرا می‌شود، وگرنه ریدایرکتِ PRG بعد از چاپ HTML
+/* هندلر ثبت واریز پیش از هدر اجرا می‌شود، وگرنه ریدایرکت PRG بعد از چاپ HTML
    کار نمی‌کند (هیچ بافر خروجی‌ای در این پروژه روشن نیست). */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 
 $orderId = (int)($_GET['id'] ?? 0);
 
-/* ---------- ثبت واریزِ کارت به کارت (PRG) ----------
-   فقط صاحب سفارش می‌تواند ثبت کند و فقط روی سفارشِ کارت‌به‌کارتِ پرداخت‌نشده. */
+/* ---------- ثبت واریز کارت به کارت (PRG) ----------
+   فقط صاحب سفارش می‌تواند ثبت کند و فقط روی سفارش کارت‌به‌کارت پرداخت‌نشده. */
 $c2cErr = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['c2c_report']) && $orderId > 0) {
     $own = false;
@@ -66,22 +66,22 @@ $orderTax   = (int)($order['tax_total'] ?? 0);
 /* نتیجهٔ بازگشت از درگاه (payment-callback.php این پارامتر را می‌گذارد) */
 $payFlag   = (string)($_GET['pay'] ?? '');
 
-/* گیتِ «بررسی موجودی» — اولین مرحلهٔ روند ارسال. تا مدیر آن را تیک نزند (یا
-   خودکار از «بررسی عکس نمونهٔ قطعه» طی نشده باشد)، هیچ اقدامِ پرداختی —
-   دکمهٔ درگاه، گزارشِ واریزِ کارت‌به‌کارت، ثبتِ اطلاعاتِ چک — در دسترس نیست. */
+/* گیت «بررسی موجودی» — اولین مرحلهٔ روند ارسال. تا مدیر آن را تیک نزند (یا
+   خودکار از «بررسی عکس نمونهٔ قطعه» طی نشده باشد)، هیچ اقدام پرداختی —
+   دکمهٔ درگاه، گزارش واریز کارت‌به‌کارت، ثبت اطلاعات چک — در دسترس نیست. */
 $stockUnlocked = orderPaymentUnlocked($order);
 
 /* کارت به کارت: آیا مشتری واریز را ثبت کرده؟
-   نکته: اطلاعاتِ کارت/چک عمداً به $stockUnlocked گره نمی‌خورد — این دو حالا
-   خودِ checkout.php جمع‌شان می‌کند (پیش از این‌که سفارش، و پس‌ازآن امکانِ
-   بررسیِ موجودی، اصلاً وجود داشته باشد)، پس مخفی‌کردنِ چیزی که مشتری همین
-   الان فرستاده گمراه‌کننده بود. گیت فقط جلوی «پرداختِ آنیِ» درگاهِ بانکی را
+   نکته: اطلاعات کارت/چک عمدا به $stockUnlocked گره نمی‌خورد — این دو حالا
+   خود checkout.php جمع‌شان می‌کند (پیش از این‌که سفارش، و پس‌ازآن امکان
+   بررسی موجودی، اصلا وجود داشته باشد)، پس مخفی‌کردن چیزی که مشتری همین
+   الان فرستاده گمراه‌کننده بود. گیت فقط جلوی «پرداخت آنی» درگاه بانکی را
    می‌گیرد (پایین‌تر). */
 $c2cOn     = $payOn && $payMethod === 'card' && !$payIsPaid && paymentC2cReady();
 $c2cDone   = $c2cOn && trim((string)($order['c2c_ref'] ?? '')) !== '';
 $c2cSaved  = ((string)($_GET['c2c'] ?? '') === 'ok');
 
-/* چک از ۲۰۲۶-۰۸-۳۰ دیگر فرمی ندارد — فقط پیغامِ تأیید + مهلتِ ارسالِ اصلِ چک
+/* چک از ۲۰۲۶-۰۸-۳۰ دیگر فرمی ندارد — فقط پیغام تأیید + مهلت ارسال اصل چک
    (paymentChequeNoteText()) وقتی سفارش هنوز دریافت نشده. */
 $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady();
 ?>
@@ -111,7 +111,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
         <?php if ($payOn && !$stockUnlocked && !$payIsPaid && $order['status'] !== 'cancelled'): ?>
         <div style="max-width:380px;margin:0 auto 1rem;padding:0.75rem 0.9rem;border-radius:var(--radius);background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:#FCD34D;font-size:0.82rem;line-height:1.9;text-align:right;">
             <?= icon('shield-check', 'ic-sm') ?> <b>سفارش شما در انتظار «بررسی موجودی» است.</b>
-            کارشناسان ما ابتدا موجودی کالا را بررسی می‌کنند؛ به‌محضِ تأیید، امکانِ پرداخت (آنلاین یا دیگر روش‌ها) برای شما فعال می‌شود.
+            کارشناسان ما ابتدا موجودی کالا را بررسی می‌کنند؛ به‌محض تأیید، امکان پرداخت (آنلاین یا دیگر روش‌ها) برای شما فعال می‌شود.
         </div>
         <?php endif; ?>
 
@@ -144,7 +144,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
         <?php endif; ?>
 
         <?php if ($c2cOn): ?>
-        <?php /* ثبت واریزِ کارت به کارت — چهار موردی که مدیر خواسته: شناسهٔ واریز،
+        <?php /* ثبت واریز کارت به کارت — چهار موردی که مدیر خواسته: شناسهٔ واریز،
                 مبلغ، چهار رقم آخر کارت مبدأ و زمان واریز. سفارش تا تأیید مدیر
                 «در انتظار تأیید واریز» می‌ماند (هیچ پرداختی خودکار تأیید نمی‌شود). */ ?>
         <div class="c2c-box">
@@ -178,7 +178,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
                     <div class="form-group">
                         <label for="c2c_ref">شناسهٔ واریز / شمارهٔ پیگیری *</label>
                         <input type="text" name="c2c_ref" id="c2c_ref" class="form-control" dir="ltr" required
-                               value="<?= h((string)($order['c2c_ref'] ?? '')) ?>" placeholder="مثلاً 123456789">
+                               value="<?= h((string)($order['c2c_ref'] ?? '')) ?>" placeholder="مثلا 123456789">
                     </div>
                     <div class="form-group">
                         <label for="c2c_amount">مبلغ واریزی (تومان) *</label>
@@ -195,7 +195,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
                     <div class="form-group">
                         <label for="c2c_paid_text">زمان واریز *</label>
                         <input type="text" name="c2c_paid_text" id="c2c_paid_text" class="form-control" required
-                               value="<?= h((string)($order['c2c_paid_text'] ?? '')) ?>" placeholder="مثلاً امروز ساعت ۱۸:۳۰">
+                               value="<?= h((string)($order['c2c_paid_text'] ?? '')) ?>" placeholder="مثلا امروز ساعت ۱۸:۳۰">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm"><?= icon('check-circle', 'ic-sm') ?> <?= $c2cDone ? 'به‌روزرسانی اطلاعات واریز' : 'ثبت اطلاعات واریز' ?></button>
@@ -204,7 +204,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
         <?php endif; ?>
 
         <?php if ($chqOn): ?>
-        <?php /* از ۲۰۲۶-۰۸-۳۰ دیگر فرمی نیست — فقط پیغامِ تأیید + مهلتِ ارسالِ اصلِ چک
+        <?php /* از ۲۰۲۶-۰۸-۳۰ دیگر فرمی نیست — فقط پیغام تأیید + مهلت ارسال اصل چک
                 (متن و روزشمار از admin/settings.php، پرداخت با paymentChequeNoteText()). */ ?>
         <div class="c2c-box">
             <div class="c2c-t"><?= icon('check-circle', 'ic-sm') ?> سفارش شما تأیید شد</div>
@@ -212,7 +212,7 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
             <?php if (($chqSampleImg = trim((string)getSettingRaw('pay_cheque_sample', ''))) !== ''): ?>
             <div class="pc2-sample">
                 <img src="uploads/settings/<?= h($chqSampleImg) ?>" alt="نمونهٔ چک">
-                <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چکِ خوانا</span>
+                <span><?= icon('info', 'ic-sm') ?> نمونهٔ یک چک خوانا</span>
             </div>
             <?php endif; ?>
             <a href="cart.php" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;"><?= icon('cart', 'ic-sm') ?> بازگشت به سبد <span style="color:var(--text-muted);font-weight:400;">(برای تغییرات)</span></a>
