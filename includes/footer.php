@@ -76,13 +76,17 @@ $acctLabel = isCustomerLoggedIn() ? 'حساب کاربری' : 'ورود / ثبت
 
         <div class="footer-col">
             <h4>دسترسی سریع</h4>
-            <a href="banners.php"><?= icon('home') ?>خانه</a>
-            <a href="shop.php"><?= icon('store') ?>فروشگاه</a>
-            <a href="search.php?new=1"><?= icon('sparkles') ?>محصولات جدید</a>
-            <a href="search.php?sale=1"><?= icon('percent') ?>تخفیف‌ها</a>
-            <a href="cart.php"><?= icon('cart') ?>سبد خرید</a>
-            <a href="<?= $acctHref ?>"><?= icon(isCustomerLoggedIn() ? 'user' : 'login') ?><?= h($acctLabel) ?></a>
-            <a href="terms.php"><?= icon('clipboard-list') ?>شرایط و قوانین</a>
+            <?php /* آیتم‌های این ستون هم از همان جدولِ منوهاست (گروهِ «footer»)
+                    — از includes/header.php وارد شده، پس menu.php از قبل
+                    require شده. آیتمِ سیستمیِ «account» مثلِ نوارِ بالا رفتار
+                    می‌کند. */ ?>
+            <?php foreach (menuItems('footer') as $mi): ?>
+                <?php if ($mi['item_key'] === 'account'): ?>
+            <a href="<?= $acctHref ?>"><?= icon(isCustomerLoggedIn() ? $mi['icon'] : 'login') ?><?= isCustomerLoggedIn() ? h($mi['label']) : h($acctLabel) ?></a>
+                <?php elseif ($mi['url'] !== null && $mi['url'] !== ''): ?>
+            <a href="<?= h($mi['url']) ?>"><?= icon($mi['icon']) ?><?= h($mi['label']) ?></a>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
 
         <div class="footer-col">
