@@ -201,6 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
     }
 
     if ($sec === 'productyear') {
+        setSetting('product_year_enabled', isset($_POST['product_year_enabled']) ? '1' : '0');
         $pyMin = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_min'] ?? '')));
         $pyMax = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_max'] ?? '')));
         $pyToday = jalaliToday()[0];
@@ -1440,8 +1441,20 @@ require_once __DIR__ . '/layout-top.php';
   <?php if ($sec === 'productyear'): $pyRange = productYearRange(); ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('calendar') ?> بازهٔ سال تولید خودرو</h3>
+
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="product_year_enabled" id="product_year_enabled" value="1"
+             <?= productYearEnabled() ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="product_year_enabled" style="margin:0;cursor:pointer;">این قابلیت فعال باشد</label>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
+      با برداشتن تیک، هم فیلد «سال تولید» از فرم محصول و هم چیپ‌های سال از فروشگاه پنهان می‌شوند — فقط مرحلهٔ
+      انتخاب برند می‌ماند. سال‌هایی که قبلا برای محصولات ثبت کرده‌اید پاک نمی‌شوند، فقط پنهان می‌مانند تا دوباره روشن کنید.
+    </div>
+
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      همین بازه، فهرست چیپ‌های «سال تولید» را می‌سازد که در فروشگاه، بعد از انتخاب برند، به مشتری نشان داده می‌شود
+      بازهٔ زیر، فهرست چیپ‌های «سال تولید» را می‌سازد که در فروشگاه، بعد از انتخاب برند، به مشتری نشان داده می‌شود
       (<a href="../parts.php" target="_blank">دسته‌بندی قطعات</a>). با این دو عدد می‌توانید سال‌های نمایش‌داده‌شده را
       کم یا زیاد کنید — مثلا اگر خودروهای فروشگاهتان قدیمی‌تر هستند، «از سال» را عقب‌تر ببرید.
     </p>
