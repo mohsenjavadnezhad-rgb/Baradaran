@@ -1,6 +1,6 @@
 <?php
 /* برندها و مدل‌ها (جدول categories، دو سطحی: parent_id NULL = برند).
-   بازطراحی 2026-08-26: قبلا یک جدول تخت با همهٔ برند+مدل‌ها ردیف‌به‌ردیف
+   بازطراحی 2026-08-26: قبلا یک جدول تخت با همه برند+مدل‌ها ردیف‌به‌ردیف
    بود که با ده‌ها برند خیلی طولانی می‌شد (خواستهٔ کاربر: «طراحیشو تغییر بده»)
    و صفحهٔ مستقل خودش را داشت (نه layout-top.php)، پس با بقیهٔ پنل هم‌شکل
    نبود. حالا مثل admin/part-categories.php گروه‌بندی‌شده و جمع‌شونده است. */
@@ -19,6 +19,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_brand_en'])) {
     $msg = 'تنظیم نمایش نام انگلیسی ذخیره شد.';
 }
 
+/* لوگوی برند — فقط وقتی خود ردیف یک برند است (parent_id خالی)، چون در
+   سایت فقط سطح برند لوگو نشان می‌دهد (header.php/parts.php را ببینید). */
+function saveBrandLogoUpload($editId) {
+    global $pdo;
+    if (empty($_FILES['logo']['name']) || ($_FILES['logo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return;
+    $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['svg', 'png', 'jpg', 'jpeg', 'webp'], true)) return;
+    if ($_FILES['logo']['size'] > 1024 * 1024) return; // ۱ مگابایت کافی است، لوگو کوچک است
+    $dir = __DIR__ . '/../uploads/brands/';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $newName = 'brand' . (int)$editId . '_' . time() . '.' . $ext;
+    if (move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $newName)) {
+        $old = $pdo->prepare("SELECT logo FROM categories WHERE id = ?");
+        $old->execute([$editId]);
+        $oldFile = $old->fetchColumn();
+        $pdo->prepare("UPDATE categories SET logo = ? WHERE id = ?")->execute([$newName, $editId]);
+        if ($oldFile && $oldFile !== $newName && is_file($dir . $oldFile)) @unlink($dir . $oldFile);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
     $name = trim($_POST['name'] ?? '');
     $parentId = $_POST['parent_id'] !== '' ? (int)$_POST['parent_id'] : null;
@@ -30,12 +50,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
             $stmt = $pdo->prepare("UPDATE categories SET name=?, slug=?, parent_id=? WHERE id=?");
             $stmt->execute([$name, $slug, $parentId, $editId]);
             $msg = 'دسته‌بندی به‌روزرسانی شد.';
+            if ($parentId === null && categoryLogoReady()) saveBrandLogoUpload($editId);
         } else {
             $stmt = $pdo->prepare("INSERT INTO categories (name, slug, parent_id) VALUES (?, ?, ?)");
             $stmt->execute([$name, $slug, $parentId]);
             $msg = 'دسته‌بندی اضافه شد.';
+            if ($parentId === null && categoryLogoReady()) saveBrandLogoUpload((int)$pdo->lastInsertId());
         }
     }
+}
+
+/* حذف خود لوگو (برگشتن به آیکون عمومی یا فایل SVG قدیمی، اگر باشد) */
+if (isset($_GET['dellogo']) && categoryLogoReady()) {
+    $dlId = (int)$_GET['dellogo'];
+    $old = $pdo->prepare("SELECT logo FROM categories WHERE id = ?");
+    $old->execute([$dlId]);
+    $oldFile = $old->fetchColumn();
+    if ($oldFile) {
+        $pdo->prepare("UPDATE categories SET logo = NULL WHERE id = ?")->execute([$dlId]);
+        $path = __DIR__ . '/../uploads/brands/' . $oldFile;
+        if (is_file($path)) @unlink($path);
+        $msg = 'لوگو حذف شد.';
+    }
+    redirect('categories.php?edit=' . $dlId);
 }
 
 /* حذف — اگر برندی هنوز مدل دارد رد می‌شود (وگرنه مدل‌ها یتیم می‌مانند)،
@@ -114,7 +151,7 @@ require_once __DIR__ . '/layout-top.php';
                 <?php endif; ?>
             </h3></div>
             <div class="dg-box-bd" style="padding:1rem;">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="edit_id" value="<?= $editCat['id'] ?? 0 ?>">
                     <div class="form-group">
                         <label for="name">نام</label>
@@ -130,6 +167,30 @@ require_once __DIR__ . '/layout-top.php';
                         </select>
                         <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی بگذارید تا یک برند تازه بسازید؛ یک برند انتخاب کنید تا مدل همان برند شود.</small>
                     </div>
+
+                    <?php /* لوگو فقط برای خود برند معنا دارد (نه مدل) — چون در سایت
+                            فقط سطح برند لوگو نشان می‌دهد. فقط در حالت ویرایش یک
+                            برند موجود نشان داده می‌شود (نه هنگام ساختن تازه)،
+                            چون تا ردیف ساخته نشود جایی برای ذخیرهٔ فایل نیست. */ ?>
+                    <?php if (categoryLogoReady() && $editCat && empty($editCat['parent_id'])): ?>
+                    <div class="form-group">
+                        <label for="logo">لوگوی برند</label>
+                        <?php $curLogoSrc = brandLogoSrc($editCat); ?>
+                        <?php if ($curLogoSrc): ?>
+                        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
+                            <img src="../<?= h($curLogoSrc) ?>" alt="" style="width:44px;height:44px;object-fit:contain;background:var(--bg-input);border-radius:6px;padding:4px;">
+                            <?php if (!empty($editCat['logo'])): ?>
+                            <a href="?edit=<?= (int)$editCat['id'] ?>&dellogo=<?= (int)$editCat['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('لوگوی آپلودی حذف شود؟')">حذف لوگو</a>
+                            <?php else: ?>
+                            <span style="font-size:0.7rem;color:var(--text-muted);">فایل قدیمی سایت (assets/images/brands) — نه از همین‌جا آپلودشده</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+                        <input type="file" name="logo" id="logo" class="form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                        <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">SVG، PNG، JPG یا WebP — تا ۱ مگابایت. لوگوی تازه، لوگوی قبلی را جایگزین می‌کند.</small>
+                    </div>
+                    <?php endif; ?>
+
                     <button type="submit" name="save_category" class="btn btn-primary btn-block"><?= $editCat ? 'به‌روزرسانی' : 'افزودن' ?></button>
                     <?php if ($editCat || $newModelParent): ?><a href="categories.php" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">انصراف</a><?php endif; ?>
                 </form>
@@ -146,7 +207,13 @@ require_once __DIR__ . '/layout-top.php';
                 <div class="pset-sum-wrap">
                     <label for="<?= $bid ?>" class="pset-sum">
                         <span class="pset-name">
-                            <?= icon('layers', 'ic-sm') ?> <b><?= h($t['row']['name']) ?></b>
+                            <?php $brLogo = brandLogoSrc($t['row']); ?>
+                            <?php if ($brLogo): ?>
+                            <img src="../<?= h($brLogo) ?>" alt="" style="width:22px;height:22px;object-fit:contain;">
+                            <?php else: ?>
+                            <?= icon('layers', 'ic-sm') ?>
+                            <?php endif; ?>
+                            <b><?= h($t['row']['name']) ?></b>
                             <span class="pset-count"><?= count($t['children']) ?> مدل · <?= $t['own'] ?> محصول مستقیم</span>
                         </span>
                         <span class="pset-caret"><?= icon('chevron-down', 'ic-sm') ?></span>
