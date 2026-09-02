@@ -594,6 +594,10 @@ a.mm-part-head:hover { color: var(--red-hover); }
 .pby-yearlabel { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--text-secondary); }
 /* «کلید بزرگ و زیبا»ی انتخاب سال — بزرگ‌تر و رنگی‌تر از select های معمول سایت */
 .pby-yearselect {
+    /* select عنصرهای <select>/<option> فونتِ سفارشیِ سایت (Peyda) را
+       خودکار ارث نمی‌برند و با فونتِ پیش‌فرضِ سیستم نشان داده می‌شوند —
+       همان چیزی که کلمهٔ «همهٔ سال‌ها» را ناهماهنگ نشان می‌داد. */
+    font-family: inherit;
     font-size: 1.05rem;
     font-weight: 700;
     padding: 0.6rem 1.1rem;
@@ -605,6 +609,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
     min-width: 150px;
     text-align: center;
 }
+.pby-yearselect option { font-family: inherit; }
 .pby-yearselect:hover { background: var(--bg-secondary); }
 .pby-yearbtn { border-radius: 999px; padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 .pby-allyears {
