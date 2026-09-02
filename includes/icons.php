@@ -130,7 +130,7 @@ function iconLib()
  * رندر یک آیکون SVG.
  *
  * @param string $name نام آیکون از iconLib()
- * @param string $class کلاس‌های CSS اضافه (مثلاً 'ic-lg ic-amber')
+ * @param string $class کلاس‌های CSS اضافه (مثلا 'ic-lg ic-amber')
  * @param int    $size اندازهٔ پیکسلی صریح؛ 0 = اندازه از CSS بیاید
  */
 function icon($name, $class = '', $size = 0)
