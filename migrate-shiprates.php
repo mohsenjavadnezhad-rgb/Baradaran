@@ -3,14 +3,14 @@
    ---------------------------------------------------------------
    سه چیز ساخته می‌شود:
    1) جدول `shipping_methods` — فهرست روش‌های ارسال از حالت «ثابت در کد» به
-      دیتابیس منتقل می‌شود تا مدیر بتواند روش اضافه/حذف کند. بذرِ اولیه
-      همان هشت روشِ فعلی است و «فعال بودن/هزینه/توضیح»شان از همان کلیدهای
+      دیتابیس منتقل می‌شود تا مدیر بتواند روش اضافه/حذف کند. بذر اولیه
+      همان هشت روش فعلی است و «فعال بودن/هزینه/توضیح»شان از همان کلیدهای
       settings (ship_enable_* / ship_cost_* / ship_note_*) خوانده می‌شود،
       پس هیچ تنظیمی از دست نمی‌رود.
-   2) جدول `shipping_rates` — برای هر روش چند ردیفِ «شهر مقصد + وزن تا +
+   2) جدول `shipping_rates` — برای هر روش چند ردیف «شهر مقصد + وزن تا +
       هزینه». اگر شهر مشتری با ردیفی بخواند، همان هزینه جای هزینهٔ ثابت
       می‌نشیند.
-   3) ستون اختیاریِ `products.weight` (کیلوگرم) — پرکردنش تدریجی است؛ تا
+   3) ستون اختیاری `products.weight` (کیلوگرم) — پرکردنش تدریجی است؛ تا
       وقتی خالی باشد، نرخ‌نامه از «ردیف پایه» استفاده می‌کند.
    اطلاعات اتصال از includes/config.php خوانده می‌شود (هیچ رمزی در این فایل نیست). */
 require_once __DIR__ . '/includes/config.php';
@@ -20,8 +20,8 @@ require_once __DIR__ . '/includes/functions.php';
 header('Content-Type: text/html; charset=utf-8');
 
 $stmts = [
-    /* روش‌های ارسال. is_deleted = حذفِ نرم: اگر سفارشی به این روش اشاره کند
-       نباید ردیفش نابود شود، وگرنه نام روشِ آن سفارش گم می‌شود. */
+    /* روش‌های ارسال. is_deleted = حذف نرم: اگر سفارشی به این روش اشاره کند
+       نباید ردیفش نابود شود، وگرنه نام روش آن سفارش گم می‌شود. */
     "CREATE TABLE IF NOT EXISTS shipping_methods (
         id INT AUTO_INCREMENT PRIMARY KEY,
         method_key VARCHAR(40) NOT NULL UNIQUE,
@@ -64,7 +64,7 @@ foreach ($stmts as $s) {
     catch (Exception $e) { echo "ERR: " . htmlspecialchars($e->getMessage()) . "<br>"; $fail++; }
 }
 
-/* ---- بذرِ روش‌ها: تعریف از کد + وضعیت فعلی از settings ---- */
+/* ---- بذر روش‌ها: تعریف از کد + وضعیت فعلی از settings ---- */
 $seeded = 0;
 try {
     $ins = $pdo->prepare("INSERT IGNORE INTO shipping_methods
@@ -92,11 +92,11 @@ try {
     $ok++;
 } catch (Exception $e) { echo "ERR seed: " . htmlspecialchars($e->getMessage()) . "<br>"; $fail++; }
 
-/* ---- کلیدهای پیش‌فرضِ تنظیماتِ جدید ---- */
+/* ---- کلیدهای پیش‌فرض تنظیمات جدید ---- */
 $stmt = $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)");
 foreach ([
     ['ship_barbari_cost', '0'],   // هزینهٔ پایهٔ باربری
-    ['ship_barbari_desc', ''],    // توضیحِ زیر گزینهٔ باربری در صفحهٔ تسویه
+    ['ship_barbari_desc', ''],    // توضیح زیر گزینهٔ باربری در صفحهٔ تسویه
     ['ship_rate_note',    ''],    // توضیح اختیاری بالای جدول نرخ‌نامه
 ] as $d) {
     try { $stmt->execute($d); $ok++; } catch (Exception $e) { $fail++; }
