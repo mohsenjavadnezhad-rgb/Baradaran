@@ -90,11 +90,11 @@ function renderBrandsTree($brands) {
 
             <div class="header-actions">
                 <?php if (isCustomerLoggedIn()): $cu = currentCustomer();
-                    /* نوعِ حساب کنارِ اسم — خواستهٔ کاربر: «مشخص باشه با اکانت
+                    /* نوع حساب کنار اسم — خواستهٔ کاربر: «مشخص باشه با اکانت
                        همکار وارد شده یا مشتری». همان کلاس‌های badge-partner/
-                       badge-retail/badge-pending که در فهرستِ مشتریانِ ادمین
+                       badge-retail/badge-pending که در فهرست مشتریان ادمین
                        هست، اینجا هم دوباره استفاده می‌شود (در style.css اند،
-                       نه فقط inline layout-top، پس سمتِ سایت هم در دسترس‌اند). */
+                       نه فقط inline layout-top، پس سمت سایت هم در دسترس‌اند). */
                     $cuIsPartner = $cu && (($cu['customer_type'] ?? 'retail') === 'partner');
                     $cuApproved  = $cuIsPartner && (($cu['partner_status'] ?? '') === 'approved');
                 ?>
@@ -126,10 +126,10 @@ function renderBrandsTree($brands) {
     <nav class="main-navbar">
         <div class="header-container">
             <?php /* آیتم‌های این نوار از پنل مدیریت (admin/menus.php) می‌آیند —
-                    قابل افزودن/حذف/تغییرنام/غیرفعال‌کردن. دو آیتمِ «سیستمی»
-                    (item_key پر) رفتارِ ویژه‌شان همین‌جا کد شده: مگامنوی
-                    فروشگاه (محتوایش از $partTree می‌آید) و لینکِ حساب‌کاربری/
-                    ورود (بسته به ورودِ مشتری عوض می‌شود)؛ بقیه لینکِ ساده‌اند. */ ?>
+                    قابل افزودن/حذف/تغییرنام/غیرفعال‌کردن. دو آیتم «سیستمی»
+                    (item_key پر) رفتار ویژه‌شان همین‌جا کد شده: مگامنوی
+                    فروشگاه (محتوایش از $partTree می‌آید) و لینک حساب‌کاربری/
+                    ورود (بسته به ورود مشتری عوض می‌شود)؛ بقیه لینک ساده‌اند. */ ?>
             <?php foreach (menuItems('main') as $mi): ?>
                 <?php if ($mi['item_key'] === 'shop_mega'): ?>
             <div class="nav-dropdown nav-mega">
