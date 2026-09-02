@@ -1,5 +1,5 @@
 <?php
-/* پروبِ موقت — دو خواستهٔ تازه:
+/* پروب موقت — دو خواستهٔ تازه:
    A) صفحهٔ روش‌های ارسال در ادمین نباید نوار اسکرول لازم داشته باشد
    B) استان و شهر در «مشخصات و آدرس تحویل» نوار کشویی باشند
    هیچ رمزی و هیچ اطلاعات شخصی چاپ نمی‌شود. بعد از استفاده ۴۰۴ می‌شود. */
@@ -15,7 +15,7 @@ function has($h, $n, $l) { ok(strpos($h, $n) !== false, $l); }
 function hasnt($h, $n, $l) { ok(strpos($h, $n) === false, $l); }
 function done() { global $P, $F; echo "\n--- $P PASS / $F FAIL ---\n"; }
 
-/* ---------------- A) موتورِ کمک‌تابع‌های شهر و استان ---------------- */
+/* ---------------- A) موتور کمک‌تابع‌های شهر و استان ---------------- */
 if ($m === 'eng') {
     ok(shippingCitiesReady(), 'cities-table-ready');
 
@@ -35,11 +35,11 @@ if ($m === 'eng') {
     ok(shippingCityProvince('یک شهر ناموجود') === '', 'city2prov-unknown-empty');
     ok(shippingCityProvince('') === '', 'city2prov-blank-empty');
 
-    /* پایتختِ هر استان باید اولِ فهرستِ همان استان باشد (ترتیب sort_order) */
+    /* پایتخت هر استان باید اول فهرست همان استان باشد (ترتیب sort_order) */
     ok(($g['خراسان رضوی'][0] ?? '') === 'مشهد', 'capital-first-mashhad');
     ok(($g['تهران'][0] ?? '') === 'تهران', 'capital-first-tehran');
 
-    /* --- رندرِ فیلدها --- */
+    /* --- رندر فیلدها --- */
     $html = shippingProvinceCityFields('خراسان رضوی', 'مشهد', 'یک راهنما');
     has($html, '<select name="province" id="province"', 'province-is-select');
     has($html, '<select name="city" id="city"', 'city-is-select');
@@ -49,20 +49,20 @@ if ($m === 'eng') {
     has($html, '<option value="خراسان رضوی" selected>', 'province-preselected');
     has($html, '<option value="مشهد" selected>', 'city-preselected');
     has($html, 'یک راهنما', 'hint-rendered');
-    /* شهرِ استان دیگر نباید در فهرستِ فیلترشده باشد */
+    /* شهر استان دیگر نباید در فهرست فیلترشده باشد */
     hasnt($html, '>تبریز<', 'other-province-city-filtered-out');
     has($html, '>نیشابور<', 'same-province-city-present');
     has($html, 'dispatchEvent(new Event("change"', 'change-event-fired');
     has($html, 'form-hint', 'hint-class');
 
-    /* حالتِ خالی: همهٔ شهرها با optgroup تا بدونِ جاوااسکریپت هم قابل انتخاب باشد */
+    /* حالت خالی: همهٔ شهرها با optgroup تا بدون جاوااسکریپت هم قابل انتخاب باشد */
     $h2 = shippingProvinceCityFields('', '', '');
     has($h2, '<optgroup label="خراسان رضوی">', 'blank-shows-optgroups');
     has($h2, '>تبریز<', 'blank-shows-all-cities');
     has($h2, '<option value="">— انتخاب استان —</option>', 'blank-province-placeholder');
     hasnt($h2, 'form-hint', 'no-hint-when-empty');
 
-    /* شهرِ ناشناختهٔ ذخیره‌شده نباید گم شود */
+    /* شهر ناشناختهٔ ذخیره‌شده نباید گم شود */
     $h3 = shippingProvinceCityFields('یک استان دستی', 'یک شهر دستی', '');
     has($h3, '<option value="یک شهر دستی" selected>', 'unknown-city-kept');
     has($h3, '<option value="یک استان دستی" selected>', 'unknown-province-kept');
@@ -83,7 +83,7 @@ if ($m === 'eng') {
     exit;
 }
 
-/* ---------------- B) صفحهٔ تسویه: واقعاً کشویی شده؟ ---------------- */
+/* ---------------- B) صفحهٔ تسویه: واقعا کشویی شده؟ ---------------- */
 if ($m === 'chk') {
     $cid = (int)$pdo->query("SELECT id FROM customers ORDER BY id DESC LIMIT 1")->fetchColumn();
     if ($cid <= 0) { echo "FAIL no-customer\n"; exit; }
@@ -93,7 +93,7 @@ if ($m === 'chk') {
     $prevCity = (string)$pdo->query("SELECT city FROM customers WHERE id=$cid")->fetchColumn();
     $prevProv = (string)$pdo->query("SELECT province FROM customers WHERE id=$cid")->fetchColumn();
 
-    /* بازگردانی حتماً در shutdown، چون صفحهٔ include شده ممکن است redirect/exit کند */
+    /* بازگردانی حتما در shutdown، چون صفحهٔ include شده ممکن است redirect/exit کند */
     register_shutdown_function(function () use ($pdo, $cid, $prevCity, $prevProv) {
         try {
             $pdo->prepare("UPDATE customers SET city=?, province=? WHERE id=?")
@@ -102,7 +102,7 @@ if ($m === 'chk') {
         } catch (Throwable $e) { echo "\n[RESTORE FAILED]\n"; }
     });
 
-    /* شهرِ آزمایشی از خودِ فهرست، نه هاردکد */
+    /* شهر آزمایشی از خود فهرست، نه هاردکد */
     $pdo->prepare("UPDATE customers SET city='مشهد', province='' WHERE id=?")->execute([$cid]);
 
     $_SESSION['customer_id'] = $cid;
@@ -119,7 +119,7 @@ if ($m === 'chk') {
     has($html, '<select name="city" id="city"', 'checkout-city-select');
     hasnt($html, 'list="ship-cities"', 'old-datalist-gone');
     hasnt($html, '<datalist id="ship-cities"', 'old-datalist-markup-gone');
-    /* استان از خودِ شهرِ پروفایل حساب شده باشد، هرچند در پروفایل خالی بود */
+    /* استان از خود شهر پروفایل حساب شده باشد، هرچند در پروفایل خالی بود */
     has($html, '<option value="خراسان رضوی" selected>', 'province-derived-from-city');
     has($html, '<option value="مشهد" selected>', 'city-from-profile-selected');
     hasnt($html, '>تبریز<', 'checkout-city-list-filtered');
@@ -151,7 +151,7 @@ if ($m === 'acc') {
     exit;
 }
 
-/* ---------------- A2) ادمین: پهنایِ بخش ارسال ---------------- */
+/* ---------------- A2) ادمین: پهنای بخش ارسال ---------------- */
 if ($m === 'adm') {
     $aid = (int)$pdo->query("SELECT id FROM admins ORDER BY id ASC LIMIT 1")->fetchColumn();
     if ($aid <= 0) { echo "FAIL no-admin\n"; exit; }
@@ -199,7 +199,7 @@ if ($m === 'adm2') {
     exit;
 }
 
-/* ---------------- A3) عرضِ واقعی: جدول باید در قاب جا شود ---------------- */
+/* ---------------- A3) عرض واقعی: جدول باید در قاب جا شود ---------------- */
 if ($m === 'css') {
     $css = (string)file_get_contents(__DIR__ . '/assets/css/style.css');
     ok(strpos($css, '.ship-rtable { min-width: 680px; }') !== false, 'table-minwidth-680');
@@ -209,11 +209,11 @@ if ($m === 'css') {
     /* حساب سرانگشتی: قاب ۱۳۲۰ منهای padding جعبه (۱٫۲۵rem×۲=۴۰) و حاشیه */
     $frame = 1320 - 40 - 2;
     ok($frame > 680, "frame=$frame > table-min=680  ⇒ بدون اسکرول");
-    /* بدترین حالتِ لپ‌تاپ ۱۰۲۴: منهای سایدبار ۲۴۰ و padding محتوا ۴۰ */
+    /* بدترین حالت لپ‌تاپ ۱۰۲۴: منهای سایدبار ۲۴۰ و padding محتوا ۴۰ */
     $small = 1024 - 240 - 40 - 40 - 2;
     ok($small > 680, "laptop1024=$small > 680  ⇒ بدون اسکرول");
     $old = 700 - 40 - 2;
-    ok($old < 720, "قبلاً: frame=$old < 720 ⇒ همین باعثِ نوار اسکرول بود");
+    ok($old < 720, "قبلا: frame=$old < 720 ⇒ همین باعث نوار اسکرول بود");
     done();
     exit;
 }
