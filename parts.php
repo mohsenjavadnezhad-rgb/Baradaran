@@ -36,7 +36,7 @@ if ($brandId) {
     if (!$selectedBrand) $brandId = 0;
 }
 
-$yearOptions = productYearReady() ? productYearOptions() : [];
+$yearOptions = (productYearReady() && productYearEnabled()) ? productYearOptions() : [];
 if ($year && !in_array($year, $yearOptions, true)) $year = 0;
 
 /* کارت محصول (هم‌شکل با فروشگاه) */
@@ -78,10 +78,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearO
         <?php if (!$selectedBrand): ?>
         <div class="pby-title"><?= icon('cog', 'ic-sm') ?> اول برند خودروتان را انتخاب کنید</div>
         <div class="pby-brands">
-            <?php foreach ($allBrands as $b):
-                $logoFile = 'assets/images/brands/' . $b['slug'] . '.svg';
-                $logoSrc = file_exists(__DIR__ . '/' . $logoFile) ? $logoFile : '';
-            ?>
+            <?php foreach ($allBrands as $b): $logoSrc = brandLogoSrc($b); ?>
             <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$b['id'] ?>" class="pby-brand-tile">
                 <?php if ($logoSrc): ?><img src="<?= $logoSrc ?>" alt="" class="pby-brand-logo"><?php else: ?><?= icon('cog') ?><?php endif; ?>
                 <span><?= h($b['name']) ?></span>
@@ -95,8 +92,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearO
         <?php else: ?>
         <div class="pby-selrow">
             <div class="pby-selbrand">
-                <?php $logoFile = 'assets/images/brands/' . $selectedBrand['slug'] . '.svg';
-                      $logoSrc = file_exists(__DIR__ . '/' . $logoFile) ? $logoFile : ''; ?>
+                <?php $logoSrc = brandLogoSrc($selectedBrand); ?>
                 <?php if ($logoSrc): ?><img src="<?= $logoSrc ?>" alt="" class="pby-brand-logo"><?php else: ?><?= icon('cog') ?><?php endif; ?>
                 <b><?= h($selectedBrand['name']) ?></b>
                 <a href="parts.php?<?= $baseQs ?>" class="pby-change"><?= icon('refresh', 'ic-sm') ?> تغییر برند</a>
