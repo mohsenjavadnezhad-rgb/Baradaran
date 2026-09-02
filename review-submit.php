@@ -2,11 +2,11 @@
 /* ------------------------------------------------------------------
    ثبت نظر / پرسش / پاسخ  (POST → PRG → بازگشت به صفحهٔ محصول)
    ------------------------------------------------------------------
-   این فایل عمداً مستقل است و includes/header.php را لود نمی‌کند، چون
-   handleCartAction() سراسریِ هدر روی POSTهای این فرم‌ها اثر می‌گذاشت و
+   این فایل عمدا مستقل است و includes/header.php را لود نمی‌کند، چون
+   handleCartAction() سراسری هدر روی POSTهای این فرم‌ها اثر می‌گذاشت و
    الگوی «ارسال → ریدایرکت» را می‌شکست.
 
-   دسترسی: نظر و پرسش فقط برای مشتریِ واردشده؛ پاسخ برای مشتریِ واردشده
+   دسترسی: نظر و پرسش فقط برای مشتری واردشده؛ پاسخ برای مشتری واردشده
    یا ادمین (پاسخ ادمین خودکار تأیید می‌شود و با نشان «فروشگاه» می‌آید).
    هر ردیف مشتری به‌صورت pending ذخیره می‌شود و پس از تأیید ادمین دیده می‌شود.
    ------------------------------------------------------------------ */
@@ -23,7 +23,7 @@ $backHash  = ($action === 'review') ? '#reviews' : '#qa';
 if (!$productId || !in_array($action, ['review', 'question', 'answer'], true)) redirect('shop.php');
 if (!reviewsReady()) redirect('product.php?id=' . $productId);
 
-/* محصول باید واقعاً وجود داشته باشد (جلوگیری از ثبت روی شناسهٔ دلخواه) */
+/* محصول باید واقعا وجود داشته باشد (جلوگیری از ثبت روی شناسهٔ دلخواه) */
 if (!getProductById($productId)) redirect('shop.php');
 
 $back = 'product.php?id=' . $productId;
@@ -41,9 +41,9 @@ if (!$customer && !($action === 'answer' && $isAdmin)) {
     redirect('login.php?return=' . urlencode($back . $backHash));
 }
 
-/* ---------- متنِ ورودی ---------- */
+/* ---------- متن ورودی ---------- */
 $body = trim((string)($_POST['body'] ?? ''));
-$squeezed = preg_replace('/\R{3,}/u', "\n\n", $body);      // خط خالیِ پشت‌سرهم کوتاه شود
+$squeezed = preg_replace('/\R{3,}/u', "\n\n", $body);      // خط خالی پشت‌سرهم کوتاه شود
 if (is_string($squeezed)) $body = $squeezed;               // خطای preg → متن دست‌نخورده بماند
 if (function_exists('mb_substr')) $body = mb_substr($body, 0, 2000, 'UTF-8');
 else                              $body = substr($body, 0, 2000);
@@ -82,7 +82,7 @@ try {
         goBack('question', '#qa');
 
     } else {
-        /* ---------- پاسخ به یک پرسشِ تأییدشدهٔ همین محصول ---------- */
+        /* ---------- پاسخ به یک پرسش تأییدشدهٔ همین محصول ---------- */
         if ($len < 3) goBack('short', '#qa');
         $parentId = (int)($_POST['parent_id'] ?? 0);
 
