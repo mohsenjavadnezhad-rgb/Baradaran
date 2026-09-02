@@ -6,9 +6,9 @@
       واحد وزن» تغییر می‌کند: هر ردیف می‌گوید «هر {weight_unit} کیلوگرم،
       {cost} تومان». وزن سبد بر واحد تقسیم و به بالا رند می‌شود
       (۳ کیلو با نرخ ۵۰٬۰۰۰ برای هر ۱ کیلو ⇒ ۱۵۰٬۰۰۰).
-      ردیف‌های قدیمیِ پله‌ای هم منتقل می‌شوند (weight_to ⇒ weight_unit).
+      ردیف‌های قدیمی پله‌ای هم منتقل می‌شوند (weight_to ⇒ weight_unit).
    2) کلید یکتا روی (method_key, city_norm) — برای هر روش، هر شهر فقط یک ردیف.
-      پس فرمِ ادمین «افزودن» می‌تواند upsert کند و هیچ‌وقت دو نرخ متناقض
+      پس فرم ادمین «افزودن» می‌تواند upsert کند و هیچ‌وقت دو نرخ متناقض
       برای یک شهر پیش نمی‌آید.
    3) جدول `cities` — فهرست آمادهٔ شهرها (مراکز استان + شهرهای بزرگ) تا مدیر
       شهر را از یک انتخابگر بردارد، نه با تایپ. افزودن دستی هم ممکن است.
@@ -66,8 +66,8 @@ if (!dbHasTable('shipping_rates')) {
 } else {
     if (!$hadUnit) {
         crRun("ALTER TABLE shipping_rates ADD COLUMN weight_unit DECIMAL(10,2) NOT NULL DEFAULT 1.00 AFTER city_norm", 'add weight_unit');
-        /* ردیف‌های پله‌ایِ قبلی: «تا N کیلو» ⇒ «هر N کیلو». نزدیک‌ترین معنا
-           به داده‌ای که مدیر قبلاً وارد کرده بوده. */
+        /* ردیف‌های پله‌ای قبلی: «تا N کیلو» ⇒ «هر N کیلو». نزدیک‌ترین معنا
+           به داده‌ای که مدیر قبلا وارد کرده بوده. */
         crRun("UPDATE shipping_rates SET weight_unit = weight_to WHERE weight_to > 0", 'backfill weight_unit');
     } else {
         echo 'weight_unit از قبل بود.<br>';
@@ -166,7 +166,7 @@ if (dbHasTable('cities')) {
         $ok++;
     } catch (Throwable $e) { echo 'ERR seed cities: ' . htmlspecialchars($e->getMessage()) . '<br>'; $fail++; }
 
-    /* اگر ردیفی name_norm خالی داشت (افزودهٔ دستیِ قدیمی) پرش کن */
+    /* اگر ردیفی name_norm خالی داشت (افزودهٔ دستی قدیمی) پرش کن */
     try {
         $rows = $pdo->query("SELECT id, name FROM cities WHERE name_norm = ''")->fetchAll();
         if ($rows) {
