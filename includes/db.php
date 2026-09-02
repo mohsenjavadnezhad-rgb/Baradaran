@@ -13,7 +13,7 @@ try {
     header('Content-Type: text/html; charset=utf-8');
     die('<div style="text-align:center;margin-top:100px;font-family:Tahoma;direction:rtl;">'
         . '<h2>خطا در اتصال به دیتابیس</h2>'
-        . '<p>لطفاً فایل database.sql را در phpMyAdmin اجرا کنید.</p>'
+        . '<p>لطفا فایل database.sql را در phpMyAdmin اجرا کنید.</p>'
         . '<p>سپس اطلاعات اتصال را در includes/config.php بررسی نمایید.</p>'
         . '</div>');
 }
