@@ -2,12 +2,12 @@
 /* مهاجرت «تأیید عکس نمونهٔ قطعه» — یک‌بار اجرا و سپس خودحذف.
    ---------------------------------------------------------------
    دو جدول ساخته می‌شود:
-   1) part_checks     — یک ردیف برای هر درخواستِ بررسیِ عکس. پیش از ثبتِ سفارش
-      ساخته می‌شود، پس در آن لحظه order_id خالی است و بعد از ثبتِ سفارش پر
+   1) part_checks     — یک ردیف برای هر درخواست بررسی عکس. پیش از ثبت سفارش
+      ساخته می‌شود، پس در آن لحظه order_id خالی است و بعد از ثبت سفارش پر
       می‌شود تا در «جزئیات سفارش» ادمین دیده شود.
    2) part_check_images — عکس‌های هر درخواست (حداقل سه زاویهٔ مختلف).
-   به‌علاوه سه کلیدِ تنظیمات (کلیدِ خاموش‌کردنِ کل مرحله، حداقل تعداد عکس، و
-   متنِ دلخواهِ بالای صفحه) و پوشهٔ uploads/partchecks/.
+   به‌علاوه سه کلید تنظیمات (کلید خاموش‌کردن کل مرحله، حداقل تعداد عکس، و
+   متن دلخواه بالای صفحه) و پوشهٔ uploads/partchecks/.
    اطلاعات اتصال از includes/config.php خوانده می‌شود (هیچ رمزی در این فایل نیست). */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/db.php';
@@ -19,8 +19,8 @@ header('Content-Type: text/html; charset=utf-8');
 echo '<meta charset="utf-8"><div style="font:14px tahoma;direction:rtl;padding:1rem;line-height:2;">';
 
 $stmts = [
-    /* درخواستِ بررسی. cart_sig امضای کالاهای سبد در لحظهٔ آپلود است تا اگر
-       مشتری سبد را عوض کرد، تأییدِ قبلی به قطعهٔ دیگری منتقل نشود. */
+    /* درخواست بررسی. cart_sig امضای کالاهای سبد در لحظهٔ آپلود است تا اگر
+       مشتری سبد را عوض کرد، تأیید قبلی به قطعهٔ دیگری منتقل نشود. */
     "CREATE TABLE IF NOT EXISTS part_checks (
         id INT AUTO_INCREMENT PRIMARY KEY,
         customer_id INT NULL,
@@ -57,12 +57,12 @@ foreach ($stmts as $s) {
     catch (Exception $e) { echo 'ERR: ' . htmlspecialchars($e->getMessage()) . '<br>'; $fail++; }
 }
 
-/* کلیدهای پیش‌فرضِ تنظیمات */
+/* کلیدهای پیش‌فرض تنظیمات */
 $ins = $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)");
 foreach ([
-    ['partcheck_enabled',     '1'],   // کلیدِ خاموش‌کردنِ کل این مرحله
+    ['partcheck_enabled',     '1'],   // کلید خاموش‌کردن کل این مرحله
     ['partcheck_min_photos',  '3'],   // حداقل تعداد عکس از زوایای مختلف
-    ['partcheck_notice',      ''],    // متنِ دلخواهِ بالای صفحه (خالی = متنِ پیش‌فرضِ کد)
+    ['partcheck_notice',      ''],    // متن دلخواه بالای صفحه (خالی = متن پیش‌فرض کد)
 ] as $d) {
     try { $ins->execute($d); $ok++; } catch (Exception $e) { $fail++; }
 }
