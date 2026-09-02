@@ -590,37 +590,37 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 .pby-change:hover { color: var(--red-light); border-color: var(--red-primary); }
 
-.pby-yearform { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-.pby-yearlabel { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--text-secondary); }
-/* «کلید بزرگ و زیبا»ی انتخاب سال — بزرگ‌تر و رنگی‌تر از select های معمول سایت */
-.pby-yearselect {
-    /* select عنصرهای <select>/<option> فونتِ سفارشیِ سایت (Peyda) را
-       خودکار ارث نمی‌برند و با فونتِ پیش‌فرضِ سیستم نشان داده می‌شوند —
-       همان چیزی که کلمهٔ «همهٔ سال‌ها» را ناهماهنگ نشان می‌داد. */
-    font-family: inherit;
-    font-size: 1.05rem;
+/* برند + سال زیر هم (نه کنار هم) — چون کادر چیپ‌های سال حالا می‌تواند
+   چند سطر باشد و کنار برند جا نمی‌شد. */
+.pby-selrow { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+
+.pby-years { width: 100%; }
+.pby-yearslabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
+/* چیپ‌های بزرگ سال به‌جای نوار کشویی (خواستهٔ کاربر) — هر سال یک دکمهٔ
+   گرد کلیک‌پذیر مستقل، هم‌شکل با کاشی برند بالا ولی جمع‌وجورتر چون تعدادشان
+   بیشتر است. لینک سادهاند، پس بدون جاوااسکریپت هم کار می‌کنند. */
+.pby-yearchips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pby-yearchip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    padding: 0.6rem 1.1rem;
-    border: 2px solid var(--red-primary);
+    border: 2px solid var(--border-color);
     border-radius: 999px;
     background: var(--bg-card);
     color: var(--text-primary);
-    cursor: pointer;
-    min-width: 150px;
-    text-align: center;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s, color 0.15s;
 }
-.pby-yearselect option { font-family: inherit; }
-.pby-yearselect:hover { background: var(--bg-secondary); }
-.pby-yearbtn { border-radius: 999px; padding: 0.6rem 1.2rem; font-size: 0.85rem; }
-.pby-allyears {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    font-size: 0.78rem; color: var(--text-muted); text-decoration: none;
-}
-.pby-allyears:hover { color: var(--red-light); }
+.pby-yearchip:hover { border-color: var(--red-primary); transform: translateY(-2px); }
+.pby-yearchip.is-on { background: var(--red-primary); border-color: var(--red-primary); color: #fff; }
 @media (max-width: 640px) {
     .pby-brands { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     .pby-brand-tile { height: 90px; }
-    .pby-selrow { flex-direction: column; align-items: flex-start; }
+    .pby-yearchip { min-width: 56px; padding: 0.5rem 0.8rem; font-size: 0.85rem; }
 }
 
 .parts-section-title {
