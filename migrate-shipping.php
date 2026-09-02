@@ -1,8 +1,8 @@
 <?php
 /* مهاجرت «روش‌های ارسال» — یک‌بار اجرا و سپس خودحذف.
    ---------------------------------------------------------------
-   • دو ستون روی orders: روشی که مشتری انتخاب کرده + هزینهٔ ارسالِ ثبت‌شده.
-     هزینه در خودِ سفارش ذخیره می‌شود تا تغییرِ بعدیِ قیمت‌ها در تنظیمات،
+   • دو ستون روی orders: روشی که مشتری انتخاب کرده + هزینهٔ ارسال ثبت‌شده.
+     هزینه در خود سفارش ذخیره می‌شود تا تغییر بعدی قیمت‌ها در تنظیمات،
      مبلغ سفارش‌های قدیمی را عوض نکند.
    • کلیدهای پیش‌فرض تنظیمات با INSERT IGNORE: همهٔ روش‌ها فعال و همه با
      هزینهٔ صفر (= پس‌کرایه / توافقی)، پس تا وقتی مدیر قیمتی وارد نکند
@@ -17,10 +17,10 @@ require_once __DIR__ . '/includes/functions.php';
 header('Content-Type: text/html; charset=utf-8');
 
 $stmts = [
-    /* کلیدِ روشِ انتخابی: peyk_mashhad | post_sefareshi | post_pishtaz | barbari
+    /* کلید روش انتخابی: peyk_mashhad | post_sefareshi | post_pishtaz | barbari
        | chapar | tipax | digi_express | post_havaei  (خالی = ثبت‌شده پیش از این قابلیت) */
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_method VARCHAR(40) NULL",
-    /* هزینهٔ ارسالِ همین سفارش؛ صفر = پس‌کرایه / توافقی */
+    /* هزینهٔ ارسال همین سفارش؛ صفر = پس‌کرایه / توافقی */
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_cost DECIMAL(15,0) NOT NULL DEFAULT 0",
 ];
 
@@ -42,7 +42,7 @@ $stmt = $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) 
 foreach ($defaults as $d) {
     try { $stmt->execute($d); $ok++; } catch (Exception $e) { $fail++; }
 }
-/* توضیح اختیاریِ بالای انتخابگر ارسال در صفحهٔ تسویه */
+/* توضیح اختیاری بالای انتخابگر ارسال در صفحهٔ تسویه */
 try { $stmt->execute(['ship_desc', '']); $ok++; } catch (Exception $e) { $fail++; }
 
 echo "Shipping migration done. OK: $ok — Failed: $fail<br>";
