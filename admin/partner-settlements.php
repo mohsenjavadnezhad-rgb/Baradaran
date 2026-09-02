@@ -1,8 +1,8 @@
 <?php
-/* پیگیریِ تسویهٔ همکاران — یک گزارشِ مجزا: کدام همکار، چند فاکتورِ بی‌تسویه
-   دارد، جمعِ بدهی‌اش چقدر است، و قرار است با چه روشی تسویه کند (چک، اول ماه،
-   کارت‌به‌کارتِ در انتظار تأیید، پرداخت در محل، یا آنلاینِ ناموفق). هر همکار
-   یک ردیفِ قابل‌بازشدن است؛ زیرش فهرستِ خودِ فاکتورهای بدهکارش. */
+/* پیگیری تسویهٔ همکاران — یک گزارش مجزا: کدام همکار، چند فاکتور بی‌تسویه
+   دارد، جمع بدهی‌اش چقدر است، و قرار است با چه روشی تسویه کند (چک، اول ماه،
+   کارت‌به‌کارت در انتظار تأیید، پرداخت در محل، یا آنلاین ناموفق). هر همکار
+   یک ردیف قابل‌بازشدن است؛ زیرش فهرست خود فاکتورهای بدهکارش. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -11,11 +11,11 @@ if (!isLoggedIn()) { header('Location: login.php'); exit; }
 $payOn     = paymentReady();
 $hasPnrCol = dbHasColumn('customers', 'customer_type');
 
-/* وضعیتِ پیگیریِ هر روشِ تسویه (نقدی/اول ماه/چک) — جدا از payment_status خودِ
-   سفارش‌ها؛ این یک یادداشتِ ساده برای خودِ ادمین است: «این روش را همین الان
-   پیگیری کردم / تمام شد» یا «هنوز در حالِ پیگیری‌ام»، تا هر روش کلیدِ سبزِ
+/* وضعیت پیگیری هر روش تسویه (نقدی/اول ماه/چک) — جدا از payment_status خود
+   سفارش‌ها؛ این یک یادداشت ساده برای خود ادمین است: «این روش را همین الان
+   پیگیری کردم / تمام شد» یا «هنوز در حال پیگیری‌ام»، تا هر روش کلید سبز
    خودش را داشته باشد. در settings ذخیره می‌شود، کلیدهای pset_status_<method>؛
-   مقدارِ 'done' یعنی سبز، هرچیزِ دیگر یعنی «در حال پیگیری». */
+   مقدار 'done' یعنی سبز، هرچیز دیگر یعنی «در حال پیگیری». */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_toggle_method'])) {
     $pmKey = preg_replace('/[^a-z_]/', '', (string)$_POST['pset_toggle_method']);
     if ($pmKey !== '') {
@@ -85,34 +85,34 @@ require_once __DIR__ . '/layout-top.php';
 
 <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1.25rem;">
     این صفحه فقط سفارش‌های همکاران را نشان می‌دهد که هنوز <b>پرداخت‌نشده</b>، <b>در انتظار</b> یا <b>ناموفق</b> هستند
-    (سفارش‌های لغوشده یا پرداخت‌شده اینجا نمی‌آیند). برای هر همکار، مبلغِ بدهی و روشِ تسویه‌ای که انتخاب کرده مشخص است؛
-    برای چک، وضعیتِ «دریافت چک» هم همین‌جا دیده می‌شود.
+    (سفارش‌های لغوشده یا پرداخت‌شده اینجا نمی‌آیند). برای هر همکار، مبلغ بدهی و روش تسویه‌ای که انتخاب کرده مشخص است؛
+    برای چک، وضعیت «دریافت چک» هم همین‌جا دیده می‌شود.
 </p>
 
 <div class="dash-cards" style="margin-bottom:1.5rem;">
     <div class="dc dc-red">
-        <span class="dc-lbl">جمع کل بدهیِ همکاران</span>
+        <span class="dc-lbl">جمع کل بدهی همکاران</span>
         <span class="dc-val"><?= formatPrice($grandDebt) ?></span>
     </div>
     <div class="dc dc-orange">
-        <span class="dc-lbl">همکارانِ بدهکار</span>
+        <span class="dc-lbl">همکاران بدهکار</span>
         <span class="dc-val"><?= number_format(count($groups)) ?> نفر</span>
     </div>
     <div class="dc dc-gold">
-        <span class="dc-lbl">فاکتورهایِ بی‌تسویه</span>
+        <span class="dc-lbl">فاکتورهای بی‌تسویه</span>
         <span class="dc-val"><?= number_format(array_sum(array_map(function ($g) { return count($g['orders']); }, $groups))) ?> فاکتور</span>
     </div>
 </div>
 
 <?php if ($methodTotals): ?>
 <div class="dg-box" id="tsviyeh" style="margin-bottom:1.5rem;">
-    <div class="dg-box-hd"><h3><?= icon('credit-card', 'ic-sm') ?> تفکیک بر اساس روشِ تسویه</h3></div>
+    <div class="dg-box-hd"><h3><?= icon('credit-card', 'ic-sm') ?> تفکیک بر اساس روش تسویه</h3></div>
     <div class="dg-box-bd" style="padding:0.75rem 1rem;">
-        <?php /* زیرِ هم، نه کنارِ هم (خواستهٔ کاربر) — هر روش ردیفِ مستقلِ خودش را
-                دارد؛ وضعیتِ «در حال پیگیری»/«تسویه شد» یک یادداشتِ دستیِ ادمین
+        <?php /* زیر هم، نه کنار هم (خواستهٔ کاربر) — هر روش ردیف مستقل خودش را
+                دارد؛ وضعیت «در حال پیگیری»/«تسویه شد» یک یادداشت دستی ادمین
                 است (pset_status_<method> در settings)، جدا از payment_status
-                خودِ سفارش‌ها — چون هدف یادآوریِ «همین الان این روش را پیگیری
-                کردم» است، نه بازتابِ خودکارِ وضعیتِ تک‌تکِ فاکتورها. */ ?>
+                خود سفارش‌ها — چون هدف یادآوری «همین الان این روش را پیگیری
+                کردم» است، نه بازتاب خودکار وضعیت تک‌تک فاکتورها. */ ?>
         <div style="display:flex;flex-direction:column;gap:0.6rem;">
             <?php foreach ($methodTotals as $pm => $mt):
                 $pmDone = getSettingRaw('pset_status_' . $pm, 'progress') === 'done';
@@ -130,7 +130,7 @@ require_once __DIR__ . '/layout-top.php';
                     <form method="POST" action="partner-settlements.php#tsviyeh">
                         <input type="hidden" name="pset_toggle_method" value="<?= h($pm) ?>">
                         <button type="submit" class="btn <?= $pmDone ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
-                            <?= $pmDone ? 'بازگرداندن به در حال پیگیری' : 'ثبتِ تسویه‌شدن' ?>
+                            <?= $pmDone ? 'بازگرداندن به در حال پیگیری' : 'ثبت تسویه‌شدن' ?>
                         </button>
                     </form>
                 </span>
@@ -144,12 +144,12 @@ require_once __DIR__ . '/layout-top.php';
 <?php if (!$groups): ?>
 <div class="no-results" style="padding:2rem 1rem;">
     <div class="no-results-icon"><?= icon('check-circle') ?></div>
-    <p style="font-size:0.95rem;">هیچ همکاری در حال حاضر بدهیِ بازی ندارد.</p>
+    <p style="font-size:0.95rem;">هیچ همکاری در حال حاضر بدهی بازی ندارد.</p>
 </div>
 <?php else: ?>
 
 <div class="dg-box">
-    <div class="dg-box-hd"><h3><?= icon('users', 'ic-sm') ?> همکارانِ بدهکار (<?= count($groups) ?>)</h3></div>
+    <div class="dg-box-hd"><h3><?= icon('users', 'ic-sm') ?> همکاران بدهکار (<?= count($groups) ?>)</h3></div>
     <div class="dg-box-bd" style="padding:0;">
         <?php foreach ($groups as $g): $cu = $g['customer']; $pid = 'pset-' . (int)$cu['id']; ?>
         <div class="pset-row">
