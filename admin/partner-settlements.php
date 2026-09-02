@@ -1,8 +1,18 @@
 <?php
 /* پیگیری تسویهٔ همکاران — یک گزارش مجزا: کدام همکار، چند فاکتور بی‌تسویه
    دارد، جمع بدهی‌اش چقدر است، و قرار است با چه روشی تسویه کند (چک، اول ماه،
-   کارت‌به‌کارت در انتظار تأیید، پرداخت در محل، یا آنلاین ناموفق). هر همکار
-   یک ردیف قابل‌بازشدن است؛ زیرش فهرست خود فاکتورهای بدهکارش. */
+   کارت‌به‌کارت در انتظار تأیید، پرداخت در محل، یا آنلاین ناموفق).
+   ---------------------------------------------------------------------
+   تب‌بندی (خواستهٔ کاربر): بالای صفحه یک ردیف تب — «همه روش‌ها» + یک تب به
+   ازای هر روشی که واقعا بدهی‌ای با آن باقی مانده. دو تب «پرداخت اول ماه» و
+   «چک» محتوای ویژهٔ خودشان را دارند:
+     • اول ماه: نوار شمارش‌معکوس خودکار تا پایان ماه شمسی جاری + برچسب
+       «عقب‌افتاده» روی فاکتورهایی که از ماه قبل مانده‌اند.
+     • چک: سه دستهٔ جدا — «باید چک بفرستند»، «چک ارسال شده، منتظر دریافت»
+       و «چک دریافت شد» — با جزئیات کامل چک (بانک/سریال/تاریخ/مبلغ/در
+       وجه/شناسهٔ صیاد) و دکمهٔ سریع «ثبت دریافت چک» همین‌جا.
+   بقیهٔ روش‌ها (پرداخت در محل، کارت‌به‌کارت، درگاه‌های آنلاین) همان فهرست
+   تفکیکی‌شدهٔ اصلی را می‌بینند، فقط فیلترشده روی همان یک روش. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -22,7 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_toggle_method'])
         $cur = getSettingRaw('pset_status_' . $pmKey, 'progress');
         setSetting('pset_status_' . $pmKey, $cur === 'done' ? 'progress' : 'done');
     }
-    header('Location: partner-settlements.php#tsviyeh');
+    $backPm = preg_replace('/[^a-z_]/', '', (string)($_POST['pset_back_pm'] ?? 'all'));
+    header('Location: partner-settlements.php?pm=' . ($backPm !== '' ? $backPm : 'all') . '#tsviyeh');
+    exit;
+}
+
+/* دکمهٔ سریع «ثبت دریافت چک» — دقیقا همان کاری که در جزئیات سفارش انجام
+   می‌شود (paymentChequeReceive)، فقط بدون نیاز به بازکردن هر سفارش جداگانه.
+   وضعیت پرداخت را عوض نمی‌کند — فقط می‌گوید اصل چک رسیده است. */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_cheque_receive'])) {
+    $rcvId = (int)$_POST['pset_cheque_receive'];
+    if ($rcvId > 0 && function_exists('paymentChequeReceive')) paymentChequeReceive($rcvId);
+    header('Location: partner-settlements.php?pm=cheque#tsviyeh');
     exit;
 }
 
@@ -68,6 +89,88 @@ if ($payOn && $hasPnrCol) {
     uasort($groups, function ($a, $b) { return $b['debt'] <=> $a['debt']; });
 }
 
+/* ---------- تب فعال ---------- */
+$activePm = (string)($_GET['pm'] ?? 'all');
+if ($activePm !== 'all' && !isset($methodTotals[$activePm])) $activePm = 'all';
+
+/* ترتیب تب‌ها: «اول ماه» و «چک» بلافاصله بعد «همه» (خواستهٔ کاربر)، بقیه به
+   ترتیب بدهی نزولی. */
+$tabKeys = array_keys($methodTotals);
+usort($tabKeys, function ($a, $b) {
+    $priority = ['partner_month' => 0, 'cheque' => 1];
+    $pa = $priority[$a] ?? 99;
+    $pb = $priority[$b] ?? 99;
+    if ($pa !== $pb) return $pa <=> $pb;
+    global $methodTotals;
+    return $methodTotals[$b]['debt'] <=> $methodTotals[$a]['debt'];
+});
+
+/* گروه‌های فیلترشده روی روش فعال — همان ساختار $groups، فقط با نگه‌داشتن
+   فقط فاکتورهایی که روش‌شان با تب انتخاب‌شده یکی است (و بدهی هر همکار هم
+   دوباره فقط از همان فاکتورها جمع می‌زند). */
+function psetFilterGroups($groups, $pm) {
+    if ($pm === 'all') return $groups;
+    $out = [];
+    foreach ($groups as $cid => $g) {
+        $orders = array_values(array_filter($g['orders'], function ($o) use ($pm) {
+            return (string)($o['payment_method'] ?? 'cod') === $pm;
+        }));
+        if (!$orders) continue;
+        $debt = 0;
+        foreach ($orders as $o) $debt += max(0, (int)$o['total_amount'] - (int)($o['paid_amount'] ?? 0));
+        $out[$cid] = ['customer' => $g['customer'], 'orders' => $orders, 'debt' => $debt];
+    }
+    uasort($out, function ($a, $b) { return $b['debt'] <=> $a['debt']; });
+    return $out;
+}
+$viewGroups = psetFilterGroups($groups, $activePm);
+
+/* ---------- محتوای ویژهٔ «پرداخت اول ماه» ----------
+   شمارش‌معکوس خودکار تا پایان ماه شمسی جاری — همهٔ فاکتورهای همین ماه یک
+   مهلت مشترک دارند. فاکتورهایی که از ماه قبل مانده‌اند «عقب‌افتاده»اند،
+   چون مهلت تسویه‌شان (پایان همان ماه) از قبل گذشته است. */
+$pmToday = null; $pmDaysLeft = null; $pmMonthLabel = '';
+if ($activePm === 'partner_month') {
+    $pmToday = jalaliToday();
+    $pmDaysInMonth = jalaliMonthDays($pmToday[0], $pmToday[1]);
+    $pmDaysLeft = $pmDaysInMonth - $pmToday[2];
+    $pmMonthLabel = jalaliMonthName($pmToday[1]) . ' ' . $pmToday[0];
+}
+
+/* ---------- محتوای ویژهٔ «چک» ----------
+   سه دستهٔ جدا از روی داده‌های ثبت‌شدهٔ چک هر سفارش (checkout.php آن‌ها را
+   می‌گیرد، admin/order-detail.php تک‌تک نشان می‌دهد — اینجا همه‌شان یک‌جا و
+   دسته‌بندی‌شده‌اند). */
+$chqSendList = []; $chqWaitList = []; $chqDoneList = [];
+$chqReady2 = function_exists('paymentChequeReady') && paymentChequeReady();
+if ($activePm === 'cheque' && $chqReady2) {
+    foreach ($viewGroups as $g) {
+        foreach ($g['orders'] as $o) {
+            $entry = ['customer' => $g['customer'], 'order' => $o];
+            if (!empty($o['cheque_received_at'])) {
+                $chqDoneList[] = $entry;
+            } elseif (trim((string)($o['cheque_number'] ?? '')) !== '') {
+                $chqWaitList[] = $entry;
+            } else {
+                $chqSendList[] = $entry;
+            }
+        }
+    }
+}
+
+/* متن مهلت فیزیکی چک — از تاریخ ثبت چک (یا تاریخ سفارش، اگر هنوز ثبت
+   نشده) + عدد روزهای مهلت تنظیم‌شده در پنل (پرداخت ← چک). */
+function psetChequeDeadline($baseDateStr) {
+    $days = function_exists('paymentChequeDeadlineDays') ? paymentChequeDeadlineDays() : 10;
+    $baseTs = strtotime((string)$baseDateStr);
+    if (!$baseTs) return ['text' => '', 'over' => false];
+    $deadlineTs = strtotime('+' . (int)$days . ' days', $baseTs);
+    $diffDays = (int)ceil(($deadlineTs - time()) / 86400);
+    if ($diffDays > 0)  return ['text' => $diffDays . ' روز تا مهلت',        'over' => false];
+    if ($diffDays === 0) return ['text' => 'امروز آخرین مهلت است',           'over' => false];
+    return ['text' => 'مهلت ' . abs($diffDays) . ' روز پیش گذشت', 'over' => true];
+}
+
 require_once __DIR__ . '/layout-top.php';
 ?>
 
@@ -85,8 +188,8 @@ require_once __DIR__ . '/layout-top.php';
 
 <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1.25rem;">
     این صفحه فقط سفارش‌های همکاران را نشان می‌دهد که هنوز <b>پرداخت‌نشده</b>، <b>در انتظار</b> یا <b>ناموفق</b> هستند
-    (سفارش‌های لغوشده یا پرداخت‌شده اینجا نمی‌آیند). برای هر همکار، مبلغ بدهی و روش تسویه‌ای که انتخاب کرده مشخص است؛
-    برای چک، وضعیت «دریافت چک» هم همین‌جا دیده می‌شود.
+    (سفارش‌های لغوشده یا پرداخت‌شده اینجا نمی‌آیند). با تب‌های زیر، فهرست را روی یک روش تسویهٔ خاص فیلتر کنید —
+    «پرداخت اول ماه» مهلت خودکار پایان ماه را نشان می‌دهد و «چک» همکاران را بر اساس اینکه چک را فرستاده‌اند یا نه دسته‌بندی می‌کند.
 </p>
 
 <div class="dash-cards" style="margin-bottom:1.5rem;">
@@ -105,53 +208,182 @@ require_once __DIR__ . '/layout-top.php';
 </div>
 
 <?php if ($methodTotals): ?>
-<div class="dg-box" id="tsviyeh" style="margin-bottom:1.5rem;">
-    <div class="dg-box-hd"><h3><?= icon('credit-card', 'ic-sm') ?> تفکیک بر اساس روش تسویه</h3></div>
-    <div class="dg-box-bd" style="padding:0.75rem 1rem;">
-        <?php /* زیر هم، نه کنار هم (خواستهٔ کاربر) — هر روش ردیف مستقل خودش را
-                دارد؛ وضعیت «در حال پیگیری»/«تسویه شد» یک یادداشت دستی ادمین
-                است (pset_status_<method> در settings)، جدا از payment_status
-                خود سفارش‌ها — چون هدف یادآوری «همین الان این روش را پیگیری
-                کردم» است، نه بازتاب خودکار وضعیت تک‌تک فاکتورها. */ ?>
-        <div style="display:flex;flex-direction:column;gap:0.6rem;">
-            <?php foreach ($methodTotals as $pm => $mt):
-                $pmDone = getSettingRaw('pset_status_' . $pm, 'progress') === 'done';
-            ?>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;<?= $pmDone ? 'border-color:rgba(34,197,94,0.35);' : '' ?>">
-                <span style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--text-secondary);flex:1 1 auto;">
-                    <?= icon(paymentIcon($pm), 'ic-sm') ?> <b style="color:var(--text-primary);"><?= h(paymentLabel($pm)) ?></b>
-                    <span style="color:var(--text-muted);font-size:0.72rem;">(<?= $mt['count'] ?> فاکتور)</span>
-                    <b style="margin-inline-start:0.5rem;"><?= formatPrice($mt['debt']) ?></b>
-                </span>
-                <span style="display:flex;align-items:center;gap:0.5rem;">
-                    <span class="pay-badge <?= $pmDone ? 'pay-paid' : 'pay-pending' ?>">
-                        <?= icon($pmDone ? 'check-circle' : 'clock', 'ic-sm') ?> <?= $pmDone ? 'تسویه شد' : 'در حال پیگیری' ?>
-                    </span>
-                    <form method="POST" action="partner-settlements.php#tsviyeh">
-                        <input type="hidden" name="pset_toggle_method" value="<?= h($pm) ?>">
-                        <button type="submit" class="btn <?= $pmDone ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
-                            <?= $pmDone ? 'بازگرداندن به در حال پیگیری' : 'ثبت تسویه‌شدن' ?>
-                        </button>
-                    </form>
-                </span>
+<div class="cust-tabs" id="tsviyeh">
+    <a href="?pm=all#tsviyeh" class="cust-tab <?= $activePm === 'all' ? 'active' : '' ?>">
+        <?= icon('layers', 'ic-sm') ?> همهٔ روش‌ها <span class="cust-tab-n"><?= array_sum(array_column($methodTotals, 'count')) ?></span>
+    </a>
+    <?php foreach ($tabKeys as $pm): $mt = $methodTotals[$pm]; ?>
+    <a href="?pm=<?= h($pm) ?>#tsviyeh" class="cust-tab <?= $activePm === $pm ? 'active' : '' ?>">
+        <?= icon(paymentIcon($pm), 'ic-sm') ?> <?= h(paymentLabel($pm)) ?> <span class="cust-tab-n"><?= $mt['count'] ?></span>
+    </a>
+    <?php endforeach; ?>
+</div>
+
+<?php if ($activePm !== 'all'): $mt = $methodTotals[$activePm]; $pmDone = getSettingRaw('pset_status_' . $activePm, 'progress') === 'done'; ?>
+<div class="dg-box" style="margin-bottom:1.5rem;<?= $pmDone ? 'border-color:rgba(34,197,94,0.35);' : '' ?>">
+    <div class="dg-box-bd" style="padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-secondary);">
+            <?= icon(paymentIcon($activePm), 'ic-sm') ?> <b style="color:var(--text-primary);"><?= h(paymentLabel($activePm)) ?></b>
+            <span style="color:var(--text-muted);font-size:0.72rem;">(<?= $mt['count'] ?> فاکتور از <?= count($viewGroups) ?> همکار)</span>
+            <b style="margin-inline-start:0.25rem;color:var(--red-light);"><?= formatPrice($mt['debt']) ?></b>
+        </span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+            <span class="pay-badge <?= $pmDone ? 'pay-paid' : 'pay-pending' ?>">
+                <?= icon($pmDone ? 'check-circle' : 'clock', 'ic-sm') ?> <?= $pmDone ? 'تسویه شد' : 'در حال پیگیری' ?>
+            </span>
+            <form method="POST" action="partner-settlements.php#tsviyeh">
+                <input type="hidden" name="pset_toggle_method" value="<?= h($activePm) ?>">
+                <input type="hidden" name="pset_back_pm" value="<?= h($activePm) ?>">
+                <button type="submit" class="btn <?= $pmDone ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
+                    <?= $pmDone ? 'بازگرداندن به در حال پیگیری' : 'ثبت تسویه‌شدن' ?>
+                </button>
+            </form>
+        </span>
+    </div>
+</div>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php /* ---------- بنر شمارش‌معکوس «پرداخت اول ماه» ---------- */ ?>
+<?php if ($activePm === 'partner_month'): ?>
+<div class="dg-box" style="margin-bottom:1.5rem;border-color:rgba(234,179,8,0.35);">
+    <div class="dg-box-bd" style="padding:0.9rem 1.1rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span style="font-size:1.4rem;line-height:1;color:#FBBF24;"><?= icon('calendar') ?></span>
+        <span style="flex:1 1 260px;">
+            <b style="color:var(--text-primary);font-size:0.9rem;">
+                <?php if ($pmDaysLeft > 0): ?>
+                تا پایان <?= h($pmMonthLabel) ?> <?= (int)$pmDaysLeft ?> روز مانده
+                <?php else: ?>
+                امروز آخرین روز <?= h($pmMonthLabel) ?> است
+                <?php endif; ?>
+            </b>
+            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.2rem;">
+                مهلت تسویهٔ خریدهای همین ماه، پایان همین ماه است. فاکتورهایی که از ماه‌های قبل مانده‌اند، پایین با نشان «عقب‌افتاده» جدا شده‌اند.
             </div>
-            <?php endforeach; ?>
-        </div>
+        </span>
     </div>
 </div>
 <?php endif; ?>
 
-<?php if (!$groups): ?>
+<?php /* ================================================================
+        محتوای اصلی: برای «چک» سه جدول دسته‌بندی‌شده؛ برای بقیهٔ تب‌ها
+        (همه/اول ماه/سایر روش‌ها) همان فهرست تفکیکی‌شدهٔ اکاردئونی.
+        ================================================================ */ ?>
+
+<?php if ($activePm === 'cheque' && $chqReady2): ?>
+
+    <?php if (!$chqSendList && !$chqWaitList && !$chqDoneList): ?>
+    <div class="no-results" style="padding:2rem 1rem;">
+        <div class="no-results-icon"><?= icon('check-circle') ?></div>
+        <p style="font-size:0.95rem;">هیچ فاکتور چکی باز نیست.</p>
+    </div>
+    <?php else: ?>
+
+    <?php
+    /* یک جدول دستهٔ چک — سه بار با پارامترهای متفاوت صدا زده می‌شود */
+    function psetChequeTable($title, $iconName, $list, $tone, $showReceiveBtn, $activePm) {
+        if (!$list) return;
+        $debtSum = 0;
+        foreach ($list as $e) $debtSum += max(0, (int)$e['order']['total_amount'] - (int)($e['order']['paid_amount'] ?? 0));
+        ?>
+        <div class="dg-box" style="margin-bottom:1.25rem;<?= $tone ?>">
+            <div class="dg-box-hd"><div class="dg-hd-t"><?= icon($iconName, 'ic-sm') ?> <?= h($title) ?>
+                <span style="color:var(--text-muted);font-weight:400;font-size:0.75rem;margin-inline-start:0.4rem;">(<?= count($list) ?> فاکتور — <?= formatPrice($debtSum) ?>)</span>
+            </div></div>
+            <div class="dg-box-bd" style="padding:0;overflow-x:auto;">
+                <table class="admin-table" style="margin:0;min-width:720px;">
+                    <thead>
+                        <tr>
+                            <th>همکار</th>
+                            <th>سفارش</th>
+                            <th>تاریخ سفارش</th>
+                            <th>جزئیات چک</th>
+                            <th>مهلت</th>
+                            <th>مبلغ بدهی</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($list as $e): $cu = $e['customer']; $o = $e['order'];
+                            $odebt = max(0, (int)$o['total_amount'] - (int)($o['paid_amount'] ?? 0));
+                            $baseDate = trim((string)($o['cheque_reported_at'] ?? '')) !== '' ? $o['cheque_reported_at'] : $o['created_at'];
+                            $dl = psetChequeDeadline($baseDate);
+                        ?>
+                        <tr>
+                            <td>
+                                <b><?= h($cu['full_name'] ?: 'بدون نام') ?></b>
+                                <div style="color:var(--text-muted);font-size:0.72rem;direction:ltr;"><?= h($cu['mobile']) ?></div>
+                            </td>
+                            <td dir="ltr"><?= h(orderNumber($o)) ?></td>
+                            <td><?= h(jDate($o['created_at'], true)) ?></td>
+                            <td style="font-size:0.75rem;color:var(--text-secondary);">
+                                <?php if (trim((string)($o['cheque_bank'] ?? '')) !== ''): ?>
+                                <div>بانک: <b><?= h($o['cheque_bank']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if (trim((string)($o['cheque_number'] ?? '')) !== ''): ?>
+                                <div>سریال: <b dir="ltr"><?= h($o['cheque_number']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if (trim((string)($o['cheque_date'] ?? '')) !== ''): ?>
+                                <div>تاریخ چک: <b><?= h($o['cheque_date']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if ((int)($o['cheque_amount'] ?? 0) > 0): ?>
+                                <div>مبلغ چک: <b><?= formatPrice((int)$o['cheque_amount']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if (trim((string)($o['cheque_payee'] ?? '')) !== ''): ?>
+                                <div>در وجه: <b><?= h($o['cheque_payee']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if (trim((string)($o['cheque_sayad'] ?? '')) !== ''): ?>
+                                <div>شناسهٔ صیاد: <b dir="ltr"><?= h($o['cheque_sayad']) ?></b></div>
+                                <?php endif; ?>
+                                <?php if (trim((string)($o['cheque_number'] ?? '')) === ''): ?>
+                                <span style="color:var(--text-muted);">هنوز ثبت نشده</span>
+                                <?php endif; ?>
+                                <?php if (!empty($o['cheque_received_at'])): ?>
+                                <div style="color:#4ADE80;margin-top:2px;"><?= icon('check-circle', 'ic-sm') ?> دریافت: <?= h(jDate($o['cheque_received_at'], true)) ?></div>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (!empty($o['cheque_received_at'])): ?>
+                                <span style="color:#4ADE80;font-size:0.78rem;">رسیده</span>
+                                <?php elseif ($dl['text'] !== ''): ?>
+                                <span style="font-size:0.78rem;color:<?= $dl['over'] ? '#F87171' : 'var(--text-secondary)' ?>;"><?= h($dl['text']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><b><?= formatPrice($odebt) ?></b></td>
+                            <td style="white-space:nowrap;">
+                                <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
+                                <?php if ($showReceiveBtn): ?>
+                                <form method="POST" action="partner-settlements.php?pm=cheque#tsviyeh" style="display:inline;" onsubmit="return confirm('دریافت این چک ثبت شود؟');">
+                                    <input type="hidden" name="pset_cheque_receive" value="<?= (int)$o['id'] ?>">
+                                    <button type="submit" class="btn btn-primary btn-sm"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت</button>
+                                </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php
+    }
+    psetChequeTable('باید چک ارسال کنند', 'send', $chqSendList, 'border-color:rgba(239,68,68,0.3);', false, $activePm);
+    psetChequeTable('چک ارسال شده — منتظر دریافت هستیم', 'clock', $chqWaitList, 'border-color:rgba(234,179,8,0.35);', true, $activePm);
+    psetChequeTable('چک دریافت شد — در انتظار تکمیل وضعیت پرداخت', 'check-circle', $chqDoneList, 'border-color:rgba(34,197,94,0.3);', false, $activePm);
+    ?>
+    <?php endif; ?>
+
+<?php elseif (!$viewGroups): ?>
 <div class="no-results" style="padding:2rem 1rem;">
     <div class="no-results-icon"><?= icon('check-circle') ?></div>
-    <p style="font-size:0.95rem;">هیچ همکاری در حال حاضر بدهی بازی ندارد.</p>
+    <p style="font-size:0.95rem;">هیچ همکاری در حال حاضر بدهی باز ندارد.</p>
 </div>
 <?php else: ?>
 
 <div class="dg-box">
-    <div class="dg-box-hd"><h3><?= icon('users', 'ic-sm') ?> همکاران بدهکار (<?= count($groups) ?>)</h3></div>
+    <div class="dg-box-hd"><h3><?= icon('users', 'ic-sm') ?> همکاران بدهکار (<?= count($viewGroups) ?>)</h3></div>
     <div class="dg-box-bd" style="padding:0;">
-        <?php foreach ($groups as $g): $cu = $g['customer']; $pid = 'pset-' . (int)$cu['id']; ?>
+        <?php foreach ($viewGroups as $g): $cu = $g['customer']; $pid = 'pset-' . (int)$cu['id']; ?>
         <div class="pset-row">
             <input type="checkbox" id="<?= $pid ?>" class="pset-toggle" hidden>
             <div class="pset-sum-wrap">
@@ -178,7 +410,11 @@ require_once __DIR__ . '/layout-top.php';
                         <th>شماره سفارش</th>
                         <th>تاریخ</th>
                         <th>روش تسویه</th>
+                        <?php if ($activePm === 'partner_month'): ?>
+                        <th>مهلت تسویه</th>
+                        <?php else: ?>
                         <th>وضعیت</th>
+                        <?php endif; ?>
                         <th>مبلغ بدهی</th>
                         <th>عملیات</th>
                     </tr>
@@ -193,6 +429,18 @@ require_once __DIR__ . '/layout-top.php';
                         <td dir="ltr"><?= h(orderNumber($o)) ?></td>
                         <td><?= h(jDate($o['created_at'], true)) ?></td>
                         <td><?= icon(paymentIcon($pm), 'ic-sm') ?> <?= h(paymentLabel($pm)) ?></td>
+                        <?php if ($activePm === 'partner_month'):
+                            $oj = gregorianToJalali(date('Y', strtotime($o['created_at'])), date('n', strtotime($o['created_at'])), date('j', strtotime($o['created_at'])));
+                            $sameMonth = ($pmToday && $oj[0] === $pmToday[0] && $oj[1] === $pmToday[1]);
+                        ?>
+                        <td>
+                            <?php if ($sameMonth): ?>
+                            <span style="color:var(--text-secondary);font-size:0.78rem;"><?= (int)$pmDaysLeft ?> روز تا پایان ماه</span>
+                            <?php else: ?>
+                            <span style="color:#F87171;font-size:0.78rem;"><?= icon('alert', 'ic-sm') ?> عقب‌افتاده — <?= h(jalaliMonthName($oj[1])) ?> <?= $oj[0] ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <?php else: ?>
                         <td>
                             <?= paymentStatusBadgeFor($ps, $pm) ?>
                             <?php if ($pm === 'cheque' && function_exists('paymentChequeReady') && paymentChequeReady()): ?>
@@ -205,6 +453,7 @@ require_once __DIR__ . '/layout-top.php';
                                 <?php endif; ?>
                             <?php endif; ?>
                         </td>
+                        <?php endif; ?>
                         <td><b><?= formatPrice($odebt) ?></b></td>
                         <td>
                             <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
