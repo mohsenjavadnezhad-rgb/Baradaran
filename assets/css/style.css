@@ -531,6 +531,93 @@ a.mm-part-head:hover { color: var(--red-hover); }
 
 .parts-cat-tile:hover .parts-cat-tile-count { color: var(--red-light); }
 
+/* ---------- مرحلهٔ برند/سال صفحهٔ parts.php (خواستهٔ کاربر) ---------- */
+.pby-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1.1rem;
+    margin-bottom: 1.75rem;
+}
+.pby-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.9rem;
+}
+.pby-brands {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+/* کاشی برند — عمدا بزرگ‌تر و برجسته‌تر از .parts-cat-tile چون این
+   انتخاب، نقطهٔ شروع کل مسیر خرید است (خواستهٔ کاربر: «کلید بزرگ و زیبا»). */
+.pby-brand-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 110px;
+    padding: 0.75rem 0.5rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    text-decoration: none;
+    text-align: center;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+.pby-brand-tile:hover {
+    border-color: var(--red-primary);
+    background: var(--bg-secondary);
+    transform: translateY(-3px);
+}
+.pby-brand-logo { width: 40px; height: 40px; object-fit: contain; }
+.pby-brand-tile span { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+
+.pby-selrow { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.pby-selbrand { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; }
+.pby-selbrand .pby-brand-logo { width: 32px; height: 32px; }
+.pby-selbrand b { color: var(--text-primary); }
+.pby-change {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.75rem; color: var(--text-muted); text-decoration: none;
+    border: 1px solid var(--border-color); border-radius: 999px; padding: 0.15rem 0.6rem;
+}
+.pby-change:hover { color: var(--red-light); border-color: var(--red-primary); }
+
+.pby-yearform { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.pby-yearlabel { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--text-secondary); }
+/* «کلید بزرگ و زیبا»ی انتخاب سال — بزرگ‌تر و رنگی‌تر از select های معمول سایت */
+.pby-yearselect {
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.6rem 1.1rem;
+    border: 2px solid var(--red-primary);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    min-width: 150px;
+    text-align: center;
+}
+.pby-yearselect:hover { background: var(--bg-secondary); }
+.pby-yearbtn { border-radius: 999px; padding: 0.6rem 1.2rem; font-size: 0.85rem; }
+.pby-allyears {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.78rem; color: var(--text-muted); text-decoration: none;
+}
+.pby-allyears:hover { color: var(--red-light); }
+@media (max-width: 640px) {
+    .pby-brands { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+    .pby-brand-tile { height: 90px; }
+    .pby-selrow { flex-direction: column; align-items: flex-start; }
+}
+
 .parts-section-title {
     font-size: 1rem;
     font-weight: 600;
