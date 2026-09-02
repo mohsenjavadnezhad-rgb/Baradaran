@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     }
 }
 /* حذف — چه دستهٔ اصلی باشد چه زیرمجموعه، اگر خودش زیرمجموعه دارد رد می‌شود
-   (وگرنه آن زیرمجموعه‌ها یتیم می‌مانند: parent_id‌شان به ردیفِ پاک‌شده اشاره
-   می‌کند و از درخت گم می‌شوند، بی‌آنکه واقعاً حذف شده باشند). */
+   (وگرنه آن زیرمجموعه‌ها یتیم می‌مانند: parent_id‌شان به ردیف پاک‌شده اشاره
+   می‌کند و از درخت گم می‌شوند، بی‌آنکه واقعا حذف شده باشند). */
 if (isset($_GET['delete'])) {
     $delId = (int)$_GET['delete'];
     $chk = $pdo->prepare("SELECT COUNT(*) FROM part_categories WHERE parent_id=?");
@@ -56,8 +56,8 @@ $editPC = null;
 if (isset($_GET['edit'])) { $st = $pdo->prepare("SELECT * FROM part_categories WHERE id = ?"); $st->execute([(int)$_GET['edit']]); $editPC = $st->fetch(); }
 
 /* «+ زیرمجموعه جدید» زیر یک دستهٔ اصلی — فرم را خالی نگه می‌دارد و فقط
-   «والد» را از پیش روی همان دسته می‌گذارد (قبلاً به‌اشتباه خودِ دستهٔ اصلی
-   را در فرمِ ویرایش می‌گذاشت، یعنی با ذخیره، نامِ دستهٔ اصلی عوض می‌شد نه
+   «والد» را از پیش روی همان دسته می‌گذارد (قبلا به‌اشتباه خود دستهٔ اصلی
+   را در فرم ویرایش می‌گذاشت، یعنی با ذخیره، نام دستهٔ اصلی عوض می‌شد نه
    این‌که زیرمجموعهٔ تازه‌ای ساخته شود). */
 $newChildParent = 0;
 if (!$editPC && isset($_GET['new_child'])) $newChildParent = (int)$_GET['new_child'];
@@ -85,7 +85,7 @@ require_once __DIR__ . '/layout-top.php';
         <input type="hidden" name="edit_id" value="<?= $editPC['id'] ?? 0 ?>">
         <div class="form-group"><label>نام</label><input type="text" name="name" class="form-control" value="<?= h($editPC['name'] ?? '') ?>" required></div>
         <div class="form-group"><label>والد</label><select name="parent_id" class="form-control"><option value="0">-- دستهٔ اصلی (بدون والد) --</option><?php foreach ($parents as $pp): ?><option value="<?=$pp['id']?>" <?= ($editPC['parent_id'] ?? $newChildParent) == $pp['id'] ? 'selected' : '' ?>><?=h($pp['name'])?></option><?php endforeach; ?></select>
-          <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی/«دستهٔ اصلی» بگذارید تا یک دستهٔ اصلیِ تازه (مثل «موتور و قطعات موتوری») بسازید که در منوی سایت هم نمایش داده می‌شود؛ یک والد انتخاب کنید تا زیرمجموعهٔ همان دسته شود.</small>
+          <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی/«دستهٔ اصلی» بگذارید تا یک دستهٔ اصلی تازه (مثل «موتور و قطعات موتوری») بسازید که در منوی سایت هم نمایش داده می‌شود؛ یک والد انتخاب کنید تا زیرمجموعهٔ همان دسته شود.</small>
         </div>
         <button type="submit" name="save" class="btn btn-primary btn-block"><?= $editPC ? 'به‌روزرسانی' : 'افزودن' ?></button>
         <?php if ($editPC || $newChildParent): ?><a href="part-categories.php" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">انصراف</a><?php endif; ?>
@@ -101,7 +101,7 @@ require_once __DIR__ . '/layout-top.php';
       <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
         <a href="?edit=<?= $t['p']['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;">ویرایش</a>
         <?php /* اگر زیرمجموعه دارد، لینک بدون confirm() رد می‌شود چون سرور به‌جای
-                حذف، فقط پیامِ خطا نشان می‌دهد — چیزی واقعاً پاک نمی‌شود. */ ?>
+                حذف، فقط پیام خطا نشان می‌دهد — چیزی واقعا پاک نمی‌شود. */ ?>
         <a href="?delete=<?= $t['p']['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"
            <?= $t['c'] ? '' : 'onclick="return confirm(\'این دستهٔ اصلی حذف شود؟\');"' ?>>حذف</a>
       </div>
