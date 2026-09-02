@@ -1,7 +1,7 @@
 <?php
-/* گزارش چاپی/اکسلِ «دسته‌بندی قطعات» — محصولات فقط به زیرشاخه‌ها (child) وصل
-   می‌شوند (products.part_category_id)، نه به سرشاخه؛ پس جمعِ هر سرشاخه از
-   جمعِ زیرشاخه‌هایش به دست می‌آید. الگو از admin/categories-report.php. */
+/* گزارش چاپی/اکسل «دسته‌بندی قطعات» — محصولات فقط به زیرشاخه‌ها (child) وصل
+   می‌شوند (products.part_category_id)، نه به سرشاخه؛ پس جمع هر سرشاخه از
+   جمع زیرشاخه‌هایش به دست می‌آید. الگو از admin/categories-report.php. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -150,7 +150,7 @@ tr.rp-sub-row td{background:#F9FAFB;color:#374151;font-weight:600}
   </table>
 </div>
 
-<div class="rp-total">جمع کل محصولاتِ دسته‌بندی‌شده: <b><?= number_format($grandProducts) ?></b></div>
+<div class="rp-total">جمع کل محصولات دسته‌بندی‌شده: <b><?= number_format($grandProducts) ?></b></div>
 
 </body>
 </html>
