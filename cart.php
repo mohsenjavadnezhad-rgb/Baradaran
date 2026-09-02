@@ -36,8 +36,16 @@ $pickBack = isset($_GET['pick']) && $needPick;
    به part-check.php می‌رود؛ آن صفحه خودش کلیدِ «رد کردن این مرحله» را دارد، پس
    مسیر هیچ‌وقت بسته نمی‌شود. با خاموش‌بودنِ مرحله رفتار قبلی برمی‌گردد. */
 $pchkOn   = partCheckOn();
-$nextHref = $pchkOn ? 'part-check.php' : 'checkout.php';
-$nextText = $pchkOn ? 'ادامه — بررسی عکس قطعه' : 'ادامه ثبت سفارش';
+$baseNext = $pchkOn ? 'part-check.php' : 'checkout.php';
+/* «خرید بدون ثبت‌نام» (تنظیمات ← ثبت سفارش/ورود): مشتریِ واردنشده به‌جای
+   اجبارِ ورودی که خودِ part-check.php/checkout.php می‌گذارند، اول از
+   guest-checkout.php رد می‌شود که فقط شمارهٔ موبایل می‌گیرد (بدون کدِ تأیید)
+   و از آن‌جا همان مسیرِ همیشگی ادامه پیدا می‌کند. مشتریِ واردشده و حالتِ
+   خاموش، رفتارِ قبلی را دارند. */
+$nextHref = (!isCustomerLoggedIn() && guestCheckoutEnabled())
+    ? ('guest-checkout.php?next=' . urlencode($baseNext))
+    : $baseNext;
+$nextText = 'ادامه ثبت سفارش';
 ?>
 
 <div class="container">
