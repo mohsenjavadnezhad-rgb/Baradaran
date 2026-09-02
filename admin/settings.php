@@ -11,7 +11,7 @@ $sections = settingsSections();
 $sec = settingsSectionKey($_POST['sec'] ?? $_GET['sec'] ?? '');
 
 /* کلیدهای متنی هر بخش — هنگام ذخیره فقط کلیدهای همان بخش ارسال‌شده نوشته
-   می‌شوند. اگر مثل قبل روی همهٔ کلیدها حلقه بزنیم، بخش‌هایی که در این صفحه
+   می‌شوند. اگر مثل قبل روی همه کلیدها حلقه بزنیم، بخش‌هایی که در این صفحه
    رندر نشده‌اند (و در POST نیستند) خالی می‌شوند. */
 $secTextKeys = [
     'footer' => [
@@ -198,6 +198,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
 
     if ($sec === 'checkout') {
         setSetting('allow_guest_checkout', isset($_POST['allow_guest_checkout']) ? '1' : '0');
+    }
+
+    if ($sec === 'productyear') {
+        $pyMin = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_min'] ?? '')));
+        $pyMax = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_max'] ?? '')));
+        $pyToday = jalaliToday()[0];
+        if ($pyMin <= 0) $pyMin = $pyToday - 30;
+        if ($pyMax <= 0) $pyMax = $pyToday;
+        if ($pyMin > $pyMax) { $pyTmp = $pyMin; $pyMin = $pyMax; $pyMax = $pyTmp; }
+        setSetting('product_year_min', (string)$pyMin);
+        setSetting('product_year_max', (string)$pyMax);
     }
 
     if ($sec === 'shiprate') {
@@ -1144,7 +1155,7 @@ require_once __DIR__ . '/layout-top.php';
     <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.9;">
       <?= icon('info', 'ic-sm') ?>
       اگر تیک «نمایش در تسویه» یک روش را بردارید، آن روش در صفحهٔ تسویه دیده نمی‌شود.
-      اگر تیک همهٔ روش‌ها برداشته شود، انتخابگر ارسال کامل حذف می‌شود و سفارش‌ها مثل قبل بدون روش ارسال ثبت می‌شوند.
+      اگر تیک همه روش‌ها برداشته شود، انتخابگر ارسال کامل حذف می‌شود و سفارش‌ها مثل قبل بدون روش ارسال ثبت می‌شوند.
       قیمت اینجا وارد نمی‌شود — قیمت را در بخش <a href="settings.php?sec=shiprate"><b>نرخ‌نامه‌های ارسال</b></a>، شهر به شهر، وارد کنید.
       <?php if ($shipTbl): ?>
       <br>
@@ -1425,6 +1436,35 @@ require_once __DIR__ . '/layout-top.php';
   </div>
   <?php endif; ?>
 
+  <?php /* ---------- سال تولید خودرو ---------- */ ?>
+  <?php if ($sec === 'productyear'): $pyRange = productYearRange(); ?>
+  <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
+    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('calendar') ?> بازهٔ سال تولید خودرو</h3>
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
+      همین بازه، فهرست چیپ‌های «سال تولید» را می‌سازد که در فروشگاه، بعد از انتخاب برند، به مشتری نشان داده می‌شود
+      (<a href="../parts.php" target="_blank">دسته‌بندی قطعات</a>). با این دو عدد می‌توانید سال‌های نمایش‌داده‌شده را
+      کم یا زیاد کنید — مثلا اگر خودروهای فروشگاهتان قدیمی‌تر هستند، «از سال» را عقب‌تر ببرید.
+    </p>
+    <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+      <div>
+        <label>از سال (شمسی)</label>
+        <input type="text" name="product_year_min" class="form-control" dir="ltr" inputmode="numeric" maxlength="4"
+               value="<?= (int)$pyRange[0] ?>" style="width:120px;">
+      </div>
+      <div>
+        <label>تا سال (شمسی)</label>
+        <input type="text" name="product_year_max" class="form-control" dir="ltr" inputmode="numeric" maxlength="4"
+               value="<?= (int)$pyRange[1] ?>" style="width:120px;">
+      </div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.35rem;line-height:1.8;">
+      پیش‌فرض، از ۳۰ سال پیش تا امسال (شمسی) است. اگر عددی نامعتبر یا خالی وارد کنید، همین پیش‌فرض دوباره جایگزین می‌شود.
+      این بازه فقط روی «فهرست چیپ‌ها»ی سال اثر دارد؛ محصولی که سالش خارج از این بازه ثبت شده باشد، همچنان با
+      لینک مستقیم یا جست‌وجو قابل‌دیدن و خرید می‌ماند.
+    </div>
+  </div>
+  <?php endif; ?>
+
   <?php /* ---------- شرایط و قوانین ---------- */ ?>
   <?php if ($sec === 'terms'): ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
@@ -1515,7 +1555,7 @@ require_once __DIR__ . '/layout-top.php';
 <?php if ($sec === 'shiprate'): ?>
 <div id="ratecrud">
 
-  <?php /* فرم افزودن، فشرده: همهٔ فیلدها در یک ردیف باریک تا کادر کوتاه بماند.
+  <?php /* فرم افزودن، فشرده: همه فیلدها در یک ردیف باریک تا کادر کوتاه بماند.
            راهنمای بلند قبلی به <details> بالای صفحه («راهنمای محاسبه») منتقل شد. */ ?>
   <?php if ($shipRtOn): ?>
   <div class="rt-card rt-add">
