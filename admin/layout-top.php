@@ -145,6 +145,7 @@ $pchkPending = partCheckPendingCount();
 <?= adminMenuLink('categories.php', 'layers', 'برندها و مدل‌ها', $currentPage) ?>
 <?= adminMenuLink('part-categories.php', 'cog', 'دسته‌بندی قطعات', $currentPage) ?>
 <?= adminMenuLink('banners.php', 'image', 'بنرها', $currentPage) ?>
+<?= adminMenuLink('menus.php', 'menu', 'منوهای سایت', $currentPage) ?>
 <?= adminMenuLink('orders.php', 'clipboard-list', 'سفارشات', $currentPage) ?>
 <?= adminMenuLink('customers.php', 'users', 'مشتریان و همکاران', $currentPage) ?>
 <?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage) ?>
