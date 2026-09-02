@@ -1,5 +1,5 @@
 <?php
-/* صفِ بررسیِ «عکس نمونهٔ قطعه» — سمتِ ادمین.
+/* صف بررسی «عکس نمونهٔ قطعه» — سمت ادمین.
    کارشناس عکس‌های مشتری را می‌بیند، با کالای سبد مقایسه می‌کند و در همین‌جا هم
    «مطابقت قطعه» را تأیید/رد می‌کند و هم «موجودی» را — خواستهٔ مدیر: «بعد ادمین
    که عکس رو تایید کرد همونجا تایید موجودی رو ببینه».
@@ -14,7 +14,7 @@ $ready = partChecksReady();
 $tab   = (string)($_GET['tab'] ?? 'pending');
 if (!in_array($tab, ['pending', 'approved', 'rejected', 'all'], true)) $tab = 'pending';
 
-/* ---------- ثبتِ داوری ---------- */
+/* ---------- ثبت داوری ---------- */
 if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id   = (int)($_POST['pc_id'] ?? 0);
     $act  = (string)($_POST['pc_do'] ?? '');
@@ -47,7 +47,7 @@ if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: ' . $back); exit;
 }
 
-/* ---------- خواندنِ فهرست ---------- */
+/* ---------- خواندن فهرست ---------- */
 $rows = []; $counts = ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'all' => 0];
 if ($ready) {
     try {
@@ -104,8 +104,8 @@ require_once __DIR__ . '/layout-top.php';
 
 <p style="color:var(--text-muted);font-size:0.83rem;line-height:1.9;margin-bottom:1rem;">
     <?= icon('info', 'ic-sm') ?>
-    عکس‌ها را با کالای سبد خرید مشتری مقایسه کنید. با <b>تأیید</b>، کلیدِ «ثبت سفارش و پرداخت» برای
-    مشتری باز می‌شود؛ تیکِ <b>موجودی</b> و یادداشتِ شما هم همان‌جا به او نشان داده می‌شود.
+    عکس‌ها را با کالای سبد خرید مشتری مقایسه کنید. با <b>تأیید</b>، کلید «ثبت سفارش و پرداخت» برای
+    مشتری باز می‌شود؛ تیک <b>موجودی</b> و یادداشت شما هم همان‌جا به او نشان داده می‌شود.
 </p>
 
 <div class="pcadm-tabs">
@@ -202,12 +202,12 @@ require_once __DIR__ . '/layout-top.php';
                     <?= icon('package', 'ic-sm') ?> موجودی کالا را تأیید می‌کنم
                 </label>
                 <input type="text" name="stock_note" class="form-control" maxlength="160" style="flex:1 1 12rem;min-width:0;"
-                       placeholder="توضیح موجودی (اختیاری) — مثلاً: ۲ عدد موجود، برای شما کنار گذاشته شد">
+                       placeholder="توضیح موجودی (اختیاری) — مثلا: ۲ عدد موجود، برای شما کنار گذاشته شد">
             </div>
 
             <div class="pcadm-row">
                 <input type="text" name="admin_note" class="form-control" maxlength="255"
-                       placeholder="یادداشت برای مشتری (اختیاری) — در صورتِ رد، دلیل را این‌جا بنویسید">
+                       placeholder="یادداشت برای مشتری (اختیاری) — در صورت رد، دلیل را این‌جا بنویسید">
             </div>
 
             <div class="pcadm-acts">
