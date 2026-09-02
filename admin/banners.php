@@ -26,16 +26,16 @@ function saveBannerImage($field, $existing) {
 $tableExists = false;
 try { $pdo->query("SELECT 1 FROM banners LIMIT 1"); $tableExists = true; } catch (Exception $e) { $tableExists = false; }
 
-/* ===================== آفر زمان‌دار (بنرِ زیرِ بنر اصلی) =====================
+/* ===================== آفر زمان‌دار (بنر زیر بنر اصلی) =====================
    جدا از جدول banners؛ در timed_offers ذخیره می‌شود. صفحهٔ اصلی همهٔ آفرهای
-   فعال را به‌صورت یک اسلایدرِ خودچرخان با شمارش معکوس نمایش می‌دهد.
+   فعال را به‌صورت یک اسلایدر خودچرخان با شمارش معکوس نمایش می‌دهد.
    PRG تا رفرش مرورگر آفر تکراری نسازد. */
 $offersOn  = timedOffersReady();
 $soldOn    = timedOffersSoldReady();   /* ستون is_sold ساخته شده؟ */
 $offerErr  = '';
 $offers    = [];
 $offerProducts = [];
-$oEdit     = null;                     /* آفرِ در حالِ ویرایش (با ?oedit=) */
+$oEdit     = null;                     /* آفر در حال ویرایش (با ?oedit=) */
 $slideSec  = offerSlideSeconds();
 
 $omsgMap = [
@@ -43,13 +43,13 @@ $omsgMap = [
     'updated' => 'آفر ویرایش شد.',
     'deleted' => 'آفر حذف شد.',
     'toggled' => 'وضعیت آفر تغییر کرد.',
-    'sold'    => 'نشانِ «فروخته شد» تغییر کرد.',
+    'sold'    => 'نشان «فروخته شد» تغییر کرد.',
     'slide'   => 'زمان چرخش اسلایدر آفرها ذخیره شد.',
 ];
 if (isset($_GET['omsg']) && isset($omsgMap[$_GET['omsg']])) $msg = $omsgMap[$_GET['omsg']];
 
 if ($offersOn) {
-    /* بازهٔ چرخشِ اسلایدر (ثانیه) — در جدول settings ذخیره می‌شود */
+    /* بازهٔ چرخش اسلایدر (ثانیه) — در جدول settings ذخیره می‌شود */
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_offer_slide'])) {
         $sec = (int) faToLatinDigits($_POST['offer_slide_seconds'] ?? '6');
         $sec = max(2, min(60, $sec));
@@ -59,8 +59,8 @@ if ($offersOn) {
     }
 
     /* یک فرم برای «آفر جدید» و «ویرایش آفر»: با edit_id پرشده، UPDATE می‌شود.
-       نکتهٔ مهم در ویرایش: مهلت تنها وقتی از نو حساب می‌شود که ادمین تیکِ
-       «تمدید مهلت» را بزند؛ وگرنه اصلاحِ عنوان، شمارش معکوس را صفر می‌کرد. */
+       نکتهٔ مهم در ویرایش: مهلت تنها وقتی از نو حساب می‌شود که ادمین تیک
+       «تمدید مهلت» را بزند؛ وگرنه اصلاح عنوان، شمارش معکوس را صفر می‌کرد. */
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_offer'])) {
         $eid   = (int)($_POST['edit_id'] ?? 0);
         $pid   = (int)($_POST['product_id'] ?? 0);
@@ -73,12 +73,12 @@ if ($offersOn) {
         $sold  = isset($_POST['offer_sold']) ? 1 : 0;
         $renew = isset($_POST['offer_renew']);
 
-        /* «قیمت» و «درصد تخفیف» مستقیماً روی خودِ محصول ذخیره می‌شوند — بنرِ
+        /* «قیمت» و «درصد تخفیف» مستقیما روی خود محصول ذخیره می‌شوند — بنر
            آفر قیمت/تخفیفش را همیشه زنده از products.retail_price/retail_discount
-           می‌خواند (renderOfferBanner در banners.php سایت)، نه از یک ستونِ
+           می‌خواند (renderOfferBanner در banners.php سایت)، نه از یک ستون
            جداگانه در timed_offers. پس این‌جا فقط یک UPDATE کوتاه روی محصول
-           است، نه بخشی از خودِ آفر. مقدارِ خالی/صفر یعنی ادمین دست نزده،
-           پس قیمتِ فعلی دست‌نخورده می‌ماند (صفر کردنِ ناخواسته رخ نمی‌دهد). */
+           است، نه بخشی از خود آفر. مقدار خالی/صفر یعنی ادمین دست نزده،
+           پس قیمت فعلی دست‌نخورده می‌ماند (صفر کردن ناخواسته رخ نمی‌دهد). */
         $oPrice = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['offer_price'] ?? '')));
         $oDisc  = max(0, min(100, (int)faToLatinDigits((string)($_POST['offer_discount'] ?? '0'))));
 
@@ -151,7 +151,7 @@ if ($offersOn) {
         exit;
     }
 
-    /* کلیدِ سریعِ «فروخته شد» — همان کاری که چک‌باکسِ فرم می‌کند، در یک کلیک */
+    /* کلید سریع «فروخته شد» — همان کاری که چک‌باکس فرم می‌کند، در یک کلیک */
     if (isset($_GET['osold']) && $soldOn) {
         try {
             $pdo->prepare("UPDATE timed_offers SET is_sold = 1 - is_sold WHERE id=?")
@@ -169,24 +169,24 @@ if ($offersOn) {
         $offerProducts = $pdo->query("SELECT id, name, technical_number, retail_price, retail_discount FROM products WHERE is_active = 1 ORDER BY name")->fetchAll();
     } catch (Throwable $e) { $offers = []; $offerProducts = []; }
 
-    /* پیش‌پرکردنِ فرم برای ویرایش — از همان فهرستِ بالا خوانده می‌شود */
+    /* پیش‌پرکردن فرم برای ویرایش — از همان فهرست بالا خوانده می‌شود */
     if (isset($_GET['oedit'])) {
         $oeid = (int)$_GET['oedit'];
         foreach ($offers as $o) { if ((int)$o['id'] === $oeid) { $oEdit = $o; break; } }
     }
 
-    /* میانبرِ «آفر» کنارِ محصول در admin/products.php: ?ofor=<id>#offers یعنی
-       فرمِ «آفر جدید» با همین محصول از پیش انتخاب‌شده باز شود. فقط وقتی معنا
-       دارد که در حالِ ویرایشِ آفرِ دیگری نباشیم. */
+    /* میانبر «آفر» کنار محصول در admin/products.php: ?ofor=<id>#offers یعنی
+       فرم «آفر جدید» با همین محصول از پیش انتخاب‌شده باز شود. فقط وقتی معنا
+       دارد که در حال ویرایش آفر دیگری نباشیم. */
     $oForProductId = 0;
     if (!$oEdit && isset($_GET['ofor'])) $oForProductId = (int)$_GET['ofor'];
 
-    /* اگر محصولِ همین آفر بعداً غیرفعال شده باشد، در $offerProducts (که فقط
+    /* اگر محصول همین آفر بعدا غیرفعال شده باشد، در $offerProducts (که فقط
        محصولات فعال را دارد) دیگر نیست — یعنی دراپ‌داون آن را نشان نمی‌دهد،
-       فرم با محصولِ خالی ارسال می‌شود و «انتخاب محصول الزامی است» ذخیره را
-       رد می‌کند؛ دقیقاً همینجا «فعال‌سازی مجدد» بی‌صدا شکست می‌خورد. پس محصولِ
-       خودِ آفر، حتی غیرفعال، همیشه به لیست اضافه می‌شود تا انتخاب‌شده بماند.
-       همین برای محصولِ ?ofor= هم صدق می‌کند (شاید همان لحظه غیرفعال شده باشد). */
+       فرم با محصول خالی ارسال می‌شود و «انتخاب محصول الزامی است» ذخیره را
+       رد می‌کند؛ دقیقا همینجا «فعال‌سازی مجدد» بی‌صدا شکست می‌خورد. پس محصول
+       خود آفر، حتی غیرفعال، همیشه به لیست اضافه می‌شود تا انتخاب‌شده بماند.
+       همین برای محصول ?ofor= هم صدق می‌کند (شاید همان لحظه غیرفعال شده باشد). */
     $wantExtraId = 0;
     if ($oEdit && (int)$oEdit['product_id'] > 0) $wantExtraId = (int)$oEdit['product_id'];
     elseif ($oForProductId > 0) $wantExtraId = $oForProductId;
@@ -366,10 +366,10 @@ require_once __DIR__ . '/layout-top.php';
 
 <?php endif; ?>
 
-<!-- ===================== آفر زمان‌دار (بنرِ زیرِ بنر اصلی) ===================== -->
+<!-- ===================== آفر زمان‌دار (بنر زیر بنر اصلی) ===================== -->
 <?php if ($offersOn):
-    /* چند آفر واقعاً در اسلایدرِ صفحهٔ اصلی دیده می‌شود؟ آفرِ منقضی یا فروخته‌شده
-       هم دیده می‌شود (بنر برداشته نمی‌شود، فقط پیامِ پایان روی آن می‌آید)،
+    /* چند آفر واقعا در اسلایدر صفحهٔ اصلی دیده می‌شود؟ آفر منقضی یا فروخته‌شده
+       هم دیده می‌شود (بنر برداشته نمی‌شود، فقط پیام پایان روی آن می‌آید)،
        پس معیار فقط «فعال بودن» است. */
     $liveOffers = 0; $doneOffers = 0;
     foreach ($offers as $o) {
@@ -381,12 +381,12 @@ require_once __DIR__ . '/layout-top.php';
 ?>
 <div id="offers" style="margin-top:1.5rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <h2 style="font-size:1rem;color:var(--text-primary);"><?= icon('clock', 'ic-sm') ?> آفر زمان‌دار (بنرِ زیرِ بنر اصلی)</h2>
+        <h2 style="font-size:1rem;color:var(--text-primary);"><?= icon('clock', 'ic-sm') ?> آفر زمان‌دار (بنر زیر بنر اصلی)</h2>
     </div>
 
     <?php if ($offerErr): ?><div class="flash flash-error" style="margin-bottom:1rem;"><?= h($offerErr) ?></div><?php endif; ?>
 
-    <!-- بازهٔ چرخشِ اسلایدر -->
+    <!-- بازهٔ چرخش اسلایدر -->
     <div class="dg-box" style="margin-bottom:1rem;">
         <div class="dg-box-hd"><h3><?= icon('refresh', 'ic-sm') ?> چرخش خودکار اسلایدر</h3></div>
         <div class="dg-box-bd" style="padding:1rem;">
@@ -398,13 +398,13 @@ require_once __DIR__ . '/layout-top.php';
                 </div>
                 <button type="submit" name="save_offer_slide" value="1" class="btn btn-primary">ذخیره</button>
                 <p style="margin:0;font-size:0.75rem;color:var(--text-muted);line-height:1.9;flex:1 1 260px;">
-                    از ۲ تا ۶۰ ثانیه. با <b>دو آفرِ فعال یا بیشتر</b>، بنرِ آفر در صفحهٔ اصلی به‌صورت خودکار و با همین بازه اسلاید می‌خورد
-                    (با نگه‌داشتن نشانگر موس روی بنر، چرخش موقتاً می‌ایستد).
+                    از ۲ تا ۶۰ ثانیه. با <b>دو آفر فعال یا بیشتر</b>، بنر آفر در صفحهٔ اصلی به‌صورت خودکار و با همین بازه اسلاید می‌خورد
+                    (با نگه‌داشتن نشانگر موس روی بنر، چرخش موقتا می‌ایستد).
                     در حال حاضر <b><?= $liveOffers ?></b> آفر در اسلایدر نمایش داده می‌شود
                     <?= $liveOffers < 2 ? '— با یک آفر، اسلایدر ثابت می‌ماند.' : '' ?>
                     <?php if ($doneOffers): ?>
                     <br><span style="color:#FBBF24;">توجه:</span> <b><?= $doneOffers ?></b> آفر مهلتش تمام شده یا فروخته شده — بنرش <b>برداشته نمی‌شود</b>،
-                    فقط به انتهای اسلایدر می‌رود و روی آن «مهلت خرید تمام شد» یا مهرِ «فروخته شد» نمایش داده می‌شود.
+                    فقط به انتهای اسلایدر می‌رود و روی آن «مهلت خرید تمام شد» یا مهر «فروخته شد» نمایش داده می‌شود.
                     <?php endif; ?>
                 </p>
             </form>
@@ -414,30 +414,30 @@ require_once __DIR__ . '/layout-top.php';
     <div style="display:grid;grid-template-columns:320px 1fr;gap:1rem;">
         <div>
             <?php
-            /* یک فرم برای ساخت و ویرایش. در حالتِ ویرایش، مقدارها از $oEdit پیش‌پر
-               می‌شوند و مهلت فقط با تیکِ «تمدید مهلت» از نو حساب می‌شود. */
+            /* یک فرم برای ساخت و ویرایش. در حالت ویرایش، مقدارها از $oEdit پیش‌پر
+               می‌شوند و مهلت فقط با تیک «تمدید مهلت» از نو حساب می‌شود. */
             $isEdit  = (bool)$oEdit;
             $eEndTs  = ($isEdit && !empty($oEdit['end_at'])) ? strtotime($oEdit['end_at']) : 0;
             $eLeft   = $eEndTs ? max(0, $eEndTs - time()) : 0;
-            /* «این آفر الان روی سایت زنده نیست» — سه دلیلِ ممکن، جدا از هم شمرده
-               می‌شوند تا جعبهٔ توضیحِ پایین بگوید کدام‌یک اتفاق افتاده. آفرِ بی‌زمان
+            /* «این آفر الان روی سایت زنده نیست» — سه دلیل ممکن، جدا از هم شمرده
+               می‌شوند تا جعبهٔ توضیح پایین بگوید کدام‌یک اتفاق افتاده. آفر بی‌زمان
                (end_at NULL) منقضی حساب نمی‌شود. */
             $eExpired = $isEdit && $eEndTs > 0 && $eEndTs <= time();
             $eSold    = $isEdit && $soldOn && !empty($oEdit['is_sold']);
             $eHidden  = $isEdit && empty($oEdit['is_active']);
             $eDone    = $eExpired || $eSold || $eHidden;
-            /* برای آفرِ تمام‌شده، روز/ساعتِ باقی‌مانده صفر است؛ صفر پیش‌پر کردن یعنی
-               ادمین حتماً باید عدد تازه بنویسد وگرنه فرم خطا می‌دهد. پس همان ۳ روزِ
-               پیش‌فرضِ «آفر جدید» را می‌گذاریم تا یک کلیکِ ذخیره کافی باشد. */
+            /* برای آفر تمام‌شده، روز/ساعت باقی‌مانده صفر است؛ صفر پیش‌پر کردن یعنی
+               ادمین حتما باید عدد تازه بنویسد وگرنه فرم خطا می‌دهد. پس همان ۳ روز
+               پیش‌فرض «آفر جدید» را می‌گذاریم تا یک کلیک ذخیره کافی باشد. */
             $eDays   = $isEdit ? ($eLeft > 0 ? (int)floor($eLeft / 86400) : 3) : 3;
             $eHours  = ($isEdit && $eLeft > 0) ? (int)floor(($eLeft % 86400) / 3600) : 0;
             $eImg    = ($isEdit && !empty($oEdit['image']) && file_exists(__DIR__ . '/../uploads/banners/' . $oEdit['image']))
                      ? '../uploads/banners/' . $oEdit['image'] : '';
-            /* قیمت/تخفیفِ فعلیِ محصول برای پیش‌پرکردنِ کادرهای «قیمت» و «درصد
-               تخفیف» — این دو مستقیماً روی products.retail_price/retail_discount
-               می‌نشینند (نه ستونی در timed_offers)، پس مقدارِ اولیه از همان‌جا
-               خوانده می‌شود: در حالتِ ویرایش از join بالا (cur_price/cur_discount)،
-               در حالتِ «آفر جدید برای محصولِ X» (?ofor=) از $offerProducts. */
+            /* قیمت/تخفیف فعلی محصول برای پیش‌پرکردن کادرهای «قیمت» و «درصد
+               تخفیف» — این دو مستقیما روی products.retail_price/retail_discount
+               می‌نشینند (نه ستونی در timed_offers)، پس مقدار اولیه از همان‌جا
+               خوانده می‌شود: در حالت ویرایش از join بالا (cur_price/cur_discount)،
+               در حالت «آفر جدید برای محصول X» (?ofor=) از $offerProducts. */
             $eCurPrice = 0; $eCurDisc = 0;
             if ($isEdit) {
                 $eCurPrice = (int)($oEdit['cur_price'] ?? 0);
@@ -454,20 +454,20 @@ require_once __DIR__ . '/layout-top.php';
                     <form method="POST" enctype="multipart/form-data" action="banners.php#offers">
                         <?php if ($isEdit): ?><input type="hidden" name="edit_id" value="<?= (int)$oEdit['id'] ?>"><?php endif; ?>
                         <?php if ($eDone): ?>
-                        <?php /* آفرِ تمام‌شده: تیک‌های پایین از پیش طوری چیده شده‌اند که یک
+                        <?php /* آفر تمام‌شده: تیک‌های پایین از پیش طوری چیده شده‌اند که یک
                                 «ذخیرهٔ تغییرات» آفر را برگرداند. اینجا صریح می‌نویسیم چه چیزی
-                                عوض می‌شود تا هیچ تغییری پشتِ پرده نباشد. */ ?>
+                                عوض می‌شود تا هیچ تغییری پشت پرده نباشد. */ ?>
                         <div class="offer-back-box">
                             <b><?= icon('refresh', 'ic-sm') ?> این آفر الان روی سایت زنده نیست</b>
                             <span>دلیل:
                                 <?php $rs = [];
                                       if ($eExpired) $rs[] = 'مهلتش تمام شده';
-                                      if ($eSold)    $rs[] = 'نشانِ «فروخته شد» دارد';
-                                      if ($eHidden)  $rs[] = 'تیکِ نمایش ندارد';
+                                      if ($eSold)    $rs[] = 'نشان «فروخته شد» دارد';
+                                      if ($eHidden)  $rs[] = 'تیک نمایش ندارد';
                                       echo h(implode(' + ', $rs)); ?>.
                             </span>
-                            <span>تیک‌های پایین از پیش برای <b>برگرداندنِ آفر</b> چیده شده‌اند؛
-                                کافی است روزِ تازه را ببینید و «ذخیرهٔ تغییرات» را بزنید. اگر
+                            <span>تیک‌های پایین از پیش برای <b>برگرداندن آفر</b> چیده شده‌اند؛
+                                کافی است روز تازه را ببینید و «ذخیرهٔ تغییرات» را بزنید. اگر
                                 نمی‌خواهید برگردد، تیک‌ها را خودتان تغییر دهید.</span>
                         </div>
                         <?php endif; ?>
@@ -485,7 +485,7 @@ require_once __DIR__ . '/layout-top.php';
                             </select>
                             <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">
                                 <span id="offerProdCount">همهٔ <?= count($offerProducts) ?> محصول</span>
-                                — می‌توانید چند کلمه را با فاصله بنویسید (مثلاً «استارت 405»)؛ ارقام فارسی و لاتین یکی حساب می‌شوند.
+                                — می‌توانید چند کلمه را با فاصله بنویسید (مثلا «استارت 405»)؛ ارقام فارسی و لاتین یکی حساب می‌شوند.
                             </small>
                         </div>
                         <div class="form-group">
@@ -496,17 +496,17 @@ require_once __DIR__ . '/layout-top.php';
                             <label>زیرعنوان (اختیاری)</label>
                             <input type="text" name="offer_subtitle" class="form-control" placeholder="مثال: تا پایان موجودی" value="<?= $isEdit ? h((string)$oEdit['subtitle']) : '' ?>">
                         </div>
-                        <?php /* قیمت و درصدِ تخفیف — روی خودِ محصول ذخیره می‌شوند (بالاتر توضیح
-                                داده شد)، پس روی همهٔ آفرهای همان محصول و هرجای دیگرِ سایت هم اثر
-                                می‌گذارند، نه فقط این بنر. با انتخابِ محصولِ دیگر از فهرستِ بالا،
-                                این دو کادر با قیمت/تخفیفِ همان محصول به‌روز می‌شوند (offerProdSelect
-                                در پایینِ صفحه). */ ?>
+                        <?php /* قیمت و درصد تخفیف — روی خود محصول ذخیره می‌شوند (بالاتر توضیح
+                                داده شد)، پس روی همهٔ آفرهای همان محصول و هرجای دیگر سایت هم اثر
+                                می‌گذارند، نه فقط این بنر. با انتخاب محصول دیگر از فهرست بالا،
+                                این دو کادر با قیمت/تخفیف همان محصول به‌روز می‌شوند (offerProdSelect
+                                در پایین صفحه). */ ?>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
                             <div class="form-group"><label>قیمت (تومان)</label><input type="text" name="offer_price" id="offerPrice" class="form-control" dir="ltr" inputmode="numeric" value="<?= $eCurPrice > 0 ? $eCurPrice : '' ?>" placeholder="خالی = بدون تغییر"></div>
                             <div class="form-group"><label>درصد تخفیف</label><input type="number" name="offer_discount" id="offerDiscount" class="form-control" value="<?= $eCurDisc ?>" min="0" max="100"></div>
                         </div>
                         <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:-0.4rem;margin-bottom:0.75rem;">
-                            این دو مستقیماً روی <b>قیمت و تخفیفِ خودِ محصول</b> ذخیره می‌شوند (همان‌طور که در فروشگاه دیده می‌شود)، نه فقط این بنر.
+                            این دو مستقیما روی <b>قیمت و تخفیف خود محصول</b> ذخیره می‌شوند (همان‌طور که در فروشگاه دیده می‌شود)، نه فقط این بنر.
                         </small>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
                             <div class="form-group"><label>شمارش معکوس (روز) <?= $isEdit ? '' : '*' ?></label><input type="number" name="offer_days" class="form-control" value="<?= $eDays ?>" min="0" max="365" <?= $isEdit ? '' : 'required' ?>></div>
@@ -515,40 +515,40 @@ require_once __DIR__ . '/layout-top.php';
                         <?php if ($isEdit): ?>
                         <label style="display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.75rem;font-size:0.82rem;line-height:1.8;">
                             <input type="checkbox" name="offer_renew" value="1" style="margin-top:0.35rem;" <?= $eExpired ? 'checked' : '' ?>>
-                            <span>تمدید مهلت — مهلت از <b>همین لحظه</b> با روز/ساعتِ بالا از نو حساب می‌شود.
+                            <span>تمدید مهلت — مهلت از <b>همین لحظه</b> با روز/ساعت بالا از نو حساب می‌شود.
                                 <?php if ($eExpired): ?>
-                                <br><span style="color:#FBBF24;font-size:0.74rem;">مهلتِ فعلی گذشته است (<?= h(jDate($oEdit['end_at'], true)) ?>)، پس این تیک از پیش خورده تا شمارش معکوس دوباره راه بیفتد.</span>
+                                <br><span style="color:#FBBF24;font-size:0.74rem;">مهلت فعلی گذشته است (<?= h(jDate($oEdit['end_at'], true)) ?>)، پس این تیک از پیش خورده تا شمارش معکوس دوباره راه بیفتد.</span>
                                 <?php else: ?>
-                                <br><span style="color:var(--text-muted);font-size:0.74rem;">اگر تیک نزنید، مهلتِ فعلی دست‌نخورده می‌ماند (<?= $eEndTs ? h(jDate($oEdit['end_at'], true)) : 'بی‌زمان' ?>) و فقط بقیهٔ فیلدها ذخیره می‌شوند.</span>
+                                <br><span style="color:var(--text-muted);font-size:0.74rem;">اگر تیک نزنید، مهلت فعلی دست‌نخورده می‌ماند (<?= $eEndTs ? h(jDate($oEdit['end_at'], true)) : 'بی‌زمان' ?>) و فقط بقیهٔ فیلدها ذخیره می‌شوند.</span>
                                 <?php endif; ?></span>
                         </label>
                         <?php endif; ?>
                         <div class="form-group">
                             <label>تصویر بنر (اختیاری)</label>
                             <input type="file" name="offer_image" class="form-control" accept="image/*">
-                            <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">اگر تصویری آپلود نکنید، <?= $isEdit ? 'تصویر فعلی حفظ می‌شود' : 'تصویر خودِ محصول استفاده می‌شود' ?>. تصویر در یک قاب تقریباً مربع نمایش داده می‌شود و برای پُرکردن قاب بُرش می‌خورد.</small>
+                            <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">اگر تصویری آپلود نکنید، <?= $isEdit ? 'تصویر فعلی حفظ می‌شود' : 'تصویر خود محصول استفاده می‌شود' ?>. تصویر در یک قاب تقریبا مربع نمایش داده می‌شود و برای پرکردن قاب برش می‌خورد.</small>
                             <?php if ($eImg): ?><div class="image-preview" style="margin-top:0.5rem;"><img src="<?= h($eImg) ?>" style="max-height:90px;border-radius:8px;"></div><?php endif; ?>
                         </div>
                         <div class="form-group">
                             <label>ترتیب نمایش</label>
                             <input type="number" name="offer_sort" class="form-control" value="<?= $isEdit ? (int)$oEdit['sort_order'] : 0 ?>" style="width:120px;">
-                            <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">عددِ کمتر = اسلاید جلوتر (آفرِ اول اسلایدر).</small>
+                            <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">عدد کمتر = اسلاید جلوتر (آفر اول اسلایدر).</small>
                         </div>
-                        <?php /* در حالتِ «تمام‌شده» این دو تیک برای برگرداندنِ آفر چیده می‌شوند:
+                        <?php /* در حالت «تمام‌شده» این دو تیک برای برگرداندن آفر چیده می‌شوند:
                                 نمایش روشن، فروخته‌شد خاموش. جعبهٔ بالای فرم همین را گفته است،
-                                پس چیزی پشتِ پرده عوض نمی‌شود — وضعیتِ فرم دقیقاً همان است که
+                                پس چیزی پشت پرده عوض نمی‌شود — وضعیت فرم دقیقا همان است که
                                 ذخیره خواهد شد. («فروخته شد» خودش یکی از دلیل‌های زنده‌نبودن
-                                است، پس شرطِ زیر برای آفرِ فروخته‌شده همیشه false می‌شود — عمدی
-                                است تا فرم همیشه پیشنهادِ «برش گردان» بدهد.) */ ?>
+                                است، پس شرط زیر برای آفر فروخته‌شده همیشه false می‌شود — عمدی
+                                است تا فرم همیشه پیشنهاد «برش گردان» بدهد.) */ ?>
                         <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;font-size:0.85rem;"><input type="checkbox" name="offer_active" value="1" <?= (!$isEdit || $oEdit['is_active'] || $eDone) ? 'checked' : '' ?>> نمایش این آفر</label>
                         <?php if ($soldOn): ?>
                         <label style="display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:1rem;font-size:0.85rem;line-height:1.8;">
                             <input type="checkbox" name="offer_sold" value="1" style="margin-top:0.35rem;" <?= ($eSold && !$eDone) ? 'checked' : '' ?>>
                             <span>فروخته شد
                                 <?php if ($eSold): ?>
-                                <br><span style="color:#FBBF24;font-size:0.74rem;">این آفر «فروخته شد» بود؛ تیک از پیش برداشته شده تا با ذخیره، مهرِ فروخته‌شد از بنر پاک شود. اگر می‌خواهید بماند، دوباره تیک بزنید.</span>
+                                <br><span style="color:#FBBF24;font-size:0.74rem;">این آفر «فروخته شد» بود؛ تیک از پیش برداشته شده تا با ذخیره، مهر فروخته‌شد از بنر پاک شود. اگر می‌خواهید بماند، دوباره تیک بزنید.</span>
                                 <?php else: ?>
-                                <br><span style="color:var(--text-muted);font-size:0.74rem;">بنر روی صفحهٔ اصلی می‌ماند و مهرِ «فروخته شد» در گوشهٔ چپِ بالای تصویر می‌خورد.</span>
+                                <br><span style="color:var(--text-muted);font-size:0.74rem;">بنر روی صفحهٔ اصلی می‌ماند و مهر «فروخته شد» در گوشهٔ چپ بالای تصویر می‌خورد.</span>
                                 <?php endif; ?></span>
                         </label>
                         <?php endif; ?>
@@ -565,7 +565,7 @@ require_once __DIR__ . '/layout-top.php';
                     <?php if (!$offers): ?>
                     <p style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.85rem;line-height:1.9;">
                         هنوز آفری ساخته نشده است.<br>
-                        آفرها <b>زیرِ بنر اصلی</b> صفحهٔ اصلی نمایش داده می‌شوند و اگر بیش از یکی فعال باشد، خودکار اسلاید می‌خورند.
+                        آفرها <b>زیر بنر اصلی</b> صفحهٔ اصلی نمایش داده می‌شوند و اگر بیش از یکی فعال باشد، خودکار اسلاید می‌خورند.
                     </p>
                     <?php endif; ?>
                     <?php foreach ($offers as $o):
@@ -609,8 +609,8 @@ require_once __DIR__ . '/layout-top.php';
                         </div>
                         <span style="font-size:0.68rem;color:var(--text-muted);">#<?= (int)$o['sort_order'] ?></span>
                         <div style="display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end;">
-                            <?php /* آفرِ زنده‌نبوده: همان کلید ویرایش، ولی برجسته و با برچسبی که
-                                    بگوید از آن راه برمی‌گردد (فرمِ ویرایش تیک‌ها را از پیش می‌چیند). */
+                            <?php /* آفر زنده‌نبوده: همان کلید ویرایش، ولی برجسته و با برچسبی که
+                                    بگوید از آن راه برمی‌گردد (فرم ویرایش تیک‌ها را از پیش می‌چیند). */
                                   $deadRow = (!$o['is_active'] || $expired || $isSold); ?>
                             <a href="?oedit=<?= (int)$o['id'] ?>#offers" class="btn <?= $deadRow ? 'btn-primary' : 'btn-secondary' ?> btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"><?= $deadRow ? 'ویرایش و فعال‌سازی' : 'ویرایش' ?></a>
                             <?php if ($soldOn): ?>
@@ -628,16 +628,16 @@ require_once __DIR__ . '/layout-top.php';
 </div>
 
 <script>
-/* جست‌وجوی فهرست محصولاتِ آفر (بدون کتابخانه). گزینه‌ها بازسازی می‌شوند
+/* جست‌وجوی فهرست محصولات آفر (بدون کتابخانه). گزینه‌ها بازسازی می‌شوند
    چون display:none روی <option> در همهٔ مرورگرها کار نمی‌کند.
-   نکته‌های مهمی که قبلاً اشتباه بود:
-   • هیچ سقفی روی تعداد گزینه‌ها نیست. سقفِ قبلی (۳۰۰) باعث می‌شد با ۵۷۴ محصول،
-     به‌محضِ تایپ‌کردن (و حتی پس از خالی‌کردنِ کادر) بقیهٔ محصول‌ها بی‌صدا غیب شوند.
-   • تعدادِ نمایش‌داده‌شده همیشه زیر کادر نوشته می‌شود تا هیچ‌وقت بی‌صدا کم نشود.
+   نکته‌های مهمی که قبلا اشتباه بود:
+   • هیچ سقفی روی تعداد گزینه‌ها نیست. سقف قبلی (۳۰۰) باعث می‌شد با ۵۷۴ محصول،
+     به‌محض تایپ‌کردن (و حتی پس از خالی‌کردن کادر) بقیهٔ محصول‌ها بی‌صدا غیب شوند.
+   • تعداد نمایش‌داده‌شده همیشه زیر کادر نوشته می‌شود تا هیچ‌وقت بی‌صدا کم نشود.
    • متن جست‌وجو و نام محصول هر دو نرمال می‌شوند: ارقام فارسی/عربی → لاتین،
      ی/ك عربی → فارسی، نیم‌فاصله حذف. پس «۴۰۵» هم «405» را پیدا می‌کند.
    • چند کلمه با فاصله = همه باید باشند (ترتیبشان مهم نیست).
-   • محصولِ انتخاب‌شده هرگز با ادامهٔ تایپ از فهرست نمی‌افتد. */
+   • محصول انتخاب‌شده هرگز با ادامهٔ تایپ از فهرست نمی‌افتد. */
 (function () {
     var box = document.getElementById('offerProdFilter');
     var sel = document.getElementById('offerProdSelect');
@@ -650,9 +650,9 @@ require_once __DIR__ . '/layout-top.php';
     }, $offerProducts), JSON_UNESCAPED_UNICODE) ?>;
     var TOTAL = all.length;
 
-    /* با انتخابِ محصولِ دیگر از فهرست، کادرهای «قیمت» و «درصد تخفیف» با
-       قیمت/تخفیفِ فعلیِ همان محصول پر می‌شوند — تا ادمین از قیمتِ واقعی که
-       دارد تغییر می‌دهد آگاه باشد، نه یک عددِ کهنه از محصولِ قبلی. */
+    /* با انتخاب محصول دیگر از فهرست، کادرهای «قیمت» و «درصد تخفیف» با
+       قیمت/تخفیف فعلی همان محصول پر می‌شوند — تا ادمین از قیمت واقعی که
+       دارد تغییر می‌دهد آگاه باشد، نه یک عدد کهنه از محصول قبلی. */
     var priceEl = document.getElementById('offerPrice');
     var discEl  = document.getElementById('offerDiscount');
     function fillPriceFields(id) {
@@ -712,7 +712,7 @@ require_once __DIR__ . '/layout-top.php';
             shown++;
         }
 
-        /* انتخابِ فعلی حتی اگر با فیلتر نخواند، سرِ فهرست می‌ماند */
+        /* انتخاب فعلی حتی اگر با فیلتر نخواند، سر فهرست می‌ماند */
         if (keep !== '' && !keptShown) {
             for (var j = 0; j < TOTAL; j++) {
                 if (String(all[j].i) === keep) {
