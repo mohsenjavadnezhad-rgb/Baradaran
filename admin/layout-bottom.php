@@ -1,7 +1,7 @@
 </div></main></div>
 <script>
 /* «انتخاب فایل» سفارشی برای هر input[type=file].form-control — رجوع کنید به
-   کامنتِ .file-pick در assets/css/style.css. */
+   کامنت .file-pick در assets/css/style.css. */
 (function () {
     var UPLOAD_ICON = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 15.5v3a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2v-3"/><path d="m7 8.5 5-5 5 5"/><path d="M12 3.5v13"/></svg>';
 
