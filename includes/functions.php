@@ -614,10 +614,43 @@ function getSubCategories($brandId) {
     return $stmt->fetchAll();
 }
 
+/* آیا ستون «لوگوی برند» روی categories ساخته شده؟ (migrate-brandlogo.php) */
+function categoryLogoReady() {
+    if (isset($GLOBALS['__catlogo_ready'])) return $GLOBALS['__catlogo_ready'];
+    return $GLOBALS['__catlogo_ready'] = dbHasColumn('categories', 'logo');
+}
+
+/* مسیر لوگوی یک برند، نسبت به ریشهٔ سایت (بدون «../» — هر صفحه خودش اضافه
+   می‌کند اگر داخل admin/ باشد). اول لوگوی آپلودی از پنل (uploads/brands/…)
+   را می‌گیرد؛ اگر نبود، به قرارداد قدیمی سایت برمی‌گردد: یک فایل SVG که
+   دستی با نام اسلاگ برند در assets/images/brands/ گذاشته شده. هیچ‌کدام
+   نبود، رشتهٔ خالی برمی‌گرداند تا آیکون عمومی جایگزین شود. */
+function brandLogoSrc($brand) {
+    if (categoryLogoReady() && !empty($brand['logo'])) {
+        $path = 'uploads/brands/' . $brand['logo'];
+        if (is_file(__DIR__ . '/../' . $path)) return $path;
+    }
+    $slug = (string)($brand['slug'] ?? '');
+    if ($slug !== '') {
+        $path = 'assets/images/brands/' . $slug . '.svg';
+        if (is_file(__DIR__ . '/../' . $path)) return $path;
+    }
+    return '';
+}
+
 /* آیا ستون‌های «سال تولید خودرو» روی محصولات ساخته شده‌اند؟ (migrate-productyear.php) */
 function productYearReady() {
     if (isset($GLOBALS['__pyear_ready'])) return $GLOBALS['__pyear_ready'];
     return $GLOBALS['__pyear_ready'] = dbHasColumn('products', 'year_from');
+}
+
+/* آیا قابلیت «سال تولید» روشن است؟ (پنل مدیریت ← تنظیمات ← سال تولید خودرو).
+   با خاموش‌بودن، هم فیلد سال در فرم محصول و هم چیپ‌های سال در فروشگاه
+   پنهان می‌شوند — فقط مرحلهٔ انتخاب برند می‌ماند. دادهٔ سال محصولات قبلی
+   پاک نمی‌شود، فقط پنهان می‌ماند تا دوباره روشن شود. پیش‌فرض روشن است تا
+   نصب‌هایی که همین حالا این قابلیت را می‌بینند رفتارشان عوض نشود. */
+function productYearEnabled() {
+    return getSettingRaw('product_year_enabled', '1') === '1';
 }
 
 /* بازهٔ سال تولید (از پنل مدیریت ← تنظیمات ← سال تولید خودرو، تنظیم‌شده با
