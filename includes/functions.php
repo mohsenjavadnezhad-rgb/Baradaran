@@ -613,6 +613,30 @@ function getSubCategories($brandId) {
     return $stmt->fetchAll();
 }
 
+/* آیا ستون‌های «سال تولید خودرو» روی محصولات ساخته شده‌اند؟ (migrate-productyear.php) */
+function productYearReady() {
+    if (isset($GLOBALS['__pyear_ready'])) return $GLOBALS['__pyear_ready'];
+    return $GLOBALS['__pyear_ready'] = dbHasColumn('products', 'year_from');
+}
+
+/* گزینه‌های سال تولید برای انتخابگر سمت فروشگاه — نزولی (جدیدترین بالا).
+   بازه از دادهٔ واقعی محصولات خوانده می‌شود؛ اگر هنوز چیزی ثبت نشده، ۳۰ سال
+   اخیر شمسی پیش‌فرض است تا انتخابگر هیچ‌وقت خالی نماند. */
+function productYearOptions() {
+    global $pdo;
+    $end = jalaliToday()[0];
+    $start = $end - 30;
+    if (productYearReady()) {
+        try {
+            $r = $pdo->query("SELECT MIN(year_from) mn, MAX(year_to) mx FROM products WHERE is_active = 1")->fetch();
+            if ($r && $r['mn'] !== null) $start = min($start, (int)$r['mn']);
+            if ($r && $r['mx'] !== null) $end = max($end, (int)$r['mx']);
+        } catch (Throwable $e) {}
+    }
+    $years = range($end, $start);
+    return $years;
+}
+
 function getProductById($id) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? AND is_active = 1");
@@ -1345,6 +1369,16 @@ function getProducts($filters = []) {
         $conditions[] = "(p.retail_discount > 0 OR p.wholesale_discount > 0)";
     }
 
+    /* سال تولید خودرو (شمسی): محصولی که برایش بازه‌ای ثبت نشده «برای همهٔ
+       سال‌ها» حساب می‌شود (خالی‌گذاشتن سال در فرم محصول یعنی محدودیتی
+       ندارد)، نه اینکه از نتیجه بیفتد. */
+    if (!empty($filters['year']) && productYearReady()) {
+        $y = (int)$filters['year'];
+        $conditions[] = "(p.year_from IS NULL OR p.year_from <= ?) AND (p.year_to IS NULL OR p.year_to >= ?)";
+        $params[] = $y;
+        $params[] = $y;
+    }
+
     if ($conditions) {
         $sql .= " WHERE " . implode(" AND ", $conditions);
     }
@@ -1630,8 +1664,8 @@ function jalaliMonthDays($jy, $jm) {
     return ($b[0] == $jy && $b[1] == 12 && $b[2] == 30) ? 30 : 29;
 }
 
-/* «همین امروز» به وقت تهران، به‌صورت [سال، ماه، روزِ شمسی] — منطقهٔ زمانی
-   صریحا تهران گرفته می‌شود چون منطقهٔ زمانیِ سرور تنظیم نشده (همان قاعده‌ای
+/* «همین امروز» به وقت تهران، به‌صورت [سال، ماه، روز شمسی] — منطقهٔ زمانی
+   صریحا تهران گرفته می‌شود چون منطقهٔ زمانی سرور تنظیم نشده (همان قاعده‌ای
    که در checkout.php برای کارت‌به‌کارت/چک استفاده شده). */
 function jalaliToday() {
     try { $now = new DateTime('now', new DateTimeZone('Asia/Tehran')); }
