@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/cart-functions.php';
+require_once __DIR__ . '/menu.php';
 
 $cartAction = handleCartAction();
 $cartCount = getCartCount();
@@ -124,10 +125,15 @@ function renderBrandsTree($brands) {
 
     <nav class="main-navbar">
         <div class="header-container">
-            <a href="banners.php" class="nav-link"><?= icon('home') ?>خانه</a>
-
+            <?php /* آیتم‌های این نوار از پنل مدیریت (admin/menus.php) می‌آیند —
+                    قابل افزودن/حذف/تغییرنام/غیرفعال‌کردن. دو آیتمِ «سیستمی»
+                    (item_key پر) رفتارِ ویژه‌شان همین‌جا کد شده: مگامنوی
+                    فروشگاه (محتوایش از $partTree می‌آید) و لینکِ حساب‌کاربری/
+                    ورود (بسته به ورودِ مشتری عوض می‌شود)؛ بقیه لینکِ ساده‌اند. */ ?>
+            <?php foreach (menuItems('main') as $mi): ?>
+                <?php if ($mi['item_key'] === 'shop_mega'): ?>
             <div class="nav-dropdown nav-mega">
-                <a href="parts.php" class="nav-link nav-dropdown-btn"><?= icon('store') ?>فروشگاه</a>
+                <a href="parts.php" class="nav-link nav-dropdown-btn"><?= icon($mi['icon']) ?><?= h($mi['label']) ?></a>
                 <div class="mega-menu">
                     <div class="mega-menu-inner">
                         <div class="mega-parts-grid">
@@ -145,14 +151,12 @@ function renderBrandsTree($brands) {
                     </div>
                 </div>
             </div>
-
-            <a href="shop.php" class="nav-link"><?= icon('cog') ?>قطعات خودرو</a>
-
-            <a href="search.php?new=1" class="nav-link"><?= icon('sparkles') ?>محصولات جدید</a>
-            <a href="search.php?featured=1" class="nav-link"><?= icon('star') ?>پرفروش‌ها</a>
-            <a href="search.php?sale=1" class="nav-link"><?= icon('percent') ?>تخفیف‌ها</a>
-            <a href="cart.php" class="nav-link"><?= icon('cart') ?>سبد خرید</a>
-            <a href="<?= isCustomerLoggedIn() ? 'account.php' : 'login.php' ?>" class="nav-link"><?= icon(isCustomerLoggedIn() ? 'user' : 'login') ?><?= isCustomerLoggedIn() ? 'حساب کاربری' : 'ورود / ثبت‌نام' ?></a>
+                <?php elseif ($mi['item_key'] === 'account'): ?>
+            <a href="<?= isCustomerLoggedIn() ? 'account.php' : 'login.php' ?>" class="nav-link"><?= icon(isCustomerLoggedIn() ? $mi['icon'] : 'login') ?><?= isCustomerLoggedIn() ? h($mi['label']) : 'ورود / ثبت‌نام' ?></a>
+                <?php elseif ($mi['url'] !== null && $mi['url'] !== ''): ?>
+            <a href="<?= h($mi['url']) ?>" class="nav-link"><?= icon($mi['icon']) ?><?= h($mi['label']) ?></a>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
     </nav>
 </header>
