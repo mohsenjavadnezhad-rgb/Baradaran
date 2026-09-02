@@ -1,13 +1,13 @@
 <?php
 /* -------------------------------------------------------------------------
-   کاوشگر یک‌بارمصرفِ بستهٔ «تنظیمات کشویی / انتخابگر مدل خودرو / آیکون‌های فوتر»
+   کاوشگر یک‌بارمصرف بستهٔ «تنظیمات کشویی / انتخابگر مدل خودرو / آیکون‌های فوتر»
    با ?key محافظت شده و پس از تأیید با _404stub.php بی‌اثر می‌شود.
    حالت‌ها (چون هر صفحه فقط یک‌بار در هر درخواست قابل include است):
      ?m=main                → بررسی فایل‌ها + توابع + رندر یک صفحهٔ عمومی
      ?m=pnew                → رندر «افزودن محصول» + سایدبار
      ?m=pedit               → رندر «ویرایش محصول» + وضعیت تیک‌ها
      ?m=sec&sec=footer|...  → رندر یک بخش تنظیمات
-     ?m=save                → آزمونِ «ذخیرهٔ یک بخش، بخش‌های دیگر را خالی نکند»
+     ?m=save                → آزمون «ذخیرهٔ یک بخش، بخش‌های دیگر را خالی نکند»
    ------------------------------------------------------------------------- */
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
@@ -26,7 +26,7 @@ function cnt($s, $n) { return substr_count($s, $n); }
 function hr($t)      { echo "\n== $t ==\n"; }
 
 /* سایدبار/صفحه‌های ادمین ورود لازم دارند؛ در پایان پاک می‌شود تا کوکی این
-   درخواست به یک نشستِ ادمینِ باز تبدیل نشود. */
+   درخواست به یک نشست ادمین باز تبدیل نشود. */
 $_SESSION['admin_id'] = 1;
 $_SESSION['admin_username'] = 'probe';
 
@@ -164,7 +164,7 @@ if ($mode === 'pnew' || $mode === 'pedit') {
         say('groups == DB brands', yn(cnt($pe, 'class="cm-brand"') === $brandsWithModels));
         say('data-brand attrs', cnt($pe, 'data-brand="'));
         say('data-name attrs', cnt($pe, 'data-name="'));
-        /* فقط نشانگرِ خودِ مارک‌آپ شمرده شود، نه رشته‌های داخل جاوااسکریپت */
+        /* فقط نشانگر خود مارک‌آپ شمرده شود، نه رشته‌های داخل جاوااسکریپت */
         $cbMark = 'type="checkbox" name="categories[]" value="';
         say('checkboxes name kept', cnt($pe, $cbMark));
         say('checkboxes == DB models', yn(cnt($pe, $cbMark) === $modelsAll));
@@ -204,12 +204,12 @@ if ($mode === 'pnew' || $mode === 'pedit') {
 /* ======================= m=sec ======================= */
 if ($mode === 'sec') {
     $want = $_GET['sec'] ?? 'footer';
-    /* هم صفحهٔ فعالِ سایدبار و هم زیرشاخهٔ فعال از این دو مقدار می‌آیند */
+    /* هم صفحهٔ فعال سایدبار و هم زیرشاخهٔ فعال از این دو مقدار می‌آیند */
     $_SERVER['SCRIPT_NAME'] = '/admin/settings.php';
     chdir($ROOT . '/admin');
     ob_start(); include $ROOT . '/admin/settings.php'; $st = ob_get_clean();
 
-    /* فیلدِ منحصربه‌فردِ هر بخش */
+    /* فیلد منحصربه‌فرد هر بخش */
     $marks = [
         'footer' => 'name="footer_about"',
         'decor'  => 'name="home_decor_style"',
@@ -248,12 +248,12 @@ if ($mode === 'save') {
     } catch (Throwable $e) { $eng = 'unknown'; }
     say('settings table engine', $eng);
 
-    /* عکسِ کاملِ همهٔ کلیدها — بازگردانی قطعی، مستقل از rollback */
+    /* عکس کامل همهٔ کلیدها — بازگردانی قطعی، مستقل از rollback */
     $snap = getAllSettings(true);
     $smsKeys = ['sms_api_key', 'sms_template_id', 'sms_param_name', 'sms_line_number',
                 'sms_method', 'sms_otp_text', 'sms_test_mode'];
 
-    /* کلیدهای بخش‌های دیگر که باید دست‌نخورده بمانند (اگر خالی‌اند، مقدارِ
+    /* کلیدهای بخش‌های دیگر که باید دست‌نخورده بمانند (اگر خالی‌اند، مقدار
        نشانه‌گذاری می‌گیرند تا آزمون معنا داشته باشد) */
     $others = ['footer_about', 'contact_email', 'footer_copyright',
                'pay_desc', 'pay_card_holder', 'home_decor_style'];
@@ -268,7 +268,7 @@ if ($mode === 'save') {
     $before = [];
     foreach ($others as $k) $before[$k] = getSettingRaw($k, '');
 
-    /* POST بخش «پیامک» با همان مقادیرِ واقعیِ فعلی (بی‌خطر) و فقط یک فیلدِ
+    /* POST بخش «پیامک» با همان مقادیر واقعی فعلی (بی‌خطر) و فقط یک فیلد
        غیرحساس تغییر می‌کند تا معلوم شود نوشتن انجام شده است. */
     $probeParam = ($snap['sms_param_name'] ?? 'CODE') . '-PROBE';
     $_SERVER['REQUEST_METHOD'] = 'POST';
@@ -304,7 +304,7 @@ if ($mode === 'save') {
     say('other sections untouched', yn($intact));
     say('..keys checked', count($others));
 
-    /* برگرداندن وضعیت: اول rollback، بعد بازنویسیِ صریح (شبکهٔ اطمینان) */
+    /* برگرداندن وضعیت: اول rollback، بعد بازنویسی صریح (شبکهٔ اطمینان) */
     if ($inTx) { $pdo->rollBack(); say('rolled back', 'OK'); }
     foreach ($smsKeys as $k) {
         if (array_key_exists($k, $snap)) { setSetting($k, $snap[$k]); }
@@ -324,6 +324,6 @@ if ($mode === 'save') {
     say('original settings restored', yn($restored));
 }
 
-/* نشست ادمینِ این کاوش نباید باقی بماند */
+/* نشست ادمین این کاوش نباید باقی بماند */
 unset($_SESSION['admin_id'], $_SESSION['admin_username']);
 echo "\n-- done ($mode) --\n";
