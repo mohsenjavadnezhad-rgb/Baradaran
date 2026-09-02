@@ -4,11 +4,21 @@ require_once 'includes/header.php';
 /* ==========================================================================
    صفحهٔ دسته‌بندی قطعات (part_categories).
      parts.php               → فهرست همهٔ سرشاخه‌ها
-     parts.php?cat=<سرشاخه>  → زیرشاخه‌ها به‌صورت مرتب + محصولات همان دسته
-     parts.php?cat=<زیرشاخه> → محصولات آن زیرشاخه (+ چیپس زیرشاخه‌های هم‌گروه)
+     parts.php?cat=<سرشاخه>  → زیرشاخه‌ها + همین‌جا مرحلهٔ برند/سال، سپس محصولات
+     parts.php?cat=<زیرشاخه> → همین مرحلهٔ برند/سال برای محصولات آن زیرشاخه
+   ---------------------------------------------------------------------
+   مرحلهٔ برند/سال (خواستهٔ کاربر): بعد از انتخاب یک دستهٔ قطعه، اول باید
+   برند خودرو انتخاب شود (کاشی‌های بزرگ)؛ با انتخاب برند، یک انتخابگر
+   بزرگ «سال تولید» کنارش ظاهر می‌شود. سال تولید اختیاری است — همان لحظه که
+   برند انتخاب شده (بدون انتخاب سال) همهٔ محصولات آن برند دیده می‌شوند؛
+   دکمهٔ «نمایش همهٔ سال‌ها» هم برای برگشتن از یک سال انتخاب‌شده به همین
+   حالت است. محصولی که سالی برایش ثبت نشده («از/تا» خالی)، برای همهٔ
+   سال‌ها مناسب حساب می‌شود (productYearReady()/getProducts() را ببینید).
    ========================================================================== */
 
-$catId = (int)($_GET['cat'] ?? 0);
+$catId   = (int)($_GET['cat'] ?? 0);
+$brandId = (int)($_GET['brand'] ?? 0);
+$year    = (int)($_GET['year'] ?? 0);
 
 $current = null;
 if ($catId) {
@@ -16,6 +26,17 @@ if ($catId) {
     $st->execute([$catId]);
     $current = $st->fetch();
 }
+
+/* برند معتبر است؟ (ورودی کاربر قابل جعل است) */
+$allBrands = getAllBrands();
+$selectedBrand = null;
+if ($brandId) {
+    foreach ($allBrands as $b) { if ((int)$b['id'] === $brandId) { $selectedBrand = $b; break; } }
+    if (!$selectedBrand) $brandId = 0;
+}
+
+$yearOptions = productYearReady() ? productYearOptions() : [];
+if ($year && !in_array($year, $yearOptions, true)) $year = 0;
 
 /* کارت محصول (هم‌شکل با فروشگاه) */
 function partsProductCard($p) {
@@ -46,12 +67,81 @@ function partsProductCard($p) {
     </div>
     <?php return ob_get_clean();
 }
+
+/* مرحلهٔ برند + سال — یک تابع مشترک چون هم صفحهٔ سرشاخه و هم صفحهٔ زیرشاخه
+   دقیقا همین قدم را لازم دارند. $baseQs = پارامترهای ثابت صفحه (cat=...)
+   که در همهٔ لینک‌های این بخش باید بماند. */
+function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearOptions, $baseQs) {
+    ?>
+    <div class="pby-box">
+        <?php if (!$selectedBrand): ?>
+        <div class="pby-title"><?= icon('cog', 'ic-sm') ?> اول برند خودروتان را انتخاب کنید</div>
+        <div class="pby-brands">
+            <?php foreach ($allBrands as $b):
+                $logoFile = 'assets/images/brands/' . $b['slug'] . '.svg';
+                $logoSrc = file_exists(__DIR__ . '/' . $logoFile) ? $logoFile : '';
+            ?>
+            <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$b['id'] ?>" class="pby-brand-tile">
+                <?php if ($logoSrc): ?><img src="<?= $logoSrc ?>" alt="" class="pby-brand-logo"><?php else: ?><?= icon('cog') ?><?php endif; ?>
+                <span><?= h($b['name']) ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <?php if (!$allBrands): ?>
+        <p style="color:var(--text-muted);font-size:0.85rem;">هنوز برندی تعریف نشده است.</p>
+        <?php endif; ?>
+
+        <?php else: ?>
+        <div class="pby-selrow">
+            <div class="pby-selbrand">
+                <?php $logoFile = 'assets/images/brands/' . $selectedBrand['slug'] . '.svg';
+                      $logoSrc = file_exists(__DIR__ . '/' . $logoFile) ? $logoFile : ''; ?>
+                <?php if ($logoSrc): ?><img src="<?= $logoSrc ?>" alt="" class="pby-brand-logo"><?php else: ?><?= icon('cog') ?><?php endif; ?>
+                <b><?= h($selectedBrand['name']) ?></b>
+                <a href="parts.php?<?= $baseQs ?>" class="pby-change"><?= icon('refresh', 'ic-sm') ?> تغییر برند</a>
+            </div>
+
+            <?php /* انتخابگر سال تولید — «کلید بزرگ و زیبا» (خواستهٔ کاربر):
+                    select بزرگ‌رنگی که با تغییر خودش ارسال می‌شود (progressive
+                    enhancement با جاوااسکریپت پایین)، به‌همراه دکمهٔ صریح
+                    «اعمال» برای حالت بدون جاوااسکریپت. */ ?>
+            <?php if ($yearOptions): ?>
+            <form method="GET" action="parts.php" class="pby-yearform" id="pbyYearForm">
+                <?php foreach (explode('&', $baseQs) as $kv): if ($kv === '') continue; list($k, $v) = array_pad(explode('=', $kv, 2), 2, ''); ?>
+                <input type="hidden" name="<?= h($k) ?>" value="<?= h(urldecode($v)) ?>">
+                <?php endforeach; ?>
+                <input type="hidden" name="brand" value="<?= (int)$brandId ?>">
+                <label for="pbyYearSel" class="pby-yearlabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</label>
+                <select name="year" id="pbyYearSel" class="pby-yearselect">
+                    <option value="0" <?= $year === 0 ? 'selected' : '' ?>>همهٔ سال‌ها</option>
+                    <?php foreach ($yearOptions as $y): ?>
+                    <option value="<?= $y ?>" <?= $year === $y ? 'selected' : '' ?>><?= $y ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-primary pby-yearbtn"><?= icon('check', 'ic-sm') ?> اعمال</button>
+                <?php if ($year): ?>
+                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>" class="pby-allyears"><?= icon('layers', 'ic-sm') ?> نمایش همهٔ سال‌ها</a>
+                <?php endif; ?>
+            </form>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+    <script>
+    (function(){
+        var sel = document.getElementById('pbyYearSel');
+        var frm = document.getElementById('pbyYearForm');
+        if (sel && frm) sel.addEventListener('change', function(){ frm.submit(); });
+    })();
+    </script>
+    <?php
+}
 ?>
 
 <div class="container">
 
 <?php if (!$current): ?>
-    <?php /* --- فهرست سرشاخه‌ها --- */ ?>
+    <?php /* --- فهرست سرشاخه‌ها (بدون تغییر) --- */ ?>
     <h1 class="page-title">دسته‌بندی قطعات</h1>
     <?php $tree = getPartCategoriesTree(); ?>
     <?php if ($tree): ?>
@@ -68,7 +158,7 @@ function partsProductCard($p) {
 
 <?php elseif (empty($current['parent_id'])): ?>
     <?php
-    /* --- صفحهٔ سرشاخه: زیرشاخه‌ها + محصولات --- */
+    /* --- صفحهٔ سرشاخه: زیرشاخه‌ها + مرحلهٔ برند/سال + محصولات --- */
     $ch = $pdo->prepare("SELECT * FROM part_categories WHERE parent_id = ? ORDER BY sort_order, name");
     $ch->execute([$current['id']]);
     $children = $ch->fetchAll();
@@ -81,7 +171,14 @@ function partsProductCard($p) {
             $counts[(int)$r['part_category_id']] = (int)$r['c'];
         }
     }
-    $products = getProducts(['part_category_ids' => $ids]);
+
+    $baseQs = 'cat=' . (int)$current['id'];
+    $products = [];
+    if ($brandId) {
+        $pf = ['part_category_ids' => $ids, 'brand_id' => $brandId];
+        if ($year) $pf['year'] = $year;
+        $products = getProducts($pf);
+    }
     ?>
     <div class="parts-crumb"><a href="parts.php">دسته‌بندی قطعات</a> &laquo; <?= h($current['name']) ?></div>
     <h1 class="page-title"><?= h($current['name']) ?></h1>
@@ -97,18 +194,22 @@ function partsProductCard($p) {
     </div>
     <?php endif; ?>
 
-    <?php if ($products): ?>
-    <div class="parts-section-title">محصولات این دسته (<?= count($products) ?>)</div>
-    <div class="product-grid">
-        <?php foreach ($products as $p) echo partsProductCard($p); ?>
-    </div>
-    <?php elseif (!$children): ?>
-    <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی در این دسته یافت نشد.</p></div>
+    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearOptions, $baseQs); ?>
+
+    <?php if ($brandId): ?>
+        <?php if ($products): ?>
+        <div class="parts-section-title">محصولات این دسته (<?= count($products) ?>)</div>
+        <div class="product-grid">
+            <?php foreach ($products as $p) echo partsProductCard($p); ?>
+        </div>
+        <?php else: ?>
+        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
+        <?php endif; ?>
     <?php endif; ?>
 
 <?php else: ?>
     <?php
-    /* --- صفحهٔ زیرشاخه: محصولات + چیپس هم‌گروه‌ها --- */
+    /* --- صفحهٔ زیرشاخه: چیپس هم‌گروه‌ها + مرحلهٔ برند/سال + محصولات --- */
     $pRow = $pdo->prepare("SELECT * FROM part_categories WHERE id = ?");
     $pRow->execute([(int)$current['parent_id']]);
     $parentRow = $pRow->fetch();
@@ -117,10 +218,17 @@ function partsProductCard($p) {
     $sib->execute([(int)$current['parent_id']]);
     $siblings = $sib->fetchAll();
 
-    $products = getProducts(['part_category_id' => (int)$current['id']]);
-    if (!$products) {
-        // اگر محصولی مستقیما به این زیرشاخه وصل نشده بود، جست‌وجوی نامی به‌عنوان جایگزین
-        $products = getProducts(['search' => $current['name']]);
+    $baseQs = 'cat=' . (int)$current['id'];
+    $products = [];
+    if ($brandId) {
+        $pf = ['part_category_id' => (int)$current['id'], 'brand_id' => $brandId];
+        if ($year) $pf['year'] = $year;
+        $products = getProducts($pf);
+        if (!$products && !$year) {
+            // اگر محصولی مستقیما به این زیرشاخه وصل نشده بود، جست‌وجوی نامی به‌عنوان جایگزین (فقط بدون فیلتر سال، تا معنایش عوض نشود)
+            $pf2 = ['search' => $current['name'], 'brand_id' => $brandId];
+            $products = getProducts($pf2);
+        }
     }
     ?>
     <div class="parts-crumb">
@@ -133,18 +241,22 @@ function partsProductCard($p) {
     <?php if ($siblings): ?>
     <div class="subcat-filter">
         <?php foreach ($siblings as $s): ?>
-        <a href="parts.php?cat=<?= $s['id'] ?>" class="brand-tag <?= $s['id'] == $current['id'] ? 'active' : '' ?>"><?= h($s['name']) ?></a>
+        <a href="parts.php?cat=<?= $s['id'] ?><?= $brandId ? '&brand=' . $brandId : '' ?><?= $year ? '&year=' . $year : '' ?>" class="brand-tag <?= $s['id'] == $current['id'] ? 'active' : '' ?>"><?= h($s['name']) ?></a>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
 
-    <?php if ($products): ?>
-    <div class="search-results-count" style="margin-bottom:1rem;"><?= count($products) ?> محصول</div>
-    <div class="product-grid">
-        <?php foreach ($products as $p) echo partsProductCard($p); ?>
-    </div>
-    <?php else: ?>
-    <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی در این دسته یافت نشد.</p></div>
+    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $year, $yearOptions, $baseQs); ?>
+
+    <?php if ($brandId): ?>
+        <?php if ($products): ?>
+        <div class="search-results-count" style="margin-bottom:1rem;"><?= count($products) ?> محصول</div>
+        <div class="product-grid">
+            <?php foreach ($products as $p) echo partsProductCard($p); ?>
+        </div>
+        <?php else: ?>
+        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
+        <?php endif; ?>
     <?php endif; ?>
 
 <?php endif; ?>
