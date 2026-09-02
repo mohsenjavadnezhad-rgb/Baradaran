@@ -119,7 +119,7 @@ function partsProductCard($p) {
 
     $products = getProducts(['part_category_id' => (int)$current['id']]);
     if (!$products) {
-        // اگر محصولی مستقیماً به این زیرشاخه وصل نشده بود، جست‌وجوی نامی به‌عنوان جایگزین
+        // اگر محصولی مستقیما به این زیرشاخه وصل نشده بود، جست‌وجوی نامی به‌عنوان جایگزین
         $products = getProducts(['search' => $current['name']]);
     }
     ?>
