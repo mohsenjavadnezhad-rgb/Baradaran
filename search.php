@@ -20,7 +20,7 @@ if ($isNew) {
     $pageIcon = icon('sparkles');
     $pageTitle = 'محصولات جدید';
     $pageNote = 'کالاهای اضافه‌شده در ' . $newDays . ' روز اخیر';
-    $emptyText = 'فعلاً محصول جدیدی ثبت نشده است.';
+    $emptyText = 'فعلا محصول جدیدی ثبت نشده است.';
     $emptyIcon = icon('sparkles');
 } elseif ($isFeatured) {
     $products = getBestSellerProducts(48);
@@ -76,9 +76,9 @@ function searchProductCard($p) {
 ?>
 
 <div class="container">
-    <?php /* نوارِ جستجویِ خودِ این صفحه حذف شد — نوارِ جستجوی بالای سایت
+    <?php /* نوار جستجوی خود این صفحه حذف شد — نوار جستجوی بالای سایت
             (includes/header.php، همیشه روی هر صفحه‌ای هست) کارش را می‌کند؛
-            داشتنِ دوتایی‌اش زیرِ هم روی همین صفحه اضافه و گیج‌کننده بود
+            داشتن دوتایی‌اش زیر هم روی همین صفحه اضافه و گیج‌کننده بود
             (خواستهٔ کاربر). */ ?>
 
     <?php if ($isListMode): ?>
@@ -112,7 +112,7 @@ function searchProductCard($p) {
     <?php endif; ?>
 
     <?php else: ?>
-    <?php /* بدون عبارت جستجو: مشتری از نوارِ بالای سایت جستجو می‌کند، اینجا
+    <?php /* بدون عبارت جستجو: مشتری از نوار بالای سایت جستجو می‌کند، اینجا
             فقط راهنمایی کوتاه است تا صفحه خالی نماند. */ ?>
     <div class="no-results">
         <div class="no-results-icon"><?= icon('search') ?></div>
