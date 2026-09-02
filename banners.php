@@ -193,7 +193,7 @@ function renderOfferBanner($o, $active = true) {
     return $out;
 }
 
-/* اسلایدر آفرها: همهٔ آفرهای فعال روی هم قرار می‌گیرند و فقط اسلاید فعال
+/* اسلایدر آفرها: همه آفرهای فعال روی هم قرار می‌گیرند و فقط اسلاید فعال
    دیده می‌شود؛ با ≥۲ آفر، خودکار و با بازهٔ تعیین‌شدهٔ ادمین می‌چرخد.
    بدون JS هم اسلاید اول (بر اساس ترتیب نمایش) دیده می‌شود. */
 function renderOfferSlider($offers, $seconds) {
@@ -246,17 +246,17 @@ function renderPromoPlaceholder() {
     return $out;
 }
 
-$special  = getSpecialSaleProduct();
 $offers   = getActiveTimedOffers(9);
 $slideSec = offerSlideSeconds();
 
 /* ---------- ردیف سه‌کارتی زیر بنر اصلی ----------
    همیشه سه اسلات رندر می‌شود تا جمع عرضشان دقیقا اندازهٔ بنر اصلی باشد.
-   اگر محصولی تیک «فروش ویژه» داشته باشد، اسلات اول از آن اوست و آفرهای
-   زمان‌دار بین اسلات‌های باقی‌مانده پخش می‌شوند؛ اسلات بی‌محتوا خط‌چین می‌شود. */
+   «فروش ویژه» (تیک is_special روی محصول) از اینجا برداشته شد — خواستهٔ
+   کاربر: «آفر» همین کار را انجام می‌دهد — پس هر سه اسلات به آفرهای
+   زمان‌دار می‌رسد؛ اسلات بی‌محتوا خط‌چین می‌ماند. renderSpecialBanner()
+   پایین همچنان تعریف است ولی دیگر جایی صدا زده نمی‌شود. */
 $promoSlots = 3;
 $promoCards = [];
-if ($special) $promoCards[] = renderSpecialBanner($special);
 $freeSlots = $promoSlots - count($promoCards);
 if ($freeSlots > 0 && $offers) {
     foreach (splitOffers($offers, min($freeSlots, count($offers))) as $grp) {
@@ -479,7 +479,7 @@ if (getSettingRaw('home_decor_enabled', '1') === '1'):
 
 <?php if ($offers): ?>
 <script>
-/* آفرهای زمان‌دار: شمارش معکوس همهٔ اسلایدها + چرخش خودکار اسلایدر.
+/* آفرهای زمان‌دار: شمارش معکوس همه اسلایدها + چرخش خودکار اسلایدر.
    بدون کتابخانه؛ مقصد هر شمارنده به‌صورت epoch در data-end است. */
 (function () {
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -533,7 +533,7 @@ if (getSettingRaw('home_decor_enabled', '1') === '1'):
     if (counts.length) { timer = setInterval(tick, 1000); tick(); }
 
     /* ---------- چرخش خودکار اسلایدرها ----------
-       هر اسلات ردیف می‌تواند اسلایدر مستقل خودش باشد، پس روی همهٔ
+       هر اسلات ردیف می‌تواند اسلایدر مستقل خودش باشد، پس روی همه
        اسلایدرها حلقه می‌زنیم و هرکدام تایمر و وضعیت جدا می‌گیرد.
        اسلایدر تک‌اسلایدی نادیده گرفته می‌شود (چیزی برای چرخاندن ندارد). */
     var sliders = document.querySelectorAll('.promo-slider');
