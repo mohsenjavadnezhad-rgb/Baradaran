@@ -16,9 +16,9 @@ function normalizeCtype($v) { return ($v === 'partner') ? 'partner' : 'retail'; 
 $ctype = normalizeCtype($_REQUEST['type'] ?? ($_SESSION['otp_type'] ?? 'retail'));
 
 /* آیا ورود به کد تأیید پیامکی نیاز دارد؟ ادمین از «تنظیمات سایت ← پیامک»
-   خاموش/روشن می‌کند. با خاموش‌بودن، مرحلهٔ «کد» کلاً حذف می‌شود و ورود
+   خاموش/روشن می‌کند. با خاموش‌بودن، مرحلهٔ «کد» کلا حذف می‌شود و ورود
    یک‌مرحله‌ای است؛ پس هر مرحلهٔ نیمه‌کارهٔ قبلی هم از نشست پاک می‌شود تا
-   کاربری که وسط دریافت کد بوده روی صفحهٔ کدِ بی‌کاربرد نماند. */
+   کاربری که وسط دریافت کد بوده روی صفحهٔ کد بی‌کاربرد نماند. */
 $otpOn = loginOtpRequired();
 if (!$otpOn) unset($_SESSION['otp_mobile']);
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($return === '' && !empty($_SESSION['otp_return'])) $return = $_SESSION['otp_return'];
     if (isset($_POST['ctype'])) $ctype = normalizeCtype($_POST['ctype']);
 
-    /* پس از ورودِ موفق: پاک‌کردن آثار مرحلهٔ ورود و رفتن به مقصد */
+    /* پس از ورود موفق: پاک‌کردن آثار مرحلهٔ ورود و رفتن به مقصد */
     $finish = function () use ($return) {
         $target = $return !== '' ? $return : ($_SESSION['otp_return'] ?? 'account.php');
         unset($_SESSION['otp_mobile'], $_SESSION['otp_type'], $_SESSION['otp_return']);
@@ -47,14 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $step = 'mobile';
     } elseif ($act === 'send_code' && !$otpOn) {
         /* تأیید پیامکی خاموش است → ورود یک‌مرحله‌ای فقط با شمارهٔ موبایل.
-           صحتِ خودِ شماره باز هم بررسی می‌شود تا رکورد بی‌ربط ساخته نشود. */
+           صحت خود شماره باز هم بررسی می‌شود تا رکورد بی‌ربط ساخته نشود. */
         $m = normalizeMobile($_POST['mobile'] ?? '');
         if (!isValidMobile($m)) {
             $error = 'شماره موبایل نامعتبر است.';
         } else {
             $c = findOrCreateCustomer($m, $ctype);
             if (!$c) {
-                $error = 'ورود انجام نشد. لطفاً دوباره تلاش کنید.';
+                $error = 'ورود انجام نشد. لطفا دوباره تلاش کنید.';
             } else {
                 loginCustomer($c);
                 $finish();
@@ -76,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($act === 'verify') {
         $mobile = $_SESSION['otp_mobile'] ?? '';
         if (!$otpOn) {
-            /* ادمین وسطِ کار تأیید پیامکی را خاموش کرده و این فرم از صفحهٔ
-               قدیمیِ باز ارسال شده — کاربر را به ورودِ یک‌مرحله‌ای برمی‌گردانیم. */
+            /* ادمین وسط کار تأیید پیامکی را خاموش کرده و این فرم از صفحهٔ
+               قدیمی باز ارسال شده — کاربر را به ورود یک‌مرحله‌ای برمی‌گردانیم. */
             $notice = 'ورود با کد تأیید غیرفعال شده است؛ فقط شمارهٔ موبایل خود را وارد کنید.';
             $step = 'mobile';
         } elseif ($mobile === '') {
