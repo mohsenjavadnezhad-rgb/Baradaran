@@ -8,7 +8,10 @@ $search = $_GET['q'] ?? '';
 $page = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * ITEMS_PER_PAGE;
 
-$specialOn = specialSaleReady();
+/* «فروش ویژه» (تیک is_special) از این صفحه و فرم محصول برداشته شد —
+   خواستهٔ کاربر: «آفر» (پایین) همین کار را انجام می‌دهد و کافی است.
+   ستون is_special و تابع getSpecialSaleProduct() در کد می‌مانند (داده از
+   بین نمی‌رود) ولی دیگر از اینجا قابل تغییر نیستند. */
 /* کلید «آفر» کنار هر محصول — میانبر به فرم «آفر جدید» در
    admin/banners.php#offers با همین محصول از پیش انتخاب‌شده. */
 $offersOn  = timedOffersReady();
@@ -21,16 +24,6 @@ function productsSelfUrl($search, $page) {
     return 'products.php' . ($qs ? '?' . http_build_query($qs) : '');
 }
 
-/* تیک «فروش ویژه» — بنر «تخفیف ویژه» در ردیف زیر بنر اصلی از جدیدترین محصول تیک‌خورده ساخته می‌شود */
-if ($specialOn && isset($_GET['special'])) {
-    try {
-        $pdo->prepare("UPDATE products SET is_special = 1 - is_special WHERE id = ?")
-            ->execute([(int)$_GET['special']]);
-    } catch (Throwable $e) { /* بی‌صدا — فهرست همچنان نمایش داده می‌شود */ }
-    header('Location: ' . productsSelfUrl($search, $page));
-    exit;
-}
-
 $sql = "FROM products WHERE is_active = 1";
 $params = [];
 if ($search) { $sql .= " AND (name LIKE ? OR technical_number LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
@@ -41,10 +34,6 @@ $totalPages = ceil($total / ITEMS_PER_PAGE);
 $stmt = $pdo->prepare("SELECT * $sql ORDER BY created_at DESC LIMIT ? OFFSET ?");
 $stmt->execute([...$params, ITEMS_PER_PAGE, $offset]);
 $products = $stmt->fetchAll();
-
-/* پایهٔ لینک توگل (با حفظ جستجو و شمارهٔ صفحه) — آماده برای چسباندن special=<id> */
-$selfUrl = productsSelfUrl($search, $page);
-$spBase  = $selfUrl . (strpos($selfUrl, '?') !== false ? '&' : '?');
 
 require_once __DIR__ . '/layout-top.php';
 ?>
@@ -60,18 +49,9 @@ require_once __DIR__ . '/layout-top.php';
   <a href="product-edit.php" class="btn btn-primary btn-sm" style="margin-right:auto;">+ محصول جدید</a>
 </form>
 
-<?php if ($specialOn): ?>
-<div class="flash" style="background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:var(--text-secondary);font-size:0.8rem;line-height:1.9;padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1rem;">
-  <?= icon('flame', 'ic-sm') ?>
-  با زدن تیک <b>فروش ویژه</b> روی یک محصول، بنر «تخفیف ویژه» در ردیف <b>زیر بنر اصلی</b> صفحهٔ اصلی
-  به‌صورت خودکار از تصویر، نام و قیمت تخفیف‌دار همان محصول ساخته می‌شود.
-  اگر چند محصول تیک داشته باشند، <b>جدیدترین</b> آن‌ها نمایش داده می‌شود.
-</div>
-<?php endif; ?>
-
 <table class="admin-table">
 <thead><tr>
-  <th>#</th><th>تصویر</th><th>نام</th><th>شماره فنی</th><th>قیمت جزئی</th><th>قیمت کلی</th><th>موجودی</th><?php if ($specialOn): ?><th>فروش ویژه</th><?php endif; ?><?php if ($offersOn): ?><th>آفر</th><?php endif; ?><th>عملیات</th>
+  <th>#</th><th>تصویر</th><th>نام</th><th>شماره فنی</th><th>قیمت جزئی</th><th>قیمت کلی</th><th>موجودی</th><?php if ($offersOn): ?><th>آفر</th><?php endif; ?><th>عملیات</th>
 </tr></thead>
 <tbody>
 <?php foreach ($products as $p): ?>
@@ -83,15 +63,6 @@ require_once __DIR__ . '/layout-top.php';
   <td><?= formatPrice($p['retail_price']) ?></td>
   <td><?= formatPrice($p['wholesale_price']) ?></td>
   <td><?= $p['stock'] ?></td>
-  <?php if ($specialOn): $isSp = !empty($p['is_special']); ?>
-  <td>
-    <a href="<?= h($spBase) ?>special=<?= $p['id'] ?>"
-       class="btn btn-sm <?= $isSp ? 'btn-primary' : 'btn-secondary' ?>"
-       title="<?= $isSp ? 'برداشتن از فروش ویژه' : 'قرار دادن در فروش ویژه' ?>">
-      <?= icon($isSp ? 'flame' : 'tag', 'ic-sm') ?> <?= $isSp ? 'ویژه' : 'عادی' ?>
-    </a>
-  </td>
-  <?php endif; ?>
   <?php if ($offersOn): ?>
   <td>
     <a href="banners.php?ofor=<?= $p['id'] ?>#offers" class="btn btn-secondary btn-sm" title="ساخت بنر آفر زمان‌دار برای این محصول">
@@ -105,7 +76,7 @@ require_once __DIR__ . '/layout-top.php';
   </td>
 </tr>
 <?php endforeach; ?>
-<?php if (!$products): ?><tr><td colspan="<?= 8 + ($specialOn ? 1 : 0) + ($offersOn ? 1 : 0) ?>" style="text-align:center;padding:2rem;color:var(--text-muted);">محصولی یافت نشد</td></tr><?php endif; ?>
+<?php if (!$products): ?><tr><td colspan="<?= 8 + ($offersOn ? 1 : 0) ?>" style="text-align:center;padding:2rem;color:var(--text-muted);">محصولی یافت نشد</td></tr><?php endif; ?>
 </tbody>
 </table>
 
