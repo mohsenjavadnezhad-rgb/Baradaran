@@ -1,8 +1,8 @@
 <?php
 /* برندها و مدل‌ها (جدول categories، دو سطحی: parent_id NULL = برند).
-   بازطراحیِ 2026-08-26: قبلاً یک جدولِ تخت با همهٔ برند+مدل‌ها ردیف‌به‌ردیف
+   بازطراحی 2026-08-26: قبلا یک جدول تخت با همهٔ برند+مدل‌ها ردیف‌به‌ردیف
    بود که با ده‌ها برند خیلی طولانی می‌شد (خواستهٔ کاربر: «طراحیشو تغییر بده»)
-   و صفحهٔ مستقلِ خودش را داشت (نه layout-top.php)، پس با بقیهٔ پنل هم‌شکل
+   و صفحهٔ مستقل خودش را داشت (نه layout-top.php)، پس با بقیهٔ پنل هم‌شکل
    نبود. حالا مثل admin/part-categories.php گروه‌بندی‌شده و جمع‌شونده است. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -12,11 +12,11 @@ if (!isLoggedIn()) { header('Location: login.php'); exit; }
 $msg = '';
 $msgErr = false;
 
-/* نمایشِ نامِ انگلیسیِ برند (اسلاگ) روی تگ‌های shop.php — [[batch9-fixes]] */
+/* نمایش نام انگلیسی برند (اسلاگ) روی تگ‌های shop.php — [[batch9-fixes]] */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_brand_en'])) {
     $mode = in_array($_POST['brand_en_mode'] ?? '', ['off', 'hover', 'always'], true) ? $_POST['brand_en_mode'] : 'off';
     setSetting('brand_en_mode', $mode);
-    $msg = 'تنظیمِ نمایشِ نامِ انگلیسی ذخیره شد.';
+    $msg = 'تنظیم نمایش نام انگلیسی ذخیره شد.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
 }
 
 /* حذف — اگر برندی هنوز مدل دارد رد می‌شود (وگرنه مدل‌ها یتیم می‌مانند)،
-   هم‌الگوی گاردِ part-categories.php ([[part-categories-admin-crud]]). */
+   هم‌الگوی گارد part-categories.php ([[part-categories-admin-crud]]). */
 if (isset($_GET['delete'])) {
     $delId = (int)$_GET['delete'];
     $chk = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE parent_id=?");
@@ -91,17 +91,17 @@ require_once __DIR__ . '/layout-top.php';
 
 <?php $benMode = brandEnMode(); ?>
 <div class="dg-box" style="padding:0.85rem 1rem;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:0.6rem;">
-    <span style="font-size:0.82rem;color:var(--text-secondary);"><?= icon('globe', 'ic-sm') ?> نمایشِ نامِ انگلیسیِ برند روی دکمه‌های صفحهٔ «قطعات خودرو»</span>
+    <span style="font-size:0.82rem;color:var(--text-secondary);"><?= icon('globe', 'ic-sm') ?> نمایش نام انگلیسی برند روی دکمه‌های صفحهٔ «قطعات خودرو»</span>
     <form method="POST" style="display:flex;align-items:center;gap:0.4rem;">
         <input type="hidden" name="save_brand_en" value="1">
         <select name="brand_en_mode" class="form-control" style="width:auto;font-size:0.8rem;padding:0.4rem 0.7rem;" onchange="this.form.submit()">
             <option value="off"    <?= $benMode === 'off'    ? 'selected' : '' ?>>نشان نده (پیش‌فرض)</option>
-            <option value="hover"  <?= $benMode === 'hover'  ? 'selected' : '' ?>>فقط با نگه‌داشتنِ موس رویش</option>
+            <option value="hover"  <?= $benMode === 'hover'  ? 'selected' : '' ?>>فقط با نگه‌داشتن موس رویش</option>
             <option value="always" <?= $benMode === 'always' ? 'selected' : '' ?>>همیشه به‌جای فارسی نشان بده</option>
         </select>
         <noscript><button type="submit" class="btn btn-secondary btn-sm">ذخیره</button></noscript>
     </form>
-    <span style="font-size:0.72rem;color:var(--text-muted);">حروفِ اولِ کلماتِ انگلیسی خودکار بزرگ نوشته می‌شود.</span>
+    <span style="font-size:0.72rem;color:var(--text-muted);">حروف اول کلمات انگلیسی خودکار بزرگ نوشته می‌شود.</span>
 </div>
 
 <div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;">
@@ -109,8 +109,8 @@ require_once __DIR__ . '/layout-top.php';
         <div class="dg-box">
             <div class="dg-box-hd"><h3>
                 <?php if ($editCat): ?>ویرایش «<?= h($editCat['name']) ?>»
-                <?php elseif ($newModelParent): ?>مدلِ جدید — <?php $npRow = null; foreach ($brands as $b) { if ((int)$b['id'] === $newModelParent) { $npRow = $b; break; } } ?>«<?= h($npRow['name'] ?? '') ?>»
-                <?php else: ?>برند یا مدلِ جدید
+                <?php elseif ($newModelParent): ?>مدل جدید — <?php $npRow = null; foreach ($brands as $b) { if ((int)$b['id'] === $newModelParent) { $npRow = $b; break; } } ?>«<?= h($npRow['name'] ?? '') ?>»
+                <?php else: ?>برند یا مدل جدید
                 <?php endif; ?>
             </h3></div>
             <div class="dg-box-bd" style="padding:1rem;">
@@ -128,7 +128,7 @@ require_once __DIR__ . '/layout-top.php';
                             <option value="<?= $b['id'] ?>" <?= ($editCat['parent_id'] ?? $newModelParent) == $b['id'] ? 'selected' : '' ?>><?= h($b['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی بگذارید تا یک برندِ تازه بسازید؛ یک برند انتخاب کنید تا مدلِ همان برند شود.</small>
+                        <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">خالی بگذارید تا یک برند تازه بسازید؛ یک برند انتخاب کنید تا مدل همان برند شود.</small>
                     </div>
                     <button type="submit" name="save_category" class="btn btn-primary btn-block"><?= $editCat ? 'به‌روزرسانی' : 'افزودن' ?></button>
                     <?php if ($editCat || $newModelParent): ?><a href="categories.php" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">انصراف</a><?php endif; ?>
@@ -147,7 +147,7 @@ require_once __DIR__ . '/layout-top.php';
                     <label for="<?= $bid ?>" class="pset-sum">
                         <span class="pset-name">
                             <?= icon('layers', 'ic-sm') ?> <b><?= h($t['row']['name']) ?></b>
-                            <span class="pset-count"><?= count($t['children']) ?> مدل · <?= $t['own'] ?> محصولِ مستقیم</span>
+                            <span class="pset-count"><?= count($t['children']) ?> مدل · <?= $t['own'] ?> محصول مستقیم</span>
                         </span>
                         <span class="pset-caret"><?= icon('chevron-down', 'ic-sm') ?></span>
                     </label>
