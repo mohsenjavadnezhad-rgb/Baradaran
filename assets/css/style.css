@@ -317,9 +317,13 @@ a:hover {
 .brand-logo-box:hover { border-color: var(--red-primary); }
 
 .brand-logo-img {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     object-fit: contain;
+    /* یکدست، سیاه‌وسفید (خواسته کاربر: «مثل بی‌ام‌و سیاه باشه») — با
+       brightness(0) هر لوگویی، صرف‌نظر از رنگ اصلی‌اش، به یک سیلوئت
+       سیاه (روی زمینه شفاف) تبدیل می‌شود. */
+    filter: brightness(0);
 }
 
 @keyframes logoSlideIn {
@@ -418,10 +422,11 @@ a:hover {
 .mm-brand-head:hover { color: var(--red-hover); }
 
 .mm-brand-icon {
-    width: 14px;
-    height: 14px;
+    width: 17px;
+    height: 17px;
     object-fit: contain;
     flex-shrink: 0;
+    filter: brightness(0);
 }
 
 .mm-part-head {
@@ -576,12 +581,12 @@ a.mm-part-head:hover { color: var(--red-hover); }
     background: var(--bg-secondary);
     transform: translateY(-3px);
 }
-.pby-brand-logo { width: 40px; height: 40px; object-fit: contain; }
+.pby-brand-logo { width: 46px; height: 46px; object-fit: contain; filter: brightness(0); }
 .pby-brand-tile span { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
 .pby-selrow { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
 .pby-selbrand { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; }
-.pby-selbrand .pby-brand-logo { width: 32px; height: 32px; }
+.pby-selbrand .pby-brand-logo { width: 38px; height: 38px; }
 .pby-selbrand b { color: var(--text-primary); }
 .pby-change {
     display: inline-flex; align-items: center; gap: 0.3rem;
