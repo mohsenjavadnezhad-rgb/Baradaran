@@ -110,7 +110,7 @@ say('step=+1 → 3', yn((int)$_SESSION['cart'][$zzId] === 3) . ' (' . $_SESSION[
 say('پیام موفق', yn(!empty($r['success'])));
 post(['action' => 'update', 'product_id' => $zzId, 'step' => '-1', 'quantity' => '3']);
 say('step=-1 → 2', yn((int)$_SESSION['cart'][$zzId] === 2) . ' (' . $_SESSION['cart'][$zzId] . ')');
-/* step باید بر مقدارِ فیلد اولویت داشته باشد، نه جمع آن */
+/* step باید بر مقدار فیلد اولویت داشته باشد، نه جمع آن */
 $_SESSION['cart'] = [$zzId => 5];
 post(['action' => 'update', 'product_id' => $zzId, 'step' => '1', 'quantity' => '99']);
 say('step بر فیلد اولویت دارد → 6', yn((int)$_SESSION['cart'][$zzId] === 6) . ' (' . $_SESSION['cart'][$zzId] . ')');
