@@ -17,7 +17,7 @@ function findBanner($base) {
     return '';
 }
 
-/* رندر یک بنر: تصویر واقعی (لینک‌دار) یا جای‌گیرِ خالی با ابعاد. */
+/* رندر یک بنر: تصویر واقعی (لینک‌دار) یا جای‌گیر خالی با ابعاد. */
 function renderBanner($b) {
     $img = findBanner($b['base']);
     $ratio = 'aspect-ratio:' . $b['w'] . '/' . $b['h'];
