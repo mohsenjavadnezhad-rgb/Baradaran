@@ -1,5 +1,5 @@
 <?php
-/* پروبِ موقتِ بررسی — هیچ راز و هیچ اطلاعات شخصی چاپ نمی‌کند.
+/* پروب موقت بررسی — هیچ راز و هیچ اطلاعات شخصی چاپ نمی‌کند.
    پس از استفاده به ۴۰۴ تبدیل می‌شود. یک حالت در هر درخواست (?m=). */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -43,7 +43,7 @@ if ($m === 'eng') {
     $r0 = shippingResolveCost('post_sefareshi', 'تبریز', 0);
     ok((int)$r0['display'] === 50000 && $r0['source'] === 'rate_base', 'no-weight=>1unit src=' . $r0['source']);
 
-    $rx = shippingResolveCost('post_sefareshi', 'شهرِ بی‌نرخ', 2.0);
+    $rx = shippingResolveCost('post_sefareshi', 'شهر بی‌نرخ', 2.0);
     ok((int)$rx['display'] === 0, 'unknown-city=>0');
 
     /* پس‌کرایه: هیچ محاسبه‌ای نباید انجام شود */
@@ -73,7 +73,7 @@ if ($m === 'eng') {
     ok(count($pk) === count($avail), 'peyk-keeps-everything ' . implode(',', $pk));
     ok(!in_array('cod', shippingAllowedPayKeys('post_sefareshi', $avail), true), 'post-drops-cod');
 
-    /* هیچ کلیدِ حذف‌شده‌ای نباید لازم باشد */
+    /* هیچ کلید حذف‌شده‌ای نباید لازم باشد */
     $t = shippingRateTexts();
     ok(!isset($t['agreed_free']) && !isset($t['estimate']) && !isset($t['flat']), 'dead-keys-gone');
 
@@ -81,7 +81,7 @@ if ($m === 'eng') {
     $js = shippingRateJs(['post_sefareshi', 'barbari'], 2.0);
     ok((float)$js['w'] === 2.0, 'js-weight');
     ok(isset($js['m']['post_sefareshi']['r'][0]['u']), 'js-rate-unit');
-    /* پرچمِ پس‌کرایه در JS فقط وقتی معنا دارد که روشی تیک‌خورده باشد؛ حالتِ ?m=col آن را می‌آزماید */
+    /* پرچم پس‌کرایه در JS فقط وقتی معنا دارد که روشی تیک‌خورده باشد؛ حالت ?m=col آن را می‌آزماید */
     if ($collectKey !== '') {
         ok(!empty($js['m'][$collectKey]['c'] ?? null) || !isset($js['m'][$collectKey]),
            "js-collect-flag ($collectKey)");
@@ -138,8 +138,8 @@ if (in_array($m, ['cart', 'chk', 'acc', 'ord', 'ord2'], true)) {
     if ($cid <= 0) { echo "FAIL no-customer-row\n"; exit; }
     $_SESSION['customer_id'] = $cid;
 
-    /* ---- سبد و تسویه: باید سبدِ واقعی داشته باشند، وگرنه صفحه ریدایرکت می‌کند.
-       هر تغییرِ موقتی با register_shutdown_function برگردانده می‌شود تا حتی اگر
+    /* ---- سبد و تسویه: باید سبد واقعی داشته باشند، وگرنه صفحه ریدایرکت می‌کند.
+       هر تغییر موقتی با register_shutdown_function برگردانده می‌شود تا حتی اگر
        صفحهٔ include‌شده exit کند، داده‌های زندهٔ سایت دست‌نخورده بمانند. ---- */
     if ($m === 'cart' || $m === 'chk') {
         $pid = (int)$pdo->query("SELECT id FROM products WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetchColumn();
@@ -218,7 +218,7 @@ if (in_array($m, ['cart', 'chk', 'acc', 'ord', 'ord2'], true)) {
         $oid = (int)$row['id'];
         $_SESSION['customer_id'] = (int)$row['customer_id'];
         currentCustomer(true);
-        /* موقتاً روش پرداخت را کارت به کارت کن تا فرم ثبت واریز رندر شود، بعد برگردان */
+        /* موقتا روش پرداخت را کارت به کارت کن تا فرم ثبت واریز رندر شود، بعد برگردان */
         $prev = $pdo->prepare("SELECT payment_method, payment_status FROM orders WHERE id=?");
         $prev->execute([$oid]); $prev = $prev->fetch();
         register_shutdown_function(function () use ($pdo, $oid, $prev) {
@@ -245,8 +245,8 @@ if (in_array($m, ['cart', 'chk', 'acc', 'ord', 'ord2'], true)) {
         exit;
     }
     if ($m === 'ord2') {
-        /* حالتِ «مشتری واریز را اعلام کرده»: وضعیت pending + چهار مقدارِ آزمایشی.
-           باید برچسب «در انتظار تأیید واریز» و بازبینیِ مقادیر ثبت‌شده دیده شود. */
+        /* حالت «مشتری واریز را اعلام کرده»: وضعیت pending + چهار مقدار آزمایشی.
+           باید برچسب «در انتظار تأیید واریز» و بازبینی مقادیر ثبت‌شده دیده شود. */
         $row = $pdo->query("SELECT id, customer_id FROM orders WHERE customer_id IS NOT NULL AND customer_id > 0 ORDER BY id DESC LIMIT 1")->fetch();
         if (!$row) { echo "INFO no-order-with-customer\n"; exit; }
         $oid = (int)$row['id'];
@@ -314,7 +314,7 @@ if (in_array($m, ['adm', 'det', 'set'], true)) {
         ob_start(); include __DIR__ . '/admin/order-detail.php'; $html = ob_get_clean();
         ok(strlen($html) > 2000, 'order-detail-rendered len=' . strlen($html));
         ok(strpos($html, 'Fatal error') === false && strpos($html, 'Warning') === false, 'det-no-php-error');
-        has($html, 'واریزِ اعلام‌شدهٔ مشتری', 'c2c-admin-panel');
+        has($html, 'واریز اعلام‌شدهٔ مشتری', 'c2c-admin-panel');
         has($html, 'تلاش‌های پرداخت', 'attempts-block-intact');
         has($html, '?v=26', 'css-v26');
         exit;
@@ -331,7 +331,7 @@ if (in_array($m, ['adm', 'det', 'set'], true)) {
     }
 }
 
-/* ---------------- بازبینیِ پایانی: هیچ داده‌ای نباید تغییرکرده مانده باشد ---------------- */
+/* ---------------- بازبینی پایانی: هیچ داده‌ای نباید تغییرکرده مانده باشد ---------------- */
 if ($m === 'state') {
     $n = (int)$pdo->query("SELECT COUNT(*) FROM shipping_rates")->fetchColumn();
     echo "INFO shipping_rates-rows=$n\n";
@@ -341,7 +341,7 @@ if ($m === 'state') {
                . " unit={$r['weight_unit']} to={$r['weight_to']} cost={$r['cost']} act={$r['is_active']}\n";
         }
     }
-    /* امضای ردیفِ آزمایشیِ خودم: تبریز + ۵۰٬۰۰۰ — ردیف‌های خودِ مدیر دست‌نخورده می‌مانند */
+    /* امضای ردیف آزمایشی خودم: تبریز + ۵۰٬۰۰۰ — ردیف‌های خود مدیر دست‌نخورده می‌مانند */
     $mine = (int)$pdo->query("SELECT COUNT(*) FROM shipping_rates WHERE method_key='post_sefareshi' AND city='تبریز' AND cost=50000")->fetchColumn();
     ok($mine === 0, 'probe-rate-row-left=' . $mine);
 
@@ -369,10 +369,10 @@ if ($m === 'state') {
     exit;
 }
 
-/* ---------------- پاک‌سازیِ ردِ پروب: وزنی که پروب نوشت و برنگرداند ----------------
-   علتِ باقی‌ماندن: در حالت cart/chk وزنِ اصلی NULL بود و شرطِ بازگردانی
-   ($prevW !== null) آن را رد می‌کرد. فقط همان محصولِ تازه‌ترین و فقط اگر
-   دقیقاً 2.000 باشد به NULL برمی‌گردد؛ ردیف‌های نرخِ خودِ مدیر لمس نمی‌شوند. */
+/* ---------------- پاک‌سازی رد پروب: وزنی که پروب نوشت و برنگرداند ----------------
+   علت باقی‌ماندن: در حالت cart/chk وزن اصلی NULL بود و شرط بازگردانی
+   ($prevW !== null) آن را رد می‌کرد. فقط همان محصول تازه‌ترین و فقط اگر
+   دقیقا 2.000 باشد به NULL برمی‌گردد؛ ردیف‌های نرخ خود مدیر لمس نمی‌شوند. */
 if ($m === 'fix') {
     $pid = (int)$pdo->query("SELECT id FROM products WHERE is_active=1 ORDER BY id DESC LIMIT 1")->fetchColumn();
     $cur = $pdo->query("SELECT weight FROM products WHERE id=$pid")->fetchColumn();
@@ -387,7 +387,7 @@ if ($m === 'fix') {
     exit;
 }
 
-/* ---------------- سناریوی واقعیِ خودِ مدیر (فقط خواندن، هیچ نوشتنی) ---------------- */
+/* ---------------- سناریوی واقعی خود مدیر (فقط خواندن، هیچ نوشتنی) ---------------- */
 if ($m === 'user') {
     foreach ($pdo->query("SELECT method_key, city, weight_unit, cost FROM shipping_rates WHERE is_active=1 ORDER BY id") as $r) {
         $city = (string)$r['city'];
@@ -400,7 +400,7 @@ if ($m === 'user') {
             $want  = $units * $cost;
             ok((int)$res['display'] === $want, "{$wt}kg => $want got=" . (int)$res['display'] . " units={$res['units']}");
         }
-        /* وزنِ واقعیِ محصولی که مدیر ثبت کرده، ضربدر تعداد */
+        /* وزن واقعی محصولی که مدیر ثبت کرده، ضربدر تعداد */
         $pw = $pdo->query("SELECT id, weight FROM products WHERE weight IS NOT NULL AND weight > 0 ORDER BY id LIMIT 1")->fetch();
         if ($pw) {
             $w1 = (float)$pw['weight'];
