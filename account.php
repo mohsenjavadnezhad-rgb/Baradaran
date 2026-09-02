@@ -10,8 +10,8 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full   = trim($_POST['full_name'] ?? '');
     $prov   = trim($_POST['province'] ?? '');
-    /* نامِ رسمیِ شهر از فهرست شهرها گرفته می‌شود تا نرخ‌نامهٔ ارسال بتواند
-       بعداً همین شهر را بشناسد؛ اگر شهر در فهرست نبود، عیناً همان چیزی که
+    /* نام رسمی شهر از فهرست شهرها گرفته می‌شود تا نرخ‌نامهٔ ارسال بتواند
+       بعدا همین شهر را بشناسد؛ اگر شهر در فهرست نبود، عینا همان چیزی که
        مشتری نوشته ذخیره می‌شود. */
     $city   = shippingCityCanonical(trim($_POST['city'] ?? ''));
     $addr   = trim($_POST['address'] ?? '');
@@ -59,9 +59,9 @@ foreach ($orders as $o) {
 
 /* ---- کلید «بروزرسانی» فهرست سفارش‌ها ----
    با جاوااسکریپت فقط همین ناحیه (#orders-live) دوباره از سرور گرفته و جای‌گذاری
-   می‌شود، پس صفحه دیگر به بالا نمی‌پرد. بدون جاوااسکریپت همان لینکِ عادی باز
+   می‌شود، پس صفحه دیگر به بالا نمی‌پرد. بدون جاوااسکریپت همان لینک عادی باز
    می‌شود؛ مقدار r بین ۱ و ۲ عوض می‌شود تا مرورگر کلیک را «همین صفحه + لنگر»
-   نبیند و درخواستِ تازه بفرستد. GET است، پس فرمِ مشخصات دوباره POST نمی‌شود
+   نبیند و درخواست تازه بفرستد. GET است، پس فرم مشخصات دوباره POST نمی‌شود
    (الگوی PRG). */
 $rNext       = (($_GET['r'] ?? '') === '1') ? '2' : '1';
 $rDone       = isset($_GET['r']);
@@ -72,15 +72,15 @@ $statsHtml = 'تعداد خرید: <b>' . $buyCount . '</b> سفارش &nbsp;|&n
            . h($refreshedAt) . '</b>';
 
 $emptyHtml = $pastOrders
-    ? '<p style="color:var(--text-muted);">سفارشِ در جریانی ندارید؛ سفارش‌های پیشین شما در صفحهٔ «سفارش‌های گذشته» است.</p>'
+    ? '<p style="color:var(--text-muted);">سفارش در جریانی ندارید؛ سفارش‌های پیشین شما در صفحهٔ «سفارش‌های گذشته» است.</p>'
       . '<a href="orders-past.php" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;">'
       . icon('clock', 'ic-sm') . ' سفارش‌های گذشته</a>'
     : '<p style="color:var(--text-muted);">هنوز سفارشی ثبت نکرده‌اید.</p>'
       . '<a href="shop.php" class="btn btn-primary btn-sm" style="margin-top:0.5rem;">شروع خرید</a>';
 
-/* پاسخِ بروزرسانیِ درجا: فقط قطعهٔ HTML فهرست، بدون هدر و فوتر.
-   کامنتِ نشانه در ابتدای خروجی است تا اگر نشست منقضی شده و پاسخ صفحهٔ ورود بود،
-   جاوااسکریپت تشخیص بدهد و به‌جای تزریقِ صفحهٔ ورود، صفحه را عادی باز کند. */
+/* پاسخ بروزرسانی درجا: فقط قطعهٔ HTML فهرست، بدون هدر و فوتر.
+   کامنت نشانه در ابتدای خروجی است تا اگر نشست منقضی شده و پاسخ صفحهٔ ورود بود،
+   جاوااسکریپت تشخیص بدهد و به‌جای تزریق صفحهٔ ورود، صفحه را عادی باز کند. */
 if (($_GET['frag'] ?? '') === 'orders') {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
@@ -109,7 +109,7 @@ require_once __DIR__ . '/includes/header.php';
 
   <?php if ($saved): ?><div class="flash flash-success">اطلاعات شما ذخیره شد.</div><?php endif; ?>
   <?php if ($errors): ?><div class="flash flash-error"><?php foreach ($errors as $e): ?><p><?= h($e) ?></p><?php endforeach; ?></div><?php endif; ?>
-  <?php if (!customerProfileComplete($c)): ?><div class="flash auth-test">لطفاً پروفایل خود را کامل کنید (نام، آدرس و کد پستی) تا هنگام خرید نیازی به وارد‌کردن دوباره نباشد.</div><?php endif; ?>
+  <?php if (!customerProfileComplete($c)): ?><div class="flash auth-test">لطفا پروفایل خود را کامل کنید (نام، آدرس و کد پستی) تا هنگام خرید نیازی به وارد‌کردن دوباره نباشد.</div><?php endif; ?>
   <?php if ($isPartner && $pStatus !== 'approved'): ?>
   <div class="auth-note" style="margin-bottom:1rem;">
     درخواست حساب <b>همکار</b> شما ثبت شده و در انتظار بررسی است.
@@ -132,12 +132,12 @@ require_once __DIR__ . '/includes/header.php';
         <?php if ($isPartner): ?>
         <div class="form-group">
           <label>نام فروشگاه / تعمیرگاه</label>
-          <input type="text" name="partner_company" class="form-control" value="<?= h($_POST['partner_company'] ?? $c['partner_company'] ?? '') ?>" placeholder="مثلاً یدکی‌فروشی برادران">
+          <input type="text" name="partner_company" class="form-control" value="<?= h($_POST['partner_company'] ?? $c['partner_company'] ?? '') ?>" placeholder="مثلا یدکی‌فروشی برادران">
         </div>
         <?php endif; ?>
         <div class="form-row-2">
-          <?php /* همان انتخابگرِ دوسطحیِ صفحهٔ تسویه: استان و شهر هر دو نوار
-                   کشویی و به هم وابسته. شهرِ پروفایل مبنای محاسبهٔ خودکار هزینهٔ
+          <?php /* همان انتخابگر دوسطحی صفحهٔ تسویه: استان و شهر هر دو نوار
+                   کشویی و به هم وابسته. شهر پروفایل مبنای محاسبهٔ خودکار هزینهٔ
                    ارسال در سبد خرید و تسویه است، پس انتخاب از فهرست جلوی
                    غلط‌های تایپی را می‌گیرد. */ ?>
           <?= shippingProvinceCityFields(
@@ -162,7 +162,7 @@ require_once __DIR__ . '/includes/header.php';
       <h3 class="account-box-title" style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
         <span>سفارش‌های در جریان (<?= count($openOrders) ?>)</span>
         <span style="display:flex;align-items:center;gap:0.35rem;flex-wrap:wrap;">
-          <?php /* بروزرسانیِ وضعیت: تازه‌ترین روند ارسالی که مدیر ثبت کرده را می‌آورد. */ ?>
+          <?php /* بروزرسانی وضعیت: تازه‌ترین روند ارسالی که مدیر ثبت کرده را می‌آورد. */ ?>
           <a href="account.php?r=<?= h($rNext) ?>#orders" id="ord-refresh" class="btn btn-secondary btn-sm"
              title="گرفتن تازه‌ترین وضعیت سفارش‌ها از فروشگاه"><?= icon('refresh', 'ic-sm') ?> بروزرسانی</a>
           <a href="orders-past.php" class="btn btn-secondary btn-sm"
@@ -176,9 +176,9 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <script>
-/* بروزرسانیِ درجای فهرست سفارش‌ها: فقط درونِ #orders-live از سرور گرفته و عوض
+/* بروزرسانی درجای فهرست سفارش‌ها: فقط درون #orders-live از سرور گرفته و عوض
    می‌شود، پس نه صفحه بارگذاری می‌شود و نه به بالا می‌پرد. اگر مرورگر fetch
-   نداشت یا پاسخ قطعهٔ موردنظر نبود (مثلاً نشست منقضی شده)، همان لینکِ عادی
+   نداشت یا پاسخ قطعهٔ موردنظر نبود (مثلا نشست منقضی شده)، همان لینک عادی
    باز می‌شود تا کلید هرگز بی‌کار نماند. */
 (function () {
     var btn = document.getElementById('ord-refresh');
