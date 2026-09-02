@@ -208,6 +208,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute([($wRaw === '' || (float)$wRaw <= 0) ? null : (float)$wRaw, $pid]);
             }
 
+            /* سال تولید خودرو (شمسی، از/تا) — اختیاری و جدا/محافظت‌شده مثل
+               weight، تا پیش از اجرای مهاجرت خطا ندهد. خالی‌گذاشتن یعنی این
+               قطعه محدودیت سالی ندارد (در فروشگاه برای همهٔ سال‌ها می‌آید).
+               فقط «از» پرشده باشد یعنی همان یک سال مشخص (از=تا). */
+            if (productYearReady()) {
+                $yfRaw = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['year_from'] ?? '')));
+                $ytRaw = preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['year_to'] ?? '')));
+                $yf = ($yfRaw !== '' && strlen($yfRaw) === 4) ? (int)$yfRaw : null;
+                $yt = ($ytRaw !== '' && strlen($ytRaw) === 4) ? (int)$ytRaw : ($yf !== null ? $yf : null);
+                if ($yf !== null && $yt !== null && $yt < $yf) { $tmp = $yf; $yf = $yt; $yt = $tmp; }
+                $pdo->prepare("UPDATE products SET year_from = ?, year_to = ? WHERE id = ?")
+                    ->execute([$yf, $yt, $pid]);
+            }
+
             /* درج تصاویر گالری در ادامهٔ ترتیب فعلی */
             if ($galleryNew) {
                 $maxSort = $pdo->prepare("SELECT COALESCE(MAX(sort_order), -1) FROM product_images WHERE product_id = ?");
@@ -360,6 +374,27 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
              style="width:200px;">
       <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;max-width:320px;line-height:1.7;">
         برای محاسبهٔ خودکار هزینهٔ ارسال از «نرخ‌نامه» (تنظیمات ← روش‌های ارسال). خالی بگذارید تا نرخ پایهٔ شهر در نظر گرفته شود.
+      </div>
+    </div>
+    <?php endif; ?>
+    <?php if (productYearReady()): ?>
+    <?php /* سال تولید خودرو (شمسی): در فروشگاه، مشتری بعد از انتخاب برند
+            می‌تواند سال تولید خودروش را هم انتخاب کند تا فقط قطعات مناسب
+            همان سال ببیند. خالی‌گذاشتن یعنی این قطعه برای همهٔ سال‌ها مناسب
+            است (خواستهٔ کاربر). */ ?>
+    <div>
+      <label>سال تولید خودرو (شمسی) — اختیاری</label>
+      <div style="display:flex;align-items:center;gap:0.4rem;">
+        <input type="text" name="year_from" class="form-control" dir="ltr" inputmode="numeric" maxlength="4"
+               placeholder="از، مثلا 1390"
+               value="<?= h($_POST['year_from'] ?? $product['year_from'] ?? '') ?>" style="width:110px;">
+        <span style="color:var(--text-muted);">تا</span>
+        <input type="text" name="year_to" class="form-control" dir="ltr" inputmode="numeric" maxlength="4"
+               placeholder="تا، مثلا 1399"
+               value="<?= h($_POST['year_to'] ?? $product['year_to'] ?? '') ?>" style="width:110px;">
+      </div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;max-width:320px;line-height:1.7;">
+        اگر این قطعه فقط برای یک سال مشخص است، فقط «از» را پر کنید. خالی‌گذاشتن هر دو یعنی محدودیت سالی ندارد و برای همهٔ سال‌ها نشان داده می‌شود.
       </div>
     </div>
     <?php endif; ?>
