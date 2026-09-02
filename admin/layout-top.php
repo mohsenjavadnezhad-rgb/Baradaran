@@ -96,14 +96,14 @@ $pchkPending = partCheckPendingCount();
 .dg-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius);overflow:hidden;}
 .dg-box-hd{padding:0.75rem 1rem;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;gap:0.75rem;}
 .dg-box-hd h3{font-size:0.85rem;color:var(--text-primary);display:flex;align-items:center;gap:0.4rem;}
-/* عنوان جعبه وقتی آیکون و متن مستقیماً داخل .dg-box-hd هستند (بدون h3) */
+/* عنوان جعبه وقتی آیکون و متن مستقیما داخل .dg-box-hd هستند (بدون h3) */
 .dg-hd-t{display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;font-weight:600;color:var(--text-primary);}
 .dg-box-hd a{font-size:0.72rem;color:var(--red-primary);text-decoration:none;}
 .dg-box-bd{padding:0.5rem;}
 .admin-form-full{max-width:700px;}
-/* بخش «روش‌های ارسال» دو جدول پهن دارد (min-width:680px در style.css) که در قابِ
+/* بخش «روش‌های ارسال» دو جدول پهن دارد (min-width:680px در style.css) که در قاب
    ۷۰۰ پیکسلی جا نمی‌شد و نوار اسکرول افقی می‌ساخت. فقط همین بخش تا ۱۳۲۰ پیکسل به
-   چپ کشیده می‌شود تا جدول‌ها بی‌اسکرول جا شوند؛ فیلدهای تک‌خطیِ همین بخش با
+   چپ کشیده می‌شود تا جدول‌ها بی‌اسکرول جا شوند؛ فیلدهای تک‌خطی همین بخش با
    ff-cap کوتاه نگه داشته می‌شوند تا کشیده و بی‌قواره نشوند. */
 .admin-form-full.ff-wide,#shipcrud,#ratecrud{max-width:1320px;}
 .ff-wide .ff-cap,#shipcrud .ff-cap{max-width:640px;}
@@ -152,7 +152,7 @@ $pchkPending = partCheckPendingCount();
 <?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending) ?>
 <?= adminMenuLink('part-checks.php', 'camera', 'بررسی عکس قطعه', $currentPage, $pchkPending) ?>
 <?php
-/* تنظیمات سایت: والدِ کشویی با چهار زیرشاخهٔ مجزا (هرکدام صفحهٔ خودش را دارد) */
+/* تنظیمات سایت: والد کشویی با چهار زیرشاخهٔ مجزا (هرکدام صفحهٔ خودش را دارد) */
 $asSecs   = settingsSections();
 $asOnSet  = ($currentPage === 'settings.php');
 $asCurSec = settingsSectionKey($_GET['sec'] ?? '');
