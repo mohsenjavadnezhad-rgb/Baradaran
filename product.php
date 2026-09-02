@@ -32,7 +32,7 @@ $variantJson = json_encode(array_map(function($v){
     return ['id'=>$v['id'],'country'=>$v['country'],'manufacturer'=>$v['manufacturer'],'retail_price'=>$v['retail_price'],'wholesale_price'=>$v['wholesale_price'],'stock'=>$v['stock'],'retail_discount'=>(int)($v['retail_discount'] ?? 0),'wholesale_discount'=>(int)($v['wholesale_discount'] ?? 0)];
 }, $variants), JSON_UNESCAPED_UNICODE);
 
-/* گالری کاروسل: تصویر اصلیِ محصول + تصاویر جدول product_images (بدون تکرار).
+/* گالری کاروسل: تصویر اصلی محصول + تصاویر جدول product_images (بدون تکرار).
    عضو اول همیشه تصویری است که ابتدا در اسلات بزرگ دیده می‌شود. */
 $gallery = [];
 if (!empty($product['image'])) $gallery[] = $product['image'];
@@ -51,7 +51,7 @@ $questions = $reviewsOn ? getProductQa($product['id']) : [];
 $isCustomer    = isCustomerLoggedIn();
 $isAdminViewer = isLoggedIn();
 
-/* پیام بازگشتِ PRG از review-submit.php ('ok' یا 'err' + متن) */
+/* پیام بازگشت PRG از review-submit.php ('ok' یا 'err' + متن) */
 $prMsgMap = [
     'review'    => ['ok',  'نظر شما ثبت شد و پس از تأیید فروشگاه نمایش داده می‌شود.'],
     'question'  => ['ok',  'پرسش شما ثبت شد و پس از تأیید فروشگاه نمایش داده می‌شود.'],
@@ -61,7 +61,7 @@ $prMsgMap = [
     'short'     => ['err', 'متن نوشته‌شده بسیار کوتاه است.'],
     'badrating' => ['err', 'امتیاز را بین ۱ تا ۵ ستاره انتخاب کنید.'],
     'noq'       => ['err', 'پرسش مورد نظر پیدا نشد.'],
-    'failed'    => ['err', 'ثبت انجام نشد؛ لطفاً دوباره تلاش کنید.'],
+    'failed'    => ['err', 'ثبت انجام نشد؛ لطفا دوباره تلاش کنید.'],
 ];
 $prMsg = isset($_GET['msg']) ? ($prMsgMap[$_GET['msg']] ?? null) : null;
 
@@ -224,7 +224,7 @@ $loginBack = 'login.php?return=' . urlencode('product.php?id=' . $product['id'] 
             <?php if ($isCustomer): ?>
             <?php /* انتخابگر ستاره فقط با CSS کار می‌کند: رادیوها به ترتیب ۵..۱ در DOM
                      هستند و با row-reverse در چیدمان راست‌به‌چپ، ستارهٔ «۱» سمت راست
-                     می‌افتد؛ پس بدون هیچ JSای هم انتخاب و هم پیش‌نمایشِ hover کار می‌کند. */ ?>
+                     می‌افتد؛ پس بدون هیچ JSای هم انتخاب و هم پیش‌نمایش hover کار می‌کند. */ ?>
             <form method="POST" action="review-submit.php" class="pr-form">
                 <input type="hidden" name="action" value="review">
                 <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
@@ -382,7 +382,7 @@ $loginBack = 'login.php?return=' . urlencode('product.php?id=' . $product['id'] 
     if (prev) prev.addEventListener('click', function () { show(idx - 1, false); });
     if (next) next.addEventListener('click', function () { show(idx + 1, false); });
 
-    /* در چیدمان راست‌به‌چپ، فلشِ راست به تصویر قبلی می‌رود */
+    /* در چیدمان راست‌به‌چپ، فلش راست به تصویر قبلی می‌رود */
     strip.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowLeft')  { e.preventDefault(); show(idx + 1, true); }
         if (e.key === 'ArrowRight') { e.preventDefault(); show(idx - 1, true); }
@@ -429,7 +429,7 @@ $loginBack = 'login.php?return=' . urlencode('product.php?id=' . $product['id'] 
     }
 
     /* ---------- بخش مشترک: هم‌گام‌سازی «تعداد» با «نوع قیمت» ----------
-       این بخش باید بالای بازگشتِ زودهنگامِ واریانت‌ها باشد تا برای محصولات
+       این بخش باید بالای بازگشت زودهنگام واریانت‌ها باشد تا برای محصولات
        بدون واریانت هم کار کند. قاعده: هرچه کاربر در فیلد تعداد بنویسد،
        اگر ≥ حد کلی باشد جعبهٔ «قیمت کلی» خودکار انتخاب می‌شود. */
     var qtyInput      = document.getElementById('qtyInput');
@@ -516,7 +516,7 @@ $loginBack = 'login.php?return=' . urlencode('product.php?id=' . $product['id'] 
                     : 'با رسیدن تعداد به <b>' + minWhole + '</b> عدد، قیمت کلی به‌صورت خودکار اعمال می‌شود.';
             }
         }
-        /* دکمهٔ میان‌بُر فقط وقتی معنی دارد که هنوز جزئی است و آستانه در دسترس است */
+        /* دکمهٔ میان‌بر فقط وقتی معنی دارد که هنوز جزئی است و آستانه در دسترس است */
         if (qtyJump) qtyJump.hidden = !(type === 'retail' && reachable && q < minWhole);
     }
 
@@ -637,7 +637,7 @@ $loginBack = 'login.php?return=' . urlencode('product.php?id=' . $product['id'] 
         return num(orig) + unit;
     }
 
-    /* قیمت‌ها/موجودی واریانت را به‌روز می‌کند و تعدادِ تایپ‌شده را حفظ می‌کند */
+    /* قیمت‌ها/موجودی واریانت را به‌روز می‌کند و تعداد تایپ‌شده را حفظ می‌کند */
     function syncUI(){
         var v = currentVariant;
         if (!v) return;
