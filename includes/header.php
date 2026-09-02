@@ -17,8 +17,7 @@ if ($headerBrandId) {
     foreach ($brands as $b) {
         if ($b['id'] == $headerBrandId) {
             $headerBrandName = $b['name'];
-            $logoFile = 'assets/images/brands/' . $b['slug'] . '.svg';
-            if (file_exists(__DIR__ . '/../' . $logoFile)) $headerLogoSrc = $logoFile;
+            $headerLogoSrc = brandLogoSrc($b);
             break;
         }
     }
@@ -28,8 +27,7 @@ function renderBrandsTree($brands) {
     $html = '';
     foreach ($brands as $brand) {
         $models = getSubCategories($brand['id']);
-        $logoFile = 'assets/images/brands/' . $brand['slug'] . '.svg';
-        $logoSrc = file_exists(__DIR__ . '/../' . $logoFile) ? $logoFile : '';
+        $logoSrc = brandLogoSrc($brand);
         $html .= '<div class="mm-col">';
         $html .= '<a href="shop.php?brand=' . $brand['id'] . '" class="mm-brand-head">';
         if ($logoSrc) $html .= '<img src="' . $logoSrc . '" class="mm-brand-icon" alt="">';
