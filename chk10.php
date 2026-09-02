@@ -1,6 +1,6 @@
 <?php
 /* ------------------------------------------------------------------
-   بررسیِ زمان‌اجرای «کاروسل تصاویر محصول» (گروه د).
+   بررسی زمان‌اجرای «کاروسل تصاویر محصول» (گروه د).
    چند ردیف product_images آزمایشی داخل یک تراکنش می‌سازد، صفحه‌ها را
    رندر می‌کند و بعد ROLLBACK می‌کند (هیچ ردی نمی‌ماند).
    یک‌بارمصرف — سپس به ۴۰۴ خنثی شود.
@@ -39,7 +39,7 @@ $pid = 0;
 try {
     $pdo->beginTransaction();
 
-    /* ---------- ۲) محصولِ آزمایشی (باید تصویر اصلی داشته باشد) ---------- */
+    /* ---------- ۲) محصول آزمایشی (باید تصویر اصلی داشته باشد) ---------- */
     $row = $pdo->query("SELECT id, name, image FROM products
         WHERE is_active = 1 AND image IS NOT NULL AND image <> ''
         ORDER BY id DESC LIMIT 1")->fetch();
@@ -148,7 +148,7 @@ try {
     $so = array_column(getProductImages($pid), 'sort_order');
     say('renumbered 0..n-1', yn($so === range(0, count($so) - 1)));
 
-    /* ---------- ۸) حذف: ردیف می‌رود، فایلِ ناموجود مشکلی نمی‌سازد ---------- */
+    /* ---------- ۸) حذف: ردیف می‌رود، فایل ناموجود مشکلی نمی‌سازد ---------- */
     $pdo->prepare("DELETE FROM product_images WHERE id = ?")->execute([$ids[2]]);
     galleryUnlinkIfUnused('zzchk_c.jpg');
     say('after delete count', count(getProductImages($pid)));
@@ -164,7 +164,7 @@ try {
     say('EXCEPTION', $e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine());
 }
 
-/* ---------- ۹) تأیید نبودِ هر ردّی ---------- */
+/* ---------- ۹) تأیید نبود هر ردی ---------- */
 try {
     $left = (int)$pdo->query("SELECT COUNT(*) FROM product_images WHERE image LIKE 'zzchk_%'")->fetchColumn();
     say('temp gallery rows left', $left);
