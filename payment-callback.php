@@ -6,7 +6,7 @@
      همیشه یک درخواست تأیید سرور-به-سرور به درگاه زده می‌شود (payment.php).
    • ورود کاربر الزامی نیست، چون بعضی درگاه‌ها با POST سرور-به-سرور برمی‌گردند
      و ممکن است کوکی نشست همراه نباشد. شناسایی سفارش با «توکن درگاه» انجام می‌شود.
-   • اگر سفارش قبلاً پرداخت‌شده باشد، دوباره تأیید نمی‌شود (idempotent).
+   • اگر سفارش قبلا پرداخت‌شده باشد، دوباره تأیید نمی‌شود (idempotent).
    header.php لود نمی‌شود تا POST بازگشتی درگاه با پردازش سبد خرید تلاقی نکند. */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -47,9 +47,9 @@ if (!paymentReady()) {
         $message = 'سفارش مربوط به این پرداخت پیدا نشد.';
         paymentLog("CALLBACK orphan | gw=$gw | authority=$authority | order=$orderIdHint");
     } elseif (($order['payment_status'] ?? '') === 'paid') {
-        /* قبلاً تأیید شده — دوباره تأیید نمی‌کنیم */
+        /* قبلا تأیید شده — دوباره تأیید نمی‌کنیم */
         $state   = 'ok';
-        $message = 'این سفارش قبلاً پرداخت شده است.';
+        $message = 'این سفارش قبلا پرداخت شده است.';
     } else {
         $orderId = (int)$order['id'];
 
