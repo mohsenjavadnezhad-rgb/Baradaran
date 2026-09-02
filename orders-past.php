@@ -1,7 +1,7 @@
 <?php
 /* ---------- سفارش‌های گذشتهٔ مشتری ----------
-   سفارش‌های ارسال‌شده و لغوشده از فهرستِ «سفارش‌های در جریان» در account.php جدا
-   شده‌اند و اینجا نشان داده می‌شوند تا آن صفحه شلوغ نشود. کارتِ هر سفارش با همان
+   سفارش‌های ارسال‌شده و لغوشده از فهرست «سفارش‌های در جریان» در account.php جدا
+   شده‌اند و اینجا نشان داده می‌شوند تا آن صفحه شلوغ نشود. کارت هر سفارش با همان
    renderCustomerOrderCard() ساخته می‌شود، پس نمایش دو صفحه هرگز واگرا نمی‌شود. */
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -19,7 +19,7 @@ try {
 
 list($openOrders, $pastOrders) = splitCustomerOrders($orders);
 
-/* جمع‌بندیِ همین صفحه: سفارش‌های لغوشده در مبلغ حساب نمی‌شوند */
+/* جمع‌بندی همین صفحه: سفارش‌های لغوشده در مبلغ حساب نمی‌شوند */
 $pastCount = 0; $pastSum = 0;
 foreach ($pastOrders as $o) {
     if (($o['status'] ?? '') === 'cancelled') continue;
@@ -35,11 +35,11 @@ $statsHtml = 'سفارش‌های تحویل‌شده: <b>' . $pastCount . '</b>
            . formatPriceUnit($pastSum) . '</b> &nbsp;|&nbsp; آخرین بروزرسانی: <b>'
            . h($refreshedAt) . '</b>';
 
-$emptyHtml = '<p style="color:var(--text-muted);">هنوز سفارشِ تحویل‌شده یا لغوشده‌ای ندارید.</p>'
+$emptyHtml = '<p style="color:var(--text-muted);">هنوز سفارش تحویل‌شده یا لغوشده‌ای ندارید.</p>'
            . '<a href="account.php#orders" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;">'
            . icon('arrow-right', 'ic-sm') . ' بازگشت به سفارش‌های در جریان</a>';
 
-/* پاسخِ بروزرسانیِ درجا — مثل account.php، فقط قطعهٔ HTML با کامنتِ نشانه */
+/* پاسخ بروزرسانی درجا — مثل account.php، فقط قطعهٔ HTML با کامنت نشانه */
 if (($_GET['frag'] ?? '') === 'orders') {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
@@ -71,7 +71,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <script>
-/* همان بروزرسانیِ درجای account.php (بدون پریدن صفحه) برای این فهرست */
+/* همان بروزرسانی درجای account.php (بدون پریدن صفحه) برای این فهرست */
 (function () {
     var btn = document.getElementById('ord-refresh');
     var box = document.getElementById('orders-live');
