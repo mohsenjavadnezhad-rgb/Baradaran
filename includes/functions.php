@@ -1588,6 +1588,57 @@ function jalaliMonthName($m) {
     return isset($names[$i]) ? $names[$i] : '';
 }
 
+/* معکوس gregorianToJalali — همان الگوریتمی که در تقویم جاوااسکریپتی
+   checkout.php (j2g) استفاده شده، اینجا به PHP پورت شده تا محاسباتی مثل
+   «چند روز تا پایان ماه شمسی» سمت سرور هم ممکن باشد (مثلا پیگیری تسویه
+   همکاران). */
+function jalaliToGregorian($jy, $jm, $jd) {
+    $jy = (int)$jy + 1595;
+    $jm = (int)$jm; $jd = (int)$jd;
+    $days = -355668 + (365 * $jy) + ((int)($jy / 33) * 8) + (int)((($jy % 33) + 3) / 4)
+          + $jd + (($jm < 7) ? ($jm - 1) * 31 : (($jm - 7) * 30) + 186);
+    $gy = 400 * (int)($days / 146097);
+    $days %= 146097;
+    if ($days > 36524) {
+        $days--;
+        $gy += 100 * (int)($days / 36524);
+        $days %= 36524;
+        if ($days >= 365) $days++;
+    }
+    $gy += 4 * (int)($days / 1461);
+    $days %= 1461;
+    if ($days > 365) {
+        $gy += (int)(($days - 1) / 365);
+        $days = ($days - 1) % 365;
+    }
+    $gd = $days + 1;
+    $leap = (($gy % 4 === 0 && $gy % 100 !== 0) || $gy % 400 === 0);
+    $dim = [0, 31, $leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    $gm = 0;
+    while ($gm < 13 && $gd > $dim[$gm]) { $gd -= $dim[$gm]; $gm++; }
+    return [$gy, $gm, $gd];
+}
+
+/* تعداد روزهای یک ماه شمسی — ۶ ماه اول ۳۱، ۵ ماه بعد ۳۰، اسفند ۲۹ یا ۳۰
+   (کبیسه‌بودن با رفت‌وبرگشت «۳۰ اسفند» سنجیده می‌شود، مثل نسخهٔ جاوااسکریپتی). */
+function jalaliMonthDays($jy, $jm) {
+    $jm = (int)$jm;
+    if ($jm < 7)  return 31;
+    if ($jm < 12) return 30;
+    $g = jalaliToGregorian($jy, 12, 30);
+    $b = gregorianToJalali($g[0], $g[1], $g[2]);
+    return ($b[0] == $jy && $b[1] == 12 && $b[2] == 30) ? 30 : 29;
+}
+
+/* «همین امروز» به وقت تهران، به‌صورت [سال، ماه، روزِ شمسی] — منطقهٔ زمانی
+   صریحا تهران گرفته می‌شود چون منطقهٔ زمانیِ سرور تنظیم نشده (همان قاعده‌ای
+   که در checkout.php برای کارت‌به‌کارت/چک استفاده شده). */
+function jalaliToday() {
+    try { $now = new DateTime('now', new DateTimeZone('Asia/Tehran')); }
+    catch (Throwable $e) { $now = new DateTime(); }
+    return gregorianToJalali((int)$now->format('Y'), (int)$now->format('n'), (int)$now->format('j'));
+}
+
 /* تاریخ شمسی از یک مقدار DATETIME/DATE دیتابیس. مثال: 1405/05/26 */
 function jDate($dateTime, $withTime = false) {
     if ($dateTime === null || $dateTime === '' || $dateTime === '0000-00-00 00:00:00') return '—';
