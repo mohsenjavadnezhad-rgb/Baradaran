@@ -1,9 +1,9 @@
 <?php
-/* فاکتور چاپیِ یک سفارش — برای مدیر.
-   بر پایهٔ همان قالبِ preinvoice.php ساخته شده، با این تفاوت که داده‌ها از
-   خودِ سفارشِ ثبت‌شده می‌آید (نه سبد خرید)، و روش ارسال/پرداخت هم روی برگه است.
-   عمداً includes/header.php لود نمی‌شود (header به‌صورت سراسری handleCartAction
-   را اجرا می‌کند) و برای همین این صفحه هیچ چیز از سبدِ خودِ مدیر را دست نمی‌زند. */
+/* فاکتور چاپی یک سفارش — برای مدیر.
+   بر پایهٔ همان قالب preinvoice.php ساخته شده، با این تفاوت که داده‌ها از
+   خود سفارش ثبت‌شده می‌آید (نه سبد خرید)، و روش ارسال/پرداخت هم روی برگه است.
+   عمدا includes/header.php لود نمی‌شود (header به‌صورت سراسری handleCartAction
+   را اجرا می‌کند) و برای همین این صفحه هیچ چیز از سبد خود مدیر را دست نمی‌زند. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -22,14 +22,14 @@ if (!$order) {
     exit;
 }
 
-/* شمارهٔ فنی در order_items ذخیره نمی‌شود، پس از خودِ محصول خوانده می‌شود */
+/* شمارهٔ فنی در order_items ذخیره نمی‌شود، پس از خود محصول خوانده می‌شود */
 $st = $pdo->prepare("SELECT oi.*, p.technical_number
                      FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id
                      WHERE oi.order_id = ? ORDER BY oi.id");
 $st->execute([$id]);
 $items = $st->fetchAll();
 
-/* مشخصاتِ حسابِ مشتری (اگر سفارش به حسابی وصل باشد) — برای کد پستی و نوع مشتری */
+/* مشخصات حساب مشتری (اگر سفارش به حسابی وصل باشد) — برای کد پستی و نوع مشتری */
 $cust = null;
 if (!empty($order['customer_id'])) {
     $st = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
@@ -180,7 +180,7 @@ table.pi-tbl td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
       <?php if ($cust && trim((string)($cust['postal_code'] ?? '')) !== ''): ?>
       <p>کد پستی: <span dir="ltr"><?= h($cust['postal_code']) ?></span></p>
       <?php endif; ?>
-      <?php if (!$cust): ?><p style="color:#6B7280;">(سفارشِ مهمان — بدون حساب کاربری)</p><?php endif; ?>
+      <?php if (!$cust): ?><p style="color:#6B7280;">(سفارش مهمان — بدون حساب کاربری)</p><?php endif; ?>
     </div>
   </div>
 
@@ -203,9 +203,9 @@ table.pi-tbl td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
     <?php endif; ?>
   </div>
 
-  <?php /* ستونِ مالیات فقط وقتی روی جدول اضافه می‌شود که واقعاً چیزی برای
+  <?php /* ستون مالیات فقط وقتی روی جدول اضافه می‌شود که واقعا چیزی برای
           نشان دادن باشد — سفارش‌های قدیمی‌تر (پیش از ستون‌های مالیات) یا
-          بدونِ هیچ قلمِ مالیات‌دار، بدون یک ستونِ خالیِ گمراه‌کننده می‌مانند. */
+          بدون هیچ قلم مالیات‌دار، بدون یک ستون خالی گمراه‌کننده می‌مانند. */
         $rowsHaveTax = false;
         foreach ($items as $item) { if ((int)($item['tax_amount'] ?? 0) > 0) { $rowsHaveTax = true; break; } }
   ?>
@@ -253,7 +253,7 @@ table.pi-tbl td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
       <?php endif; ?>
       • «قیمت کلی» با رسیدن تعداد هر کالا به حد تعیین‌شدهٔ همان کالا به‌صورت خودکار اعمال شده است.<br>
       • مبالغ به <b>تومان</b> است.<br>
-      • این برگه از پنل مدیریت و بر پایهٔ سفارشِ ثبت‌شدهٔ شمارهٔ <b dir="ltr">#<?= $id ?></b> صادر شده است.
+      • این برگه از پنل مدیریت و بر پایهٔ سفارش ثبت‌شدهٔ شمارهٔ <b dir="ltr">#<?= $id ?></b> صادر شده است.
     </div>
     <div class="pi-totals">
       <div><span>تعداد اقلام</span><b><?= number_format(count($items)) ?> قلم</b></div>
