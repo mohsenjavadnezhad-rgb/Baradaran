@@ -1,6 +1,6 @@
 <?php
-/* بازبینیِ موقتِ بخش ۱ (انتخاب روش ارسال در سبد). پس از استفاده به 404 تبدیل می‌شود.
-   هیچ رازی و هیچ اطلاعات شخصی چاپ نمی‌شود؛ هر تغییر موقتِ دیتابیس در پایان برگردانده می‌شود. */
+/* بازبینی موقت بخش ۱ (انتخاب روش ارسال در سبد). پس از استفاده به 404 تبدیل می‌شود.
+   هیچ رازی و هیچ اطلاعات شخصی چاپ نمی‌شود؛ هر تغییر موقت دیتابیس در پایان برگردانده می‌شود. */
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 header('Content-Type: text/plain; charset=utf-8');
@@ -39,7 +39,7 @@ if (!$cust) exit;
 $cid = (int)$cust['id'];
 $oldCity = (string)$cust['city'];
 
-/* شهرِ مشتری موقتاً همان شهرِ نرخ‌نامه می‌شود و در پایان برمی‌گردد */
+/* شهر مشتری موقتا همان شهر نرخ‌نامه می‌شود و در پایان برمی‌گردد */
 register_shutdown_function(function () use ($pdo, $cid, $oldCity) {
     $pdo->prepare("UPDATE customers SET city=? WHERE id=?")->execute([$oldCity, $cid]);
     echo "RESTORED customer city\n";
@@ -147,7 +147,7 @@ if ($m === 'c') {
     ok(shippingSessionMethod() === '', 'cartClear-clears-pick');
     $_SESSION['cart'] = [$pid => 3];
 
-    /* CSS: سبزِ رقم + زردِ نشان + ردیف انتخاب‌شده */
+    /* CSS: سبز رقم + زرد نشان + ردیف انتخاب‌شده */
     $css = file_get_contents(__DIR__ . '/assets/css/style.css');
     has($css, '.cart-ship-row em { font-style: normal; font-weight: 700; color: #4ADE80;', 'css-price-green');
     has($css, 'i.csr-badge', 'css-badge-yellow');
