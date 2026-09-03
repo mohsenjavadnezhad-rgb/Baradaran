@@ -191,9 +191,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
        همین بخش ذخیره شده باشد، پس نبود کلید = خاموش. */
     if ($sec === 'pchk') {
         setSetting('partcheck_enabled', isset($_POST['partcheck_enabled']) ? '1' : '0');
-        setSetting('partcheck_require_stock', isset($_POST['partcheck_require_stock']) ? '1' : '0');
         $mp = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['partcheck_min_photos'] ?? '3')));
         setSetting('partcheck_min_photos', (string)max(1, min(8, $mp ?: 3)));
+    }
+
+    if ($sec === 'stockcheck') {
+        setSetting('partcheck_require_stock', isset($_POST['partcheck_require_stock']) ? '1' : '0');
     }
 
     if ($sec === 'checkout') {
@@ -212,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         setSetting('product_year_max', (string)$pyMax);
     }
 
-    /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا (خواستهٔ کاربر) — قبلاً همین دو کلید داخل
+    /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا (خواستهٔ کاربر) — قبلا همین دو کلید داخل
        بخش «سال تولید خودرو» ذخیره می‌شدند. */
     if ($sec === 'partsteps') {
         setSetting('parts_brand_step_enabled', isset($_POST['parts_brand_step_enabled']) ? '1' : '0');
@@ -1360,32 +1363,19 @@ require_once __DIR__ . '/layout-top.php';
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
       مشتری پس از سبد خرید به صفحهٔ <b>بررسی عکس قطعه</b> می‌رود و چند عکس از زوایای مختلف قطعهٔ
       خودش می‌فرستد (یا این مرحله را رد می‌کند). شما در بخش <a href="part-checks.php">بررسی عکس قطعه</a>
-      عکس‌ها را با کالای سبد مقایسه می‌کنید و همان‌جا موجودی را هم تأیید می‌کنید؛ تا تأیید نکنید، مشتری
-      در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند و کلید «ثبت سفارش و پرداخت» برایش باز نمی‌شود —
-      حتی اگر مرحلهٔ عکس را رد کرده باشد.
+      عکس‌ها را با کالای سبد مقایسه می‌کنید. الزام «تأیید موجودی» جدا و در بخش
+      <a href="settings.php?sec=stockcheck">تأیید موجودی</a> تنظیم می‌شود.
     </p>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
       <input type="checkbox" name="partcheck_enabled" id="partcheck_enabled" value="1"
              <?= getSettingRaw('partcheck_enabled', '1') === '1' ? 'checked' : '' ?>
              style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-      <label for="partcheck_enabled" style="margin:0;cursor:pointer;">این مرحله فعال باشد (بررسی عکس + بررسی موجودی)</label>
+      <label for="partcheck_enabled" style="margin:0;cursor:pointer;">این مرحله فعال باشد (بررسی عکس)</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      با برداشتن تیک، <b>هر دو صفحه</b> (بررسی عکس و در انتظار بررسی موجودی) کاملا کنار گذاشته می‌شوند و
-      کلید سبد خرید مثل قبل مستقیم به ثبت سفارش و پرداخت می‌رود.
-    </div>
-
-    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
-      <input type="checkbox" name="partcheck_require_stock" id="partcheck_require_stock" value="1"
-             <?= getSettingRaw('partcheck_require_stock', '1') === '1' ? 'checked' : '' ?>
-             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-      <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأیید موجودی برای ادامه الزامی باشد</label>
-    </div>
-    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      اگر مرحلهٔ بالا فعال بماند ولی این تیک برداشته شود: فقط تأیید مطابقت عکس کافی است و
-      «در انتظار بررسی موجودی» دیگر مشتری را معطل نمی‌کند — یعنی می‌توانید صفحهٔ بررسی عکس را نگه دارید
-      ولی فقط صفحهٔ در-انتظار-موجودی را بردارید.
+      با برداشتن تیک، صفحهٔ بررسی عکس کنار گذاشته می‌شود و کلید سبد خرید مستقیم به ثبت سفارش و پرداخت
+      می‌رود — این کلید روی الزام «تأیید موجودی» هم اثر دارد (توضیح در بخش <a href="settings.php?sec=stockcheck">تأیید موجودی</a>).
     </div>
 
     <div class="form-group ff-cap">
@@ -1420,6 +1410,45 @@ require_once __DIR__ . '/layout-top.php';
   </div>
   <?php endif; ?>
 
+  <?php /* ---------- تأیید موجودی ---------- */ ?>
+  <?php if ($sec === 'stockcheck'): $pchkTbl2 = partChecksReady(); ?>
+  <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
+    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('package') ?> تأیید موجودی پیش از پرداخت</h3>
+
+    <?php if (!partCheckOn()): ?>
+    <div class="flash" style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:var(--text-secondary);margin-bottom:1rem;">
+      <?= icon('info', 'ic-sm') ?> «بررسی عکس قطعه» در بخش <a href="settings.php?sec=pchk" style="color:var(--red-light);">بررسی عکس قطعه</a> خاموش است،
+      پس این گزینه فعلا اثری ندارد — تأیید موجودی زیرمجموعهٔ همان مرحله است.
+    </div>
+    <?php endif; ?>
+
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
+      وقتی همکار در بخش <a href="part-checks.php">بررسی عکس قطعه</a> عکس مشتری را تأیید می‌کند، اگر این گزینه روشن باشد
+      باید موجودی همان کالا را هم همان‌جا تأیید کند — تا آن لحظه مشتری در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند
+      و کلید «ثبت سفارش و پرداخت» برایش باز نمی‌شود، حتی اگر مرحلهٔ عکس را رد کرده باشد. این گیت کاملا مسدودکننده است
+      و راه فراری ندارد.
+    </p>
+
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="partcheck_require_stock" id="partcheck_require_stock" value="1"
+             <?= getSettingRaw('partcheck_require_stock', '1') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأیید موجودی برای ادامه الزامی باشد</label>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
+      با برداشتن تیک، فقط تأیید مطابقت عکس کافی است و «در انتظار بررسی موجودی» دیگر مشتری را معطل نمی‌کند —
+      یعنی می‌توانید صفحهٔ بررسی عکس را نگه دارید ولی فقط الزام موجودی را بردارید.
+    </div>
+
+    <?php if ($pchkTbl2): ?>
+    <div style="font-size:0.8rem;color:var(--text-secondary);padding:0.7rem 0.9rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+      <?= icon('clock', 'ic-sm') ?> در انتظار بررسی: <b><?= (int)partCheckPendingCount() ?></b> درخواست —
+      <a href="part-checks.php" style="color:var(--red-light);">رفتن به صفحهٔ بررسی</a>
+    </div>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
+
   <?php /* ---------- ثبت سفارش / ورود ---------- */ ?>
   <?php if ($sec === 'checkout'): ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
@@ -1445,7 +1474,7 @@ require_once __DIR__ . '/layout-top.php';
   <?php endif; ?>
 
   <?php /* ---------- سال تولید خودرو ---------- */ ?>
-  <?php /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا — قبلاً همین کادر داخل تب «سال تولید
+  <?php /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا — قبلا همین کادر داخل تب «سال تولید
           خودرو» بود، خواستهٔ کاربر جداکردنش به تب مستقل خودش بود. */ ?>
   <?php if ($sec === 'partsteps'): ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
@@ -1468,7 +1497,7 @@ require_once __DIR__ . '/layout-top.php';
       <label for="parts_model_step_enabled" style="margin:0;cursor:pointer;">مرحلهٔ «مدل خودرو» نشان داده شود</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:0;line-height:1.8;">
-      اگر «مرحلهٔ برند» خاموش باشد، این دسته دیگر اصلاً برند نمی‌خواهد — محصولاتش را همان لحظه که دسته باز می‌شود می‌بینید.
+      اگر «مرحلهٔ برند» خاموش باشد، این دسته دیگر اصلا برند نمی‌خواهد — محصولاتش را همان لحظه که دسته باز می‌شود می‌بینید.
       «مرحلهٔ مدل» مستقل است: فقط چیپ‌های مدل را پنهان می‌کند؛ اگر برند هنوز روشن باشد، بعد از انتخاب برند مستقیم به سال/محصولات می‌رسید.
     </div>
   </div>
