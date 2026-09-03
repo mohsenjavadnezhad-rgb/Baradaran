@@ -28,10 +28,12 @@ if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id > 0 && in_array($act, ['approve', 'reject'], true)) {
         try {
-            $pdo->prepare("UPDATE part_checks
-                              SET status = ?, admin_note = ?, reviewed_at = NOW()
-                            WHERE id = ?")
-                ->execute([$act === 'approve' ? 'approved' : 'rejected', $note, $id]);
+            /* دفاع دوم: حتی اگر یک لینک/فرم قدیمی برای ردیف «فقط موجودی»
+               (photo_required=0) رسید، این صفحه هرگز آن را لمس نمی‌کند —
+               فقط ردیف‌هایی که واقعا در همین صف دیده می‌شوند قابل داوری‌اند. */
+            $sql = "UPDATE part_checks SET status = ?, admin_note = ?, reviewed_at = NOW() WHERE id = ?";
+            if ($splitReady) $sql .= " AND photo_required = 1";
+            $pdo->prepare($sql)->execute([$act === 'approve' ? 'approved' : 'rejected', $note, $id]);
             header('Location: ' . $back . '&msg=' . ($act === 'approve' ? 'ok' : 'no') . '#pc' . $id);
             exit;
         } catch (Throwable $e) {
@@ -41,7 +43,9 @@ if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
     /* برگرداندن به «در انتظار» تا اگر اشتباه داوری شد قابل اصلاح باشد */
     if ($id > 0 && $act === 'reopen') {
         try {
-            $pdo->prepare("UPDATE part_checks SET status = 'pending', reviewed_at = NULL WHERE id = ?")->execute([$id]);
+            $sql = "UPDATE part_checks SET status = 'pending', reviewed_at = NULL WHERE id = ?";
+            if ($splitReady) $sql .= " AND photo_required = 1";
+            $pdo->prepare($sql)->execute([$id]);
             header('Location: ' . $back . '&msg=re#pc' . $id); exit;
         } catch (Throwable $e) {
             header('Location: ' . $back . '&msg=err'); exit;
@@ -95,12 +99,14 @@ $tabs = ['pending' => 'در انتظار بررسی', 'approved' => 'تأیید�
 
 require_once __DIR__ . '/layout-top.php';
 ?>
+<?php /* ۲۰۲۶-۰۹-۰۳ (پیگیری، خواستهٔ کاربر): دکمهٔ «تأیید موجودی» از هدر این
+        صفحه حذف شد — کاربر گزارش داد همین دکمه باعث می‌شد وسط بررسی عکس،
+        کارشناس ناخواسته/گیج‌کننده برود موجودی را هم تأیید کند و به‌نظر
+        برسد «تأیید عکس، موجودی را هم تأیید کرد». این دو صفحه واقعا باید
+        کاملا مجزا بمانند؛ رفتن به تأیید موجودی از منوی کناری کافی است. */ ?>
 <div class="admin-header">
     <h2 style="color:var(--text-primary);"><?= icon('camera', 'ic-sm') ?> بررسی عکس نمونهٔ قطعه</h2>
-    <div style="display:flex;gap:0.5rem;">
-        <a href="stock-checks.php" class="btn btn-secondary btn-sm"><?= icon('shield-check', 'ic-sm') ?> تأیید موجودی</a>
-        <a href="orders.php" class="btn btn-secondary btn-sm">سفارشات</a>
-    </div>
+    <a href="orders.php" class="btn btn-secondary btn-sm">سفارشات</a>
 </div>
 
 <?php if (!$ready): ?>
@@ -117,9 +123,7 @@ require_once __DIR__ . '/layout-top.php';
 <p style="color:var(--text-muted);font-size:0.83rem;line-height:1.9;margin-bottom:1rem;">
     <?= icon('info', 'ic-sm') ?>
     عکس‌ها را با کالای سبد خرید مشتری مقایسه کنید و فقط <b>مطابقت قطعه</b> را تأیید/رد کنید.
-    «تأیید موجودی» از این‌جا جدا است — همکار دیگری می‌تواند مستقل، بدون دیدن این عکس‌ها،
-    فقط موجودی را در صفحهٔ <a href="stock-checks.php">تأیید موجودی</a> بررسی کند؛ مشتری وقتی
-    می‌تواند سفارش را ثبت کند که هر دو مرحلهٔ فعال (هرکدام روشن باشد) تأیید شده باشد.
+    «تأیید موجودی» کاملا جدا و در بخش دیگری از پنل بررسی می‌شود؛ اینجا کاری با آن ندارید.
 </p>
 
 <div class="pcadm-tabs">
@@ -153,16 +157,6 @@ require_once __DIR__ . '/layout-top.php';
             <?php endif; ?>
             <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($r['created_at'], true)) ?></span>
         </div>
-
-        <?php if ($splitReady): $ssRow = partCheckStockStatus($r);
-            $ssBadge = ['pending' => 'is-wait', 'approved' => 'is-ok', 'rejected' => 'is-no'][$ssRow] ?? 'is-wait';
-            $ssIcon  = ['pending' => 'clock', 'approved' => 'check-circle', 'rejected' => 'x-circle'][$ssRow] ?? 'clock'; ?>
-        <p class="pchk-sent-line">
-            <?= icon('shield-check', 'ic-sm') ?> وضعیت مستقل <b>موجودی</b>:
-            <span class="pchk-badge <?= $ssBadge ?>"><?= icon($ssIcon, 'ic-sm') ?> <?= h(partCheckStatusLabel($ssRow)) ?></span>
-            — <a href="stock-checks.php?tab=all#sc<?= (int)$r['id'] ?>">در صفحهٔ «تأیید موجودی»</a>
-        </p>
-        <?php endif; ?>
 
         <div class="pcadm-grid">
             <div class="pcadm-f">
