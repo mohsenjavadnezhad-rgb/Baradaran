@@ -103,7 +103,7 @@ require_once __DIR__ . '/layout-top.php';
         <?php /* اگر زیرمجموعه دارد، لینک بدون confirm() رد می‌شود چون سرور به‌جای
                 حذف، فقط پیام خطا نشان می‌دهد — چیزی واقعا پاک نمی‌شود. */ ?>
         <a href="?delete=<?= $t['p']['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"
-           <?= $t['c'] ? '' : 'onclick="return confirm(\'این دستهٔ اصلی حذف شود؟\');"' ?>>حذف</a>
+           <?= $t['c'] ? '' : 'data-confirm="این دستهٔ اصلی حذف شود؟"' ?>>حذف</a>
       </div>
     </div>
     <div style="padding:0.5rem 0;">
@@ -112,7 +112,7 @@ require_once __DIR__ . '/layout-top.php';
         <span><?= h($c['name']) ?></span>
         <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
           <a href="?edit=<?= $c['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;">ویرایش</a>
-          <a href="?delete=<?= $c['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" onclick="return confirm('حذف؟')">حذف</a>
+          <a href="?delete=<?= $c['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" data-confirm="این زیردسته حذف شود؟">حذف</a>
           <?php if (count($parents) > 1): ?>
           <form method="POST" style="display:flex;gap:0.2rem;align-items:center;margin:0;">
             <input type="hidden" name="move_id" value="<?= $c['id'] ?>">

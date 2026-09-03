@@ -695,6 +695,16 @@ function productYearReady() {
     return $GLOBALS['__pyear_ready'] = dbHasColumn('products', 'year_from');
 }
 
+/* ۲۰۲۶-۰۹-۰۳: آیا ستون‌های «بدونِ نیاز به برند/مدل/سالِ خودرو» روی products
+   ساخته شده‌اند؟ (migrate-productuniversal.php). خواستهٔ کاربر: بعضی
+   محصولات (مثلِ لوازمِ عمومی) اصلاً به یک خودروی خاص مقید نیستند — با
+   تیک‌زدنِ این‌ها در فرمِ محصول، آن محصول در فروشگاه/دسته‌بندیِ قطعات
+   بدونِ توجه به برند/مدل/سالِ انتخاب‌شده هم دیده می‌شود. */
+function productUniversalReady() {
+    if (isset($GLOBALS['__puniv_ready'])) return $GLOBALS['__puniv_ready'];
+    return $GLOBALS['__puniv_ready'] = dbHasColumn('products', 'no_brand_required');
+}
+
 /* آیا قابلیت «سال تولید» روشن است؟ (پنل مدیریت ← تنظیمات ← سال تولید خودرو).
    با خاموش‌بودن، هم فیلد سال در فرم محصول و هم چیپ‌های سال در فروشگاه
    پنهان می‌شوند — فقط مرحلهٔ انتخاب برند می‌ماند. دادهٔ سال محصولات قبلی
@@ -702,6 +712,23 @@ function productYearReady() {
    نصب‌هایی که همین حالا این قابلیت را می‌بینند رفتارشان عوض نشود. */
 function productYearEnabled() {
     return getSettingRaw('product_year_enabled', '1') === '1';
+}
+
+/* ۲۰۲۶-۰۹-۰۳: آیا مرحلهٔ «اول برند خودروتان را انتخاب کنید» در parts.php
+   نشان داده شود؟ خاموش‌بودن یعنی گیتِ برند به‌کلی برداشته می‌شود — محصولاتِ
+   همان دستهٔ قطعه بدونِ نیاز به انتخابِ برند مستقیم نشان داده می‌شوند
+   (خواستهٔ کاربر: «هرچی که زیرشاخهٔ این دسته‌بندی وارد شده رو نشون بده»).
+   پیش‌فرض روشن (رفتارِ فعلی حفظ می‌شود). */
+function partsBrandStepEnabled() {
+    return getSettingRaw('parts_brand_step_enabled', '1') === '1';
+}
+
+/* آیا مرحلهٔ «مدل خودرو» نشان داده شود؟ خاموش‌بودن فقط چیپ‌های مدل را
+   پنهان می‌کند؛ برند هنوز لازم است (اگر partsBrandStepEnabled() روشن
+   باشد) — انتخابِ مدل از قبل هم اختیاری بود، این کلید فقط خودِ UI را
+   پنهان می‌کند. */
+function partsModelStepEnabled() {
+    return getSettingRaw('parts_model_step_enabled', '1') === '1';
 }
 
 /* بازهٔ سال تولید (از پنل مدیریت ← تنظیمات ← سال تولید خودرو، تنظیم‌شده با
@@ -1414,17 +1441,23 @@ function getProducts($filters = []) {
     $params = [];
     $conditions = ["p.is_active = 1"];
 
+    /* ۲۰۲۶-۰۹-۰۳: محصولِ «بدونِ نیاز به برند/مدل» (تیکِ فرمِ محصول) باید در
+       هر فیلترِ برند/مدلی دیده شود، حتی اگر اصلاً به هیچ دسته‌ای وصل نباشد
+       — پس JOIN باید LEFT باشد (نه INNER)، وگرنه محصولی که هیچ ردیفِ
+       product_categories ندارد از کل نتیجه حذف می‌شد. */
+    $univ = productUniversalReady();
+    if (!empty($filters['category_id']) || !empty($filters['brand_id'])) {
+        $sql .= " LEFT JOIN product_categories pc ON p.id = pc.product_id";
+    }
+
     if (!empty($filters['category_id'])) {
-        $sql .= " JOIN product_categories pc ON p.id = pc.product_id";
-        $conditions[] = "pc.category_id = ?";
+        $conditions[] = $univ ? "(p.no_model_required = 1 OR pc.category_id = ?)" : "pc.category_id = ?";
         $params[] = $filters['category_id'];
     }
 
     if (!empty($filters['brand_id'])) {
-        if (empty($filters['category_id'])) {
-            $sql .= " JOIN product_categories pc ON p.id = pc.product_id";
-        }
-        $conditions[] = "pc.category_id IN (SELECT id FROM categories WHERE parent_id = ? OR id = ?)";
+        $cond = "pc.category_id IN (SELECT id FROM categories WHERE parent_id = ? OR id = ?)";
+        $conditions[] = $univ ? "(p.no_brand_required = 1 OR $cond)" : $cond;
         $params[] = $filters['brand_id'];
         $params[] = $filters['brand_id'];
     }

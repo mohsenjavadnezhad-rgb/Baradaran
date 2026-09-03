@@ -5318,3 +5318,57 @@ input::-webkit-inner-spin-button {
     font-size: 0.85rem;
     color: #FBBF24;
 }
+
+/* ===== کادرِ تأییدِ حذف — جایگزینِ پاپ‌آپِ بومیِ confirm() =====
+   خواستهٔ کاربر: «یک پیام روی خودِ صفحه با یک کادر زیبا بیاد، دیگر مثلِ
+   پاپ‌آپ نشون نده». رفتارش در admin/layout-bottom.php است — یک اسکریپتِ
+   عمومی که [data-confirm="متن"] روی هر <a>/<button> را می‌گیرد. */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 1rem;
+    animation: confirmFadeIn 0.15s ease;
+}
+@keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.confirm-box {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 1.35rem 1.25rem 1.1rem;
+    text-align: center;
+    animation: confirmPop 0.18s ease;
+}
+@keyframes confirmPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confirm-icon {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 0.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--red-light);
+}
+.confirm-icon .ic { width: 24px; height: 24px; }
+.confirm-msg {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.9;
+    margin-bottom: 1.1rem;
+}
+.confirm-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+}
+.confirm-actions .btn { min-width: 96px; }

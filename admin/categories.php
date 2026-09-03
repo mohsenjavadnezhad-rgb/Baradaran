@@ -120,6 +120,25 @@ if (isset($_GET['delete'])) {
     }
 }
 
+/* حذفِ دسته‌جمعیِ همهٔ مدل‌های یک برند (خواستهٔ کاربر) — خودِ برند دست‌نخورده
+   می‌ماند، فقط زیرمجموعه‌هایش پاک می‌شوند؛ ارتباطشان با محصولات هم پاک
+   می‌شود (همان قاعدهٔ حذفِ تک‌مدل بالا، فقط یک‌جا برایِ همه). */
+if (isset($_GET['delete_all_models'])) {
+    $brandId = (int)$_GET['delete_all_models'];
+    $mStmt = $pdo->prepare("SELECT id FROM categories WHERE parent_id=?");
+    $mStmt->execute([$brandId]);
+    $modelIds = array_column($mStmt->fetchAll(), 'id');
+    if ($modelIds) {
+        $in = implode(',', array_map('intval', $modelIds));
+        $pdo->exec("DELETE FROM product_categories WHERE category_id IN ($in)");
+        $pdo->exec("DELETE FROM categories WHERE id IN ($in)");
+        $msg = count($modelIds) . ' مدل حذف شد.';
+    } else {
+        $msg = 'این برند مدلی برای حذف نداشت.';
+        $msgErr = true;
+    }
+}
+
 $brands = $pdo->query("SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name")->fetchAll();
 $countStmt = $pdo->prepare("SELECT COUNT(*) FROM product_categories WHERE category_id = ?");
 $childStmt = $pdo->prepare("SELECT * FROM categories WHERE parent_id = ? ORDER BY name");
@@ -217,7 +236,7 @@ require_once __DIR__ . '/layout-top.php';
                         <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
                             <img src="../<?= h($curLogoSrc) ?>" alt="" style="width:44px;height:44px;object-fit:contain;background:var(--bg-input);border-radius:6px;padding:4px;">
                             <?php if (!empty($editCat['logo'])): ?>
-                            <a href="?edit=<?= (int)$editCat['id'] ?>&dellogo=<?= (int)$editCat['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('لوگوی آپلودی حذف شود؟')">حذف لوگو</a>
+                            <a href="?edit=<?= (int)$editCat['id'] ?>&dellogo=<?= (int)$editCat['id'] ?>" class="btn btn-danger btn-sm" data-confirm="لوگوی آپلودی حذف شود؟">حذف لوگو</a>
                             <?php else: ?>
                             <span style="font-size:0.7rem;color:var(--text-muted);">فایل قدیمی سایت (assets/images/brands) — نه از همین‌جا آپلودشده</span>
                             <?php endif; ?>
@@ -260,8 +279,14 @@ require_once __DIR__ . '/layout-top.php';
                     </label>
                     <a href="?edit=<?= (int)$t['row']['id'] ?>" class="btn btn-secondary btn-sm">ویرایش برند</a>
                     <a href="?new_model=<?= (int)$t['row']['id'] ?>" class="btn btn-secondary btn-sm">+ مدل</a>
+                    <?php /* خواستهٔ کاربر: «تمامِ زیرمجموعه‌های یک برند رو یک‌جا حذف کنم» —
+                            حذفِ دسته‌جمعیِ همهٔ مدل‌ها، بدونِ لمس‌کردنِ خودِ برند. */ ?>
+                    <?php if ($t['children']): ?>
+                    <a href="?delete_all_models=<?= (int)$t['row']['id'] ?>" class="btn btn-danger btn-sm"
+                       data-confirm="همهٔ <?= count($t['children']) ?> مدلِ «<?= h($t['row']['name']) ?>» حذف شوند؟ ارتباط آن‌ها با محصولات هم حذف می‌شود.">حذف همهٔ مدل‌ها</a>
+                    <?php endif; ?>
                     <a href="?delete=<?= (int)$t['row']['id'] ?>" class="btn btn-danger btn-sm"
-                       <?= $t['children'] ? '' : 'onclick="return confirm(\'این برند حذف شود؟\');"' ?>>حذف</a>
+                       <?= $t['children'] ? '' : 'data-confirm="این برند حذف شود؟"' ?>>حذف</a>
                 </div>
 
                 <div class="pset-body">
@@ -277,7 +302,7 @@ require_once __DIR__ . '/layout-top.php';
                                 <td><?= number_format($c['count']) ?></td>
                                 <td>
                                     <a href="?edit=<?= (int)$c['row']['id'] ?>" class="btn btn-secondary btn-sm">ویرایش</a>
-                                    <a href="?delete=<?= (int)$c['row']['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این مدل حذف شود؟ ارتباط آن با محصولات هم حذف می‌شود.')">حذف</a>
+                                    <a href="?delete=<?= (int)$c['row']['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این مدل حذف شود؟ ارتباط آن با محصولات هم حذف می‌شود.">حذف</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

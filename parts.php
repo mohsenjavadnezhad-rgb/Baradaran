@@ -24,6 +24,13 @@ $brandId = (int)($_GET['brand'] ?? 0);
 $year    = (int)($_GET['year'] ?? 0);
 $modelId = (int)($_GET['model'] ?? 0);
 
+/* ۲۰۲۶-۰۹-۰۳: خاموش/روشن‌کردنِ مرحلهٔ برند/مدل از پنل (تنظیمات ← سال تولید
+   خودرو، همان بخشِ کنترلِ مراحل). خاموش‌بودنِ برند یعنی این دسته اصلاً
+   برند نمی‌خواهد — محصولاتش مستقیم نشان داده می‌شوند، بدونِ گیت. */
+$brandStepOn = partsBrandStepEnabled();
+$modelStepOn = partsModelStepEnabled();
+if (!$brandStepOn) $brandId = 0; /* برندِ انتخابی (اگر در URL بود) نادیده گرفته می‌شود */
+
 $current = null;
 if ($catId) {
     $st = $pdo->prepare("SELECT * FROM part_categories WHERE id = ?");
@@ -87,7 +94,7 @@ function partsProductCard($p) {
 /* مرحلهٔ برند + سال — یک تابع مشترک چون هم صفحهٔ سرشاخه و هم صفحهٔ زیرشاخه
    دقیقا همین قدم را لازم دارند. $baseQs = پارامترهای ثابت صفحه (cat=...)
    که در همه لینک‌های این بخش باید بماند. */
-function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $year, $yearOptions, $baseQs) {
+function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $modelStepOn, $year, $yearOptions, $baseQs) {
     /* لینک‌های چیپِ مدل/سال باید همیشه انتخابِ دیگری (سال وقتی مدل عوض
        می‌شود، مدل وقتی سال عوض می‌شود) را نگه دارند — وگرنه انتخابِ یکی،
        آن یکی را بی‌دلیل پاک می‌کرد. */
@@ -137,7 +144,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     خودش، بالای بقیه)، و چیپ‌هایِ خودِ مدل‌ها کلاسِ جداگانه
                     گرفتند (‎.pby-modelchip‎، مستطیلِ گردگوشه — نه بیضیِ
                     ‎.pby-yearchip‎ که سال هنوز همان است). */ ?>
-            <?php if ($subModels): ?>
+            <?php if ($modelStepOn && $subModels): ?>
             <div class="pby-models">
                 <div class="pby-modelslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
                 <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-reset-chip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
@@ -212,7 +219,14 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
 
     $baseQs = 'cat=' . (int)$current['id'];
     $products = [];
-    if ($brandId) {
+    /* خواستهٔ کاربر: وقتی مرحلهٔ برند از تنظیمات خاموش است، این دسته دیگر
+       هیچ گیتی ندارد — همان لحظه که دسته باز می‌شود، همهٔ محصولاتش دیده
+       می‌شوند، بدونِ نیاز به $brandId. */
+    if (!$brandStepOn) {
+        $pf = ['part_category_ids' => $ids];
+        if ($year) $pf['year'] = $year;
+        $products = getProducts($pf);
+    } elseif ($brandId) {
         $pf = ['part_category_ids' => $ids, 'brand_id' => $brandId];
         if ($modelId) $pf['category_id'] = $modelId;
         if ($year) $pf['year'] = $year;
@@ -233,9 +247,11 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
     </div>
     <?php endif; ?>
 
-    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $year, $yearOptions, $baseQs); ?>
+    <?php if ($brandStepOn): ?>
+    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $modelStepOn, $year, $yearOptions, $baseQs); ?>
+    <?php endif; ?>
 
-    <?php if ($brandId): ?>
+    <?php if (!$brandStepOn || $brandId): ?>
         <div id="parts-products">
         <?php if ($products): ?>
         <div class="parts-section-title">محصولات این دسته (<?= count($products) ?>)</div>
@@ -243,7 +259,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
             <?php foreach ($products as $p) echo partsProductCard($p); ?>
         </div>
         <?php else: ?>
-        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $modelName !== '' ? ' — ' . h($modelName) : '' ?><?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
+        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی<?= $brandStepOn ? (' برای همین برند' . ($modelName !== '' ? ' — ' . h($modelName) : '') . ($year ? ' و سال ' . $year : '')) : '' ?> در این دسته یافت نشد.</p></div>
         <?php endif; ?>
         </div>
     <?php endif; ?>
@@ -261,7 +277,11 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
 
     $baseQs = 'cat=' . (int)$current['id'];
     $products = [];
-    if ($brandId) {
+    if (!$brandStepOn) {
+        $pf = ['part_category_id' => (int)$current['id']];
+        if ($year) $pf['year'] = $year;
+        $products = getProducts($pf);
+    } elseif ($brandId) {
         $pf = ['part_category_id' => (int)$current['id'], 'brand_id' => $brandId];
         if ($modelId) $pf['category_id'] = $modelId;
         if ($year) $pf['year'] = $year;
@@ -294,9 +314,11 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
     </div>
     <?php endif; ?>
 
-    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $year, $yearOptions, $baseQs); ?>
+    <?php if ($brandStepOn): ?>
+    <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $modelStepOn, $year, $yearOptions, $baseQs); ?>
+    <?php endif; ?>
 
-    <?php if ($brandId): ?>
+    <?php if (!$brandStepOn || $brandId): ?>
         <div id="parts-products">
         <?php if ($products): ?>
         <div class="search-results-count" style="margin-bottom:1rem;"><?= count($products) ?> محصول</div>
@@ -304,7 +326,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
             <?php foreach ($products as $p) echo partsProductCard($p); ?>
         </div>
         <?php else: ?>
-        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $modelName !== '' ? ' — ' . h($modelName) : '' ?><?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
+        <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی<?= $brandStepOn ? (' برای همین برند' . ($modelName !== '' ? ' — ' . h($modelName) : '') . ($year ? ' و سال ' . $year : '')) : '' ?> در این دسته یافت نشد.</p></div>
         <?php endif; ?>
         </div>
     <?php endif; ?>

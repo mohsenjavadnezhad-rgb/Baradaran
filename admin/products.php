@@ -72,7 +72,7 @@ require_once __DIR__ . '/layout-top.php';
   <?php endif; ?>
   <td>
     <a href="product-edit.php?id=<?= $p['id'] ?>" class="btn btn-secondary btn-sm">ویرایش</a>
-    <a href="product-edit.php?delete=<?= $p['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('حذف؟')">حذف</a>
+    <a href="product-edit.php?delete=<?= $p['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این محصول حذف شود؟">حذف</a>
   </td>
 </tr>
 <?php endforeach; ?>
