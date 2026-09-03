@@ -201,9 +201,12 @@ require_once __DIR__ . '/layout-top.php';
     <div class="dg-box">
         <div class="dg-box-hd"><h3>برندها (<?= count($tree) ?>)</h3></div>
         <div class="dg-box-bd" style="padding:0;">
+            <?php /* ۲۰۲۶-۰۹-۰۳: همه بسته شروع می‌شوند (خواستهٔ کاربر: «به‌صورت
+                    پیش‌فرض منوهاشو بسته نگه دار تا خودم باز کنم») — قبلاً
+                    برندهایِ ≤۸ مدل خودکار باز بودند. */ ?>
             <?php foreach ($tree as $t): $bid = 'catbr-' . (int)$t['row']['id']; ?>
             <div class="pset-row">
-                <input type="checkbox" id="<?= $bid ?>" class="pset-toggle" hidden <?= count($t['children']) <= 8 ? 'checked' : '' ?>>
+                <input type="checkbox" id="<?= $bid ?>" class="pset-toggle" hidden>
                 <div class="pset-sum-wrap">
                     <label for="<?= $bid ?>" class="pset-sum">
                         <span class="pset-name">

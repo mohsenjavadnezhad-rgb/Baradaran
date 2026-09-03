@@ -124,8 +124,8 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     اول است، هم برای انتخابِ صریح هم برایِ برگشتن از یک مدلِ
                     انتخاب‌شده. سال (اگر انتخاب شده) در همهٔ لینک‌ها حفظ می‌شود. */ ?>
             <?php if ($subModels): ?>
-            <div class="pby-years">
-                <div class="pby-yearslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
+            <div class="pby-models">
+                <div class="pby-modelslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
                 <div class="pby-yearchips">
                     <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?>" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
                     <?php foreach ($subModels as $sm): ?>

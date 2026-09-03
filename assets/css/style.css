@@ -609,8 +609,17 @@ a.mm-part-head:hover { color: var(--red-hover); }
    چند سطر باشد و کنار برند جا نمی‌شد. */
 .pby-selrow { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
 
-.pby-years { width: 100%; }
-.pby-yearslabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
+/* مدل و سال هرکدام کادرِ مجزایِ خودشان (خواستهٔ کاربر: «توی یک کادرِ
+   مجزا از سال») — قاب+پس‌زمینه، تا مدل و سال به‌وضوح دو بخشِ جدا دیده
+   شوند، نه یک ستونِ پیوسته. */
+.pby-models, .pby-years {
+    width: 100%;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-primary);
+}
+.pby-modelslabel, .pby-yearslabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
 /* چیپ‌های بزرگ سال به‌جای نوار کشویی (خواستهٔ کاربر) — هر سال یک دکمهٔ
    گرد کلیک‌پذیر مستقل، هم‌شکل با کاشی برند بالا ولی جمع‌وجورتر چون تعدادشان
    بیشتر است. لینک سادهاند، پس بدون جاوااسکریپت هم کار می‌کنند. */
