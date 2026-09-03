@@ -29,9 +29,13 @@ if (!$row || !$sameCart || (string)$row['status'] === 'rejected') {
     redirect('part-check.php');
 }
 
-$stockReq = partCheckStockRequired();
-$state = (string)$row['status'];                              /* pending | approved */
-if ($stockReq && $state === 'approved' && empty($row['stock_ok'])) $state = 'pending';
+/* ۲۰۲۶-۰۹-۰۳: مطابقت قطعه (status) و موجودی (stock_status) حالا دو وضعیت
+   مستقل‌اند که دو همکار جدا داوری می‌کنند — این صفحه هردو را با هم می‌سنجد
+   تا مشتری فقط وقتی «تأیید شد» ببیند که هرکدام از دو مرحلهٔ فعال، همان
+   مرحله را تأیید کرده باشد. */
+$stockReq    = partCheckStockRequired();
+$stockStatus = partCheckStockStatus($row);
+$state = ((string)$row['status'] === 'approved' && (!$stockReq || $stockStatus === 'approved')) ? 'approved' : 'pending';
 
 $imgs    = partCheckImages((int)$row['id']);
 $rowProd = null;
@@ -98,11 +102,15 @@ require_once __DIR__ . '/includes/header.php';
 
     <?php /* ---------- تأیید شد — خودکار به تسویه‌حساب ---------- */ ?>
     <?php elseif ($state === 'approved'): ?>
+    <?php /* دو همکار جدا این دو مرحله را تأیید کرده‌اند؛ زمان نمایش‌شده،
+            دیرترین دو تأیید است (هر کدام آخر رسیده باشد). */
+    $whenApproved = max((string)($row['reviewed_at'] ?? ''), (string)($row['stock_reviewed_at'] ?? ''));
+    if ($whenApproved === '') $whenApproved = $row['created_at']; ?>
     <div class="pchk-panel is-ok pchk-panel-big pchk-panel-pop">
         <div class="pchk-wait-icon is-ok"><?= icon('check-circle', 'ic-lg') ?></div>
         <div class="pchk-panel-head" style="justify-content:center;">
             <span class="pchk-badge is-ok"><?= icon('check-circle', 'ic-sm') ?> موجودی تأیید شد</span>
-            <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($row['reviewed_at'] ?: $row['created_at'], true)) ?></span>
+            <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($whenApproved, true)) ?></span>
         </div>
         <p class="pchk-panel-text" style="text-align:center;">
             کارشناس ما موجودی کالا را تأیید کرد. در حال انتقال به <b>ثبت سفارش و پرداخت</b>…
@@ -126,7 +134,10 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
         <?php if (trim((string)$row['admin_note']) !== ''): ?>
-        <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت کارشناس:</b> <?= nl2br(h($row['admin_note'])) ?></p>
+        <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت مطابقت قطعه:</b> <?= nl2br(h($row['admin_note'])) ?></p>
+        <?php endif; ?>
+        <?php if (trim((string)($row['stock_admin_note'] ?? '')) !== ''): ?>
+        <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت موجودی:</b> <?= nl2br(h($row['stock_admin_note'])) ?></p>
         <?php endif; ?>
         <?php require __DIR__ . '/includes/partcheck-photos.php'; ?>
         <div class="pchk-actions" style="justify-content:center;">
