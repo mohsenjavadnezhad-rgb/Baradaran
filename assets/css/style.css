@@ -322,7 +322,11 @@ a:hover {
     object-fit: contain;
     /* یکدست، سیاه‌وسفید (خواسته کاربر: «مثل بی‌ام‌و سیاه باشه») — با
        brightness(0) هر لوگویی، صرف‌نظر از رنگ اصلی‌اش، به یک سیلوئت
-       سیاه (روی زمینه شفاف) تبدیل می‌شود. */
+       سیاه تبدیل می‌شود.
+       ۲۰۲۶-۰۹-۰۳: عمداً سیاه ماند، برخلافِ .mm-brand-icon/.pby-brand-logo
+       که سفید شدند — این یکی داخلِ .brand-logo-box با پس‌زمینهٔ #fff
+       می‌نشیند (چند خط بالاتر)، پس سیاه همان انتخابِ درست است؛ سفید کردنش
+       باعث می‌شد لوگو رویِ زمینهٔ سفید محو شود. */
     filter: brightness(0);
 }
 
@@ -426,7 +430,11 @@ a:hover {
     height: 17px;
     object-fit: contain;
     flex-shrink: 0;
-    filter: brightness(0);
+    /* ۲۰۲۶-۰۹-۰۳: سفید به‌جایِ سیاه — این آیکون روی زمینهٔ تیرهٔ .mega-menu
+       (‎var(--bg-secondary)‎, #1F2937) می‌نشیند؛ سیاهِ خالص روی آن تقریباً
+       دیده نمی‌شد. invert(1) بعدِ brightness(0) هر لوگویی را یکدست سفید
+       می‌کند (همان ترفندِ استانداردِ رنگ‌آمیزیِ تصویر با فیلتر). */
+    filter: brightness(0) invert(1);
 }
 
 .mm-part-head {
@@ -581,7 +589,9 @@ a.mm-part-head:hover { color: var(--red-hover); }
     background: var(--bg-secondary);
     transform: translateY(-3px);
 }
-.pby-brand-logo { width: 46px; height: 46px; object-fit: contain; filter: brightness(0); }
+/* سفید به‌جایِ سیاه (۲۰۲۶-۰۹-۰۳) — کاشیِ برند هم پس‌زمینهٔ تیره دارد (var(--bg-card))،
+   سیاهِ خالص رویش تقریباً محو بود؛ همان دلیلِ .mm-brand-icon بالا. */
+.pby-brand-logo { width: 46px; height: 46px; object-fit: contain; filter: brightness(0) invert(1); }
 .pby-brand-tile span { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
 .pby-selrow { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
