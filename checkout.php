@@ -16,15 +16,23 @@ if (empty($cartItems)) {
 $c = currentCustomer();
 $errors = [];
 
-/* ---------- گارد مرحلهٔ «بررسی عکس نمونهٔ قطعه» + «بررسی موجودی» ----------
-   اگر مشتری هنوز نگذشته، به صفحهٔ مناسب برمی‌گردد — part-check.php (هنوز
-   اقدامی نکرده) یا stock-check.php (اقدام کرده، فقط منتظر ادمین است).
-   فقط روی GET؛ چون اگر POST ثبت نهایی هم ریدایرکت شود، مشتری‌ای که همین
-   حالا مرحله را گذرانده ولی نشستش لب‌مرزی است سفارشش را از دست می‌دهد. */
+/* ---------- گارد مرحلهٔ «بررسی عکس نمونهٔ قطعه» ----------
+   اگر مشتری هنوز اقدامی نکرده (نه آپلود، نه رد کردن)، به part-check.php
+   برمی‌گردد. فقط روی GET؛ چون اگر POST ثبت نهایی هم ریدایرکت شود، مشتری‌ای
+   که همین حالا مرحله را گذرانده ولی نشستش لب‌مرزی است سفارشش را از دست
+   می‌دهد.
+   ۲۰۲۶-۰۹-۰۳: دیگر به stock-check.php ریدایرکت نمی‌شود (خواستهٔ کاربر) —
+   وضعیت «در انتظار بررسی موجودی» حالا همین‌جا، زیر «مبلغ قابل پرداخت»،
+   به‌صورت زنده نشان داده می‌شود؛ روش پرداخت هم تا تأیید قفل می‌ماند. */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $pcGate = partCheckGateUrl($cartItems, $c);
-    if ($pcGate !== '') redirect($pcGate);
+    if ($pcGate === 'part-check.php') redirect($pcGate);
 }
+
+/* آیا هنوز منتظر تأیید موجودی هستیم؟ همان قاعدهٔ partCheckPassed() —
+   partCheckGateUrl() بالا فقط رد/نبودن ردیف را فیلتر کرد، پس اگر به این‌جا
+   رسیدیم یا ردیف نداریم (مرحله خاموش است) یا در حال بررسی/تأییدشده‌ایم. */
+$stockPending = partCheckOn() && !partCheckPassed($cartItems, $c);
 
 /* روش‌های ارسال فعال. انتخاب فقط از صفحهٔ سبد خرید می‌آید (در نشست سرور ذخیره
    شده) — تصمیم مدیر: «امکان انتخاب رو … از توی صفحه بعد ثبت سفارش بردار که دیگه
@@ -169,6 +177,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     $address  = trim($_POST['customer_address'] ?? '');
     $postal   = trim(faToLatinDigits($_POST['postal_code'] ?? ''));
     $notes    = trim($_POST['notes'] ?? '');
+
+    /* گیت «تأیید موجودی»: رادیوهای روش پرداخت در حالت انتظار disabled‌اند،
+       ولی فرم دست‌کاری‌شده هم نباید بگذرد — سرور دوباره همان چیزی را
+       می‌سنجد که بالا برای نمایش محاسبه شده بود. */
+    if ($stockPending) {
+        $errors[] = 'تا تأیید موجودی توسط کارشناسان ما، امکان ثبت سفارش نیست.';
+    }
 
     /* روش پرداخت فقط از میان روش‌های فعال پذیرفته می‌شود (ورودی کاربر قابل جعل است) */
     $payMethod = (string)($_POST['payment_method'] ?? '');
@@ -389,6 +404,27 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <?php /* ---------- گیت «تأیید موجودی» — همین‌جا، زیر مبلغ قابل پرداخت ----------
+                خواستهٔ کاربر (۲۰۲۶-۰۹-۰۳): به‌جای ریدایرکت به یک صفحهٔ جدا
+                (stock-check.php)، همین کادر زیر خلاصهٔ سفارش نشان داده
+                می‌شود؛ تا کارشناس تأیید نکند، روش پرداخت پایین‌تر قفل
+                می‌ماند (چراغ زرد چشمک‌زن). با تأیید، همین کادر خودکار (بدون
+                کاری از سمت مشتری) به چک سبز تبدیل و روش پرداخت باز می‌شود —
+                همان الگوی poll ده‌ثانیه‌ای stock-check.php/order-success.php. */ ?>
+        <?php if ($stockPending): ?>
+        <div class="checkout-stockgate" id="checkoutStockGate">
+            <span class="pchk-badge is-wait pchk-badge-blink"><?= icon('clock', 'ic-sm') ?> در انتظار بررسی موجودی</span>
+            <p><b>سفارش شما در انتظار «بررسی موجودی» است.</b> کارشناسان ما ابتدا موجودی کالا را بررسی می‌کنند؛
+               به‌محض تأیید، امکان پرداخت (آنلاین یا دیگر روش‌ها) برای شما فعال می‌شود.</p>
+        </div>
+        <script>setTimeout(function () { location.reload(); }, 10000);</script>
+        <?php elseif (partCheckOn()): ?>
+        <div class="checkout-stockgate is-ok">
+            <span class="pchk-badge is-ok"><?= icon('check-circle', 'ic-sm') ?> موجودی تأیید شد</span>
+            <p>موجودی کالا تأیید شد؛ روش پرداخت را انتخاب و سفارش را ثبت کنید.</p>
+        </div>
+        <?php endif; ?>
+
         <?php /* چیدمان دوستونه (خواستهٔ کاربر): مشخصات و آدرس سمت راست، روش
                 ارسال و پرداخت سمت چپ. در RTL اولین فرزند گرید سمت راست
                 می‌نشیند، پس ستون مشخصات اول می‌آید. زیر ۸۶۰ پیکسل ستون‌ها
@@ -453,8 +489,13 @@ require_once __DIR__ . '/includes/header.php';
                         نشان داده می‌شوند. چون روش ارسال روی این صفحه عوض‌شدنی نیست،
                         همین حالت رندرشدهٔ سرور نهایی است و اسکریپتی آن را عوض
                         نمی‌کند. سرور در ثبت سفارش دوباره بررسی می‌کند. */ ?>
-                <div class="pay-picker" id="pay-picker">
+                <div class="pay-picker <?= $stockPending ? 'is-locked' : '' ?>" id="pay-picker">
                     <div class="pay-picker-title"><?= icon('credit-card') ?> روش پرداخت</div>
+                    <?php if ($stockPending): ?>
+                    <p class="pay-rule" id="pay-rule-stock">
+                        <?= icon('clock', 'ic-sm') ?> <span>تا تأیید موجودی (کادر بالا)، انتخاب روش پرداخت قفل است.</span>
+                    </p>
+                    <?php endif; ?>
                     <?php /* پیام قاعدهٔ پرداخت («برای … پرداخت در محل امکان‌پذیر نیست»)
                             برداشته شد — تصمیم مدیر: خود گزینهٔ کم‌رنگ و غیرفعال کافی
                             است. جایش، فقط برای روش‌های پس‌کرایه، توضیح واقعا مفیدی
@@ -465,7 +506,11 @@ require_once __DIR__ . '/includes/header.php';
                     </p>
                     <?php endif; ?>
                     <?php foreach ($payMethods as $pk => $pd):
-                        $pOff = !in_array($pk, $payAllowed, true);
+                        /* در حالت انتظار تأیید موجودی، همه گزینه‌ها هم‌الگوی
+                           گزینهٔ ناسازگار با روش ارسال کم‌رنگ/غیرقابل‌کلیک
+                           می‌شوند (خواستهٔ کاربر: «تمام مراحل روش پرداخت
+                           غیرفعال باشه») — همان کلاس is-off، بدون CSS تازه. */
+                        $pOff = !in_array($pk, $payAllowed, true) || $stockPending;
                     ?>
                     <label class="pay-opt <?= $payDefault === $pk ? 'is-on' : '' ?> <?= $pOff ? 'is-off' : '' ?>">
                         <input type="radio" name="payment_method" value="<?= h($pk) ?>"
@@ -510,7 +555,7 @@ require_once __DIR__ . '/includes/header.php';
                             <?php else: ?>
                             <small>انتقال به درگاه بانکی و پرداخت اینترنتی با کارت‌های شتاب.</small>
                             <?php endif; ?>
-                            <small class="pay-off-note">برای روش ارسالی که انتخاب کرده‌اید در دسترس نیست.</small>
+                            <small class="pay-off-note"><?= ($stockPending && in_array($pk, $payAllowed, true)) ? 'در انتظار تأیید موجودی است.' : 'برای روش ارسالی که انتخاب کرده‌اید در دسترس نیست.' ?></small>
                         </span>
                     </label>
                     <?php endforeach; ?>
