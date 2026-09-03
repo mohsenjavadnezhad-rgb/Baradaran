@@ -29,10 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($pcGate === 'part-check.php') redirect($pcGate);
 }
 
+/* حالت «فقط تأیید موجودی» (۲۰۲۶-۰۹-۰۳، خواستهٔ کاربر): وقتی بررسی عکس
+   خاموش است ولی تأیید موجودی روشن، مشتری هرگز به part-check.php فرستاده
+   نمی‌شود (partCheckGateUrl() بالا در این حالت همیشه '' برمی‌گرداند) —
+   به‌جایش همین‌جا یک ردیف بی‌صدا (بدون عکس) برایش ساخته می‌شود تا در صف
+   ادمین بیفتد. */
+if (!partCheckOn() && stockGateActive()) {
+    stockCheckEnsureRow($cartItems, $c);
+}
+
 /* آیا هنوز منتظر تأیید موجودی هستیم؟ همان قاعدهٔ partCheckPassed() —
-   partCheckGateUrl() بالا فقط رد/نبودن ردیف را فیلتر کرد، پس اگر به این‌جا
-   رسیدیم یا ردیف نداریم (مرحله خاموش است) یا در حال بررسی/تأییدشده‌ایم. */
-$stockPending = partCheckOn() && !partCheckPassed($cartItems, $c);
+   چه با بررسی عکس چه بدونش. */
+$stockPending = (partCheckOn() || stockGateActive()) && !partCheckPassed($cartItems, $c);
 
 /* روش‌های ارسال فعال. انتخاب فقط از صفحهٔ سبد خرید می‌آید (در نشست سرور ذخیره
    شده) — تصمیم مدیر: «امکان انتخاب رو … از توی صفحه بعد ثبت سفارش بردار که دیگه
@@ -418,7 +426,7 @@ require_once __DIR__ . '/includes/header.php';
                به‌محض تأیید، امکان پرداخت (آنلاین یا دیگر روش‌ها) برای شما فعال می‌شود.</p>
         </div>
         <script>setTimeout(function () { location.reload(); }, 10000);</script>
-        <?php elseif (partCheckOn()): ?>
+        <?php elseif (partCheckOn() || stockGateActive()): ?>
         <div class="checkout-stockgate is-ok">
             <span class="pchk-badge is-ok"><?= icon('check-circle', 'ic-sm') ?> موجودی تأیید شد</span>
             <p>موجودی کالا تأیید شد؛ روش پرداخت را انتخاب و سفارش را ثبت کنید.</p>
