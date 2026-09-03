@@ -123,13 +123,18 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     اختیاری است، دقیقاً هم‌قاعدهٔ سال: چیپِ «همهٔ مدل‌ها» همیشه
                     اول است، هم برای انتخابِ صریح هم برایِ برگشتن از یک مدلِ
                     انتخاب‌شده. سال (اگر انتخاب شده) در همهٔ لینک‌ها حفظ می‌شود. */ ?>
+            <?php /* لنگرِ #parts-products (خواستهٔ کاربر: «وقتی روی مدل کلیک
+                    می‌کنم صفحه اتومات بیاد پایین روی محصولات») — چون این
+                    یک لینکِ ساده است (نه جاوااسکریپت)، ریلودِ صفحه با فرگمنتِ
+                    #parts-products خودش مرورگر را به همان بخش می‌برد؛ بدون
+                    جاوااسکریپت هم کار می‌کند. */ ?>
             <?php if ($subModels): ?>
             <div class="pby-models">
                 <div class="pby-modelslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
                 <div class="pby-yearchips">
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?>" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?>#parts-products" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
                     <?php foreach ($subModels as $sm): ?>
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?>" class="pby-yearchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?>#parts-products" class="pby-yearchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -218,6 +223,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
     <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $year, $yearOptions, $baseQs); ?>
 
     <?php if ($brandId): ?>
+        <div id="parts-products">
         <?php if ($products): ?>
         <div class="parts-section-title">محصولات این دسته (<?= count($products) ?>)</div>
         <div class="product-grid">
@@ -226,6 +232,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
         <?php else: ?>
         <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $modelName !== '' ? ' — ' . h($modelName) : '' ?><?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
         <?php endif; ?>
+        </div>
     <?php endif; ?>
 
 <?php else: ?>
@@ -277,6 +284,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
     <?php renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $subModels, $year, $yearOptions, $baseQs); ?>
 
     <?php if ($brandId): ?>
+        <div id="parts-products">
         <?php if ($products): ?>
         <div class="search-results-count" style="margin-bottom:1rem;"><?= count($products) ?> محصول</div>
         <div class="product-grid">
@@ -285,6 +293,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
         <?php else: ?>
         <div class="no-results"><div class="no-results-icon"><?= icon('package') ?></div><p>محصولی برای همین برند<?= $modelName !== '' ? ' — ' . h($modelName) : '' ?><?= $year ? ' و سال ' . $year : '' ?> در این دسته یافت نشد.</p></div>
         <?php endif; ?>
+        </div>
     <?php endif; ?>
 
 <?php endif; ?>
