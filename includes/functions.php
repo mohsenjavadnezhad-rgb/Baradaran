@@ -969,6 +969,14 @@ function partCheckStockRequired() {
     return getSettingRaw('partcheck_require_stock', '1') === '1';
 }
 
+/* آیا گیت «تأیید موجودی» فعال است — مستقل از «بررسی عکس قطعه»؟
+   ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر): این دو در تنظیمات از هم جدا شدند و حالا
+   تأیید موجودی می‌تواند بدون الزام فرستادن عکس هم فعال باشد — یعنی
+   partCheckOn() (بررسی عکس) می‌تواند خاموش بماند ولی این یکی روشن باشد. */
+function stockGateActive() {
+    return partChecksReady() && partCheckStockRequired();
+}
+
 /* آیا مشتری می‌تواند از این مرحله بگذرد؟
    «آری» یعنی درخواستش برای همین سبد مطابقتش تأیید شده، و — اگر
    partCheckStockRequired() روشن باشد (پیش‌فرض) — موجودی‌اش هم، یعنی
@@ -978,9 +986,11 @@ function partCheckStockRequired() {
    آن مسیر حذف شد: حالا رد کردن هم یک ردیف part_checks (بدون عکس) می‌سازد و
    وارد همین صف/گیت می‌شود، پس دیگر بایپس ندارد — مگر اینکه ادمین کل مرحله
    را از partCheckOn() خاموش کند (آن‌وقت این تابع بی‌درنگ true برمی‌گرداند و
-   مشتری از سبد مستقیم به تسویه‌حساب می‌رود). */
+   مشتری از سبد مستقیم به تسویه‌حساب می‌رود). ۲۰۲۶-۰۹-۰۳: با روشن‌بودن
+   stockGateActive() به‌تنهایی (بررسی عکس خاموش)، همین شرط برقرار می‌ماند —
+   فقط ردیفش را stockCheckEnsureRow() بی‌صدا و بدون عکس می‌سازد. */
 function partCheckPassed($cartItems, $customer = null) {
-    if (!partCheckOn()) return true;
+    if (!partCheckOn() && !stockGateActive()) return true;
     $sig = partCheckCartSig($cartItems);
     $cid = (int)($customer['id'] ?? ($_SESSION['customer_id'] ?? 0));
     $row = partCheckCurrent($cid);
@@ -989,6 +999,32 @@ function partCheckPassed($cartItems, $customer = null) {
     if (partCheckStockRequired() && empty($row['stock_ok'])) return false;
     /* تأیید قطعهٔ دیگری به این سبد منتقل نمی‌شود */
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
+}
+
+/* حالت «فقط تأیید موجودی» (بررسی عکس خاموش، تأیید موجودی روشن): مشتری
+   نباید مجبور به دیدن فرم آپلود part-check.php شود. اگر ردیف در-انتظار
+   منطبقی برای همین سبد نبود، بی‌صدا یکی می‌سازیم — دقیقا هم‌الگوی «رد
+   کردن» در part-check.php، فقط خودکار و بدون اقدام مشتری؛ در صف ادمین
+   (part-checks.php) عادی دیده و تأیید می‌شود. */
+function stockCheckEnsureRow($cartItems, $customer) {
+    global $pdo;
+    if (!stockGateActive()) return;
+    $cid = (int)($customer['id'] ?? 0);
+    if ($cid <= 0) return;
+    $sig = partCheckCartSig($cartItems);
+    $cur = partCheckCurrent($cid);
+    $already = $cur && (string)$cur['status'] === 'pending'
+             && ((string)$cur['cart_sig'] === $sig || (string)$cur['cart_sig'] === '');
+    if ($already) return;
+    $firstPid = null;
+    foreach ((array)$cartItems as $it) { $firstPid = (int)($it['product']['id'] ?? 0) ?: null; if ($firstPid) break; }
+    try {
+        $pdo->prepare("INSERT INTO part_checks
+                (customer_id, product_id, cart_sig, car_info, note, status)
+                VALUES (?,?,?,?,?, 'pending')")
+            ->execute([$cid, $firstPid, $sig, '',
+                       '(فقط تأیید موجودی — بررسی عکس برای این سفارش فعال نیست)']);
+    } catch (Throwable $e) {}
 }
 
 /* اگر مشتری هنوز از این مرحله نگذشته، باید به کدام صفحه برود؟ ۲۰۲۶-۰۸-۳۰:
