@@ -3786,6 +3786,27 @@ input::-webkit-inner-spin-button {
    چک را می‌گوید و باید در نگاه اول خوانده شود؛ فقط همین حالت را عوض می‌کند تا
    پیام‌های is-ok/is-bad جای دیگر دست‌نخورده بمانند. */
 .c2c-msg.is-note { color: var(--text-secondary); background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); font-size: 1rem; line-height: 2; }
+
+/* کادر سبز «موجودی تایید شد» در order-success.php — بعد از پول خودکار
+   (خواسته کاربر: تیک سبز و زیبا بعد از تایید موجودی توسط ادمین). یک
+   pop-in ساده، هم‌الگوی .pchk-panel-pop در stock-check.php. */
+.stockok-box {
+    max-width: 380px;
+    margin: 0 auto 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #4ADE80;
+    font-size: 0.85rem;
+    line-height: 1.9;
+    text-align: center;
+    animation: stockokPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes stockokPop {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
 .c2c-note {
     display: flex;
     align-items: flex-start;

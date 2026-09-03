@@ -108,10 +108,20 @@ $chqOn = $payOn && $payMethod === 'cheque' && !$payIsPaid && paymentChequeReady(
         </div>
         <?php endif; ?>
 
+        <?php /* خواسته کاربر: «بعد از بررسی موجودی که تیک توسط ادمین خورد سمت
+                مشتری اتومات صفحه رفرش بشه و تیک سبز هم بخوره» — تا این‌جا
+                مشتری باید خودش صفحه را رفرش می‌کرد تا تغییر وضعیت را ببیند.
+                همان الگوی poll ده‌ثانیه‌ای stock-check.php این‌جا هم اضافه شد،
+                فقط وقتی واقعا در انتظار است (نه هر بازدید). */ ?>
         <?php if ($payOn && !$stockUnlocked && !$payIsPaid && $order['status'] !== 'cancelled'): ?>
         <div style="max-width:380px;margin:0 auto 1rem;padding:0.75rem 0.9rem;border-radius:var(--radius);background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:#FCD34D;font-size:0.82rem;line-height:1.9;text-align:right;">
             <?= icon('shield-check', 'ic-sm') ?> <b>سفارش شما در انتظار «بررسی موجودی» است.</b>
             کارشناسان ما ابتدا موجودی کالا را بررسی می‌کنند؛ به‌محض تأیید، امکان پرداخت (آنلاین یا دیگر روش‌ها) برای شما فعال می‌شود.
+        </div>
+        <script>setTimeout(function () { location.reload(); }, 10000);</script>
+        <?php elseif ($payOn && $stockUnlocked && !empty($order['track_stock_at']) && !$payIsPaid && $order['status'] !== 'cancelled'): ?>
+        <div class="stockok-box">
+            <?= icon('check-circle', 'ic-sm') ?> <b>موجودی کالا تأیید شد</b> — سفارش شما آمادهٔ پرداخت است.
         </div>
         <?php endif; ?>
 
