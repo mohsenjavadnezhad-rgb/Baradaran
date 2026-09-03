@@ -229,7 +229,7 @@ function requireCustomerLogin($returnTo = '') {
    با روشن‌بودن، کلید «ادامه»ی سبد خرید برای مشتری واردنشده به‌جای اجبار
    ورود/کد تأیید، فقط شمارهٔ موبایل می‌گیرد (guest-checkout.php) و بدون کد
    پیامکی، بی‌صدا او را وارد می‌کند؛ از همان‌جا مسیر همیشگی ادامه پیدا می‌کند —
-   پس part-check.php/checkout.php/stock-check.php هیچ تغییری نمی‌خواهند. */
+   پس part-check.php/checkout.php هیچ تغییری نمی‌خواهند. */
 function guestCheckoutEnabled() {
     return getSettingRaw('allow_guest_checkout', '0') === '1';
 }
@@ -1060,13 +1060,15 @@ function stockCheckEnsureRow($cartItems, $customer) {
     } catch (Throwable $e) {}
 }
 
-/* اگر مشتری هنوز از این مرحله نگذشته، باید به کدام صفحه برود؟ ۲۰۲۶-۰۸-۳۰:
-   مسیر ۴ گامی شد (سبد → بررسی عکس → بررسی موجودی → ثبت سفارش)، پس یک گیت
-   واحد دیگر کافی نیست — باید بین دو صفحهٔ مقصد یکی را انتخاب کرد:
-   - هنوز درخواستی برای همین سبد نساخته (یا رد شده) ⇒ part-check.php
-     (اقدام اول: آپلود یا رد کردن)
-   - درخواست ساخته شده و pending/approved است (فقط منتظر ادمین) ⇒ stock-check.php
-   خروجی '' یعنی گذشته، ریدایرکتی لازم نیست. */
+/* اگر مشتری هنوز از این مرحله نگذشته، باید به part-check.php برود؟
+   ۲۰۲۶-۰۸-۳۰: مسیر ۳ گامی است (سبد → بررسی عکس → ثبت سفارش). ۲۰۲۶-۰۹-۰۳
+   (خواستهٔ کاربر: «این صفحه دیگه اضافه است»): صفحهٔ جداگانهٔ سوم
+   (stock-check.php، «در انتظار بررسی موجودی») حذف شد — اگر مشتری قبلا
+   اقدامی کرده (آپلود یا رد کردن) و فقط منتظر داوری ادمین است، دیگر جای
+   دیگری برای رفتن نیست؛ همان انتظار را خود checkout.php زیر «مبلغ قابل
+   پرداخت» زنده نشان می‌دهد. پس تنها حالتی که واقعا ریدایرکت لازم دارد این
+   است که مشتری هنوز هیچ اقدامی نکرده (یا قبلی‌اش رد شده) — آن‌وقت باید
+   برود part-check.php. خروجی '' یعنی نیازی به ریدایرکت نیست. */
 function partCheckGateUrl($cartItems, $customer = null) {
     if (!partCheckOn()) return '';
     if (partCheckPassed($cartItems, $customer)) return '';
@@ -1075,7 +1077,7 @@ function partCheckGateUrl($cartItems, $customer = null) {
     $row = partCheckCurrent($cid);
     $sameCart = $row && ((string)$row['cart_sig'] === $sig || (string)$row['cart_sig'] === '');
     if (!$row || !$sameCart || (string)$row['status'] === 'rejected') return 'part-check.php';
-    return 'stock-check.php';
+    return '';
 }
 
 /* پس از ثبت موفق سفارش: درخواست باز به همان سفارش گره می‌خورد تا مدیر آن را
