@@ -1016,11 +1016,26 @@ function partCheckPassed($cartItems, $customer = null) {
     if (!$row) return false;
     /* ۲۰۲۶-۰۹-۰۳: «مطابقت قطعه» و «موجودی» حالا دو وضعیت مستقل‌اند (هرکدام
        صف/ادمین خودش را دارد) — هرکدام فقط وقتی همان مرحله‌اش فعال است سنجیده
-       می‌شود، نه هردو همیشه با هم. */
-    if (partCheckOn() && (string)$row['status'] !== 'approved') return false;
+       می‌شود، نه هردو همیشه با هم.
+       پیگیری همان روز (خواستهٔ کاربر): وقتی مشتری اصلا عکسی نفرستاده
+       (photo_required=0 — یا با «رد کردن» در part-check.php، یا ردیف خالص
+       «فقط موجودی» از stockCheckEnsureRow())، دیگر چیزی برای ادمین بررسی
+       عکس نمانده؛ پس شرط «مطابقت» را اصلا نمی‌سنجیم، نه اینکه منتظر تأییدی
+       بمانیم که هیچ‌وقت لازم نبوده کسی بزندش. */
+    if (partCheckOn() && partCheckPhotoRequired($row) && (string)$row['status'] !== 'approved') return false;
     if (stockGateActive() && partCheckStockStatus($row) !== 'approved') return false;
     /* تأیید قطعهٔ دیگری به این سبد منتقل نمی‌شود */
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
+}
+
+/* آیا این ردیف واقعا نیاز به «بررسی عکس» دارد؟ خیر برای ردیف‌های خالص
+   «فقط موجودی» — چه رد کردن مرحله در part-check.php، چه ساخت خودکار در
+   stockCheckEnsureRow(). ستون نبود (پیش از migrate-partcheck-split.php) یعنی
+   رفتار قدیمی: همیشه لازم است. */
+function partCheckPhotoRequired($row) {
+    if (!$row) return true;
+    if (!partCheckStockSplitReady()) return true;
+    return !array_key_exists('photo_required', $row) || (int)$row['photo_required'] !== 0;
 }
 
 /* حالت «فقط تأیید موجودی» (بررسی عکس خاموش، تأیید موجودی روشن): مشتری
