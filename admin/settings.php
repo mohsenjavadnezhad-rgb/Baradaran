@@ -212,8 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         setSetting('product_year_max', (string)$pyMax);
     }
 
-    /* ۲۰۲۶-۰۹-۰۳: دسترسیِ مجزا (خواستهٔ کاربر) — قبلاً همین دو کلید داخلِ
-       بخشِ «سال تولید خودرو» ذخیره می‌شدند. */
+    /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا (خواستهٔ کاربر) — قبلاً همین دو کلید داخل
+       بخش «سال تولید خودرو» ذخیره می‌شدند. */
     if ($sec === 'partsteps') {
         setSetting('parts_brand_step_enabled', isset($_POST['parts_brand_step_enabled']) ? '1' : '0');
         setSetting('parts_model_step_enabled', isset($_POST['parts_model_step_enabled']) ? '1' : '0');
@@ -1445,15 +1445,15 @@ require_once __DIR__ . '/layout-top.php';
   <?php endif; ?>
 
   <?php /* ---------- سال تولید خودرو ---------- */ ?>
-  <?php /* ۲۰۲۶-۰۹-۰۳: دسترسیِ مجزا — قبلاً همین کادر داخلِ تبِ «سال تولید
-          خودرو» بود، خواستهٔ کاربر جداکردنش به تبِ مستقلِ خودش بود. */ ?>
+  <?php /* ۲۰۲۶-۰۹-۰۳: دسترسی مجزا — قبلاً همین کادر داخل تب «سال تولید
+          خودرو» بود، خواستهٔ کاربر جداکردنش به تب مستقل خودش بود. */ ?>
   <?php if ($sec === 'partsteps'): ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
-    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('layers') ?> مراحلِ برند و مدل در «دسته‌بندیِ قطعات»</h3>
+    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('layers') ?> مراحل برند و مدل در «دسته‌بندی قطعات»</h3>
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      کنترلِ همان دو مرحله‌ای که پیش از نمایشِ محصولاتِ یک دسته‌یِ قطعه در
-      <a href="../parts.php" target="_blank">دسته‌بندی قطعات</a> می‌آیند. با خاموش‌کردنِ «مرحلهٔ برند»، محصولاتِ آن دسته
-      بدونِ نیاز به انتخابِ برند مستقیم نشان داده می‌شوند — یعنی هرچه زیرِ آن دسته ثبت شده، همان‌جا دیده می‌شود.
+      کنترل همان دو مرحله‌ای که پیش از نمایش محصولات یک دسته‌ی قطعه در
+      <a href="../parts.php" target="_blank">دسته‌بندی قطعات</a> می‌آیند. با خاموش‌کردن «مرحلهٔ برند»، محصولات آن دسته
+      بدون نیاز به انتخاب برند مستقیم نشان داده می‌شوند — یعنی هرچه زیر آن دسته ثبت شده، همان‌جا دیده می‌شود.
     </p>
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
       <input type="checkbox" name="parts_brand_step_enabled" id="parts_brand_step_enabled" value="1"
@@ -1469,7 +1469,7 @@ require_once __DIR__ . '/layout-top.php';
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:0;line-height:1.8;">
       اگر «مرحلهٔ برند» خاموش باشد، این دسته دیگر اصلاً برند نمی‌خواهد — محصولاتش را همان لحظه که دسته باز می‌شود می‌بینید.
-      «مرحلهٔ مدل» مستقل است: فقط چیپ‌های مدل را پنهان می‌کند؛ اگر برند هنوز روشن باشد، بعد از انتخابِ برند مستقیم به سال/محصولات می‌رسید.
+      «مرحلهٔ مدل» مستقل است: فقط چیپ‌های مدل را پنهان می‌کند؛ اگر برند هنوز روشن باشد، بعد از انتخاب برند مستقیم به سال/محصولات می‌رسید.
     </div>
   </div>
   <?php endif; ?>

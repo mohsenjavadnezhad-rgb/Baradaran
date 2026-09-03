@@ -38,12 +38,12 @@
     document.querySelectorAll('input[type="file"].form-control').forEach(enhance);
 })();
 
-/* کادرِ تأییدِ حذف — جایگزینِ پاپ‌آپِ بومیِ confirm() (خواستهٔ کاربر: «یک
-   پیام روی خودِ صفحه با یک کادرِ زیبا بیاد، دیگه مثل پاپ‌آپ نشون نده»).
-   هر <a>/<button> با ویژگیِ data-confirm="متن" را می‌گیرد: کلیک اول
-   پیش‌فرض را می‌گیرد، کادر را نشان می‌دهد؛ تأیید یعنی همان اقدامِ اصلی
-   (رفتن به href یا submit فرم) دوباره اجرا شود — این‌بار بدونِ دخالت،
-   چون data-confirm-ok روی خودِ عنصر گذاشته می‌شود. */
+/* کادر تأیید حذف — جایگزین پاپ‌آپ بومی confirm() (خواستهٔ کاربر: «یک
+   پیام روی خود صفحه با یک کادر زیبا بیاد، دیگه مثل پاپ‌آپ نشون نده»).
+   هر <a>/<button> با ویژگی data-confirm="متن" را می‌گیرد: کلیک اول
+   پیش‌فرض را می‌گیرد، کادر را نشان می‌دهد؛ تأیید یعنی همان اقدام اصلی
+   (رفتن به href یا submit فرم) دوباره اجرا شود — این‌بار بدون دخالت،
+   چون data-confirm-ok روی خود عنصر گذاشته می‌شود. */
 (function () {
     var TRASH_ICON = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 6h19"/><path d="M8.5 6V3.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1V6"/><path d="m5 6 1.2 15.1a1.5 1.5 0 0 0 1.5 1.4h8.6a1.5 1.5 0 0 0 1.5-1.4L19 6"/><path d="M10 11v6.5M14 11v6.5"/></svg>';
 

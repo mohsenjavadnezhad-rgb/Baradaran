@@ -127,12 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $taxEnabledIn = $taxOn && isset($_POST['tax_enabled']) ? 1 : 0;
     $taxPercentIn = $taxOn ? min(100, max(0, (float)faToLatinDigits((string)($_POST['tax_percent'] ?? '0')))) : 0;
 
-    /* محصولِ عمومی/بدونِ‌نیاز — خواستهٔ کاربر: بعضی کالاها به هیچ برند/مدل/
-       سالِ خاصی مقید نیستند. سه تیکِ مستقل، هرکدام همان‌جایی که برند/مدل/
-       سال چک می‌شوند اثر می‌گذارد (getProducts()). سالِ تولید عمداً ستونِ
-       تازه‌ای نگرفت چون خالی‌گذاشتنِ year_from/year_to همین حالا هم یعنی
-       «برایِ همه سال‌ها» — فقط هنگامِ تیک‌خوردن، خودِ فیلدهایِ سال هم پاک
-       می‌شوند تا حالتِ متناقض (هم تیک هم بازهٔ سال) پیش نیاید. */
+    /* محصول عمومی/بدون‌نیاز — خواستهٔ کاربر: بعضی کالاها به هیچ برند/مدل/
+       سال خاصی مقید نیستند. سه تیک مستقل، هرکدام همان‌جایی که برند/مدل/
+       سال چک می‌شوند اثر می‌گذارد (getProducts()). سال تولید عمداً ستون
+       تازه‌ای نگرفت چون خالی‌گذاشتن year_from/year_to همین حالا هم یعنی
+       «برای همه سال‌ها» — فقط هنگام تیک‌خوردن، خود فیلدهای سال هم پاک
+       می‌شوند تا حالت متناقض (هم تیک هم بازهٔ سال) پیش نیاید. */
     $univOn = productUniversalReady();
     $noBrandIn = $univOn && isset($_POST['no_brand_required']) ? 1 : 0;
     $noModelIn = $univOn && isset($_POST['no_model_required']) ? 1 : 0;
@@ -218,8 +218,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                فقط «از» پرشده باشد یعنی همان یک سال مشخص (از=تا). */
             if (productYearReady()) {
                 if ($noYearIn) {
-                    /* تیکِ «بدونِ نیاز به سالِ تولید» خورده — هر بازه‌ای هم
-                       فرستاده شده باشد نادیده گرفته می‌شود تا حالتِ
+                    /* تیک «بدون نیاز به سال تولید» خورده — هر بازه‌ای هم
+                       فرستاده شده باشد نادیده گرفته می‌شود تا حالت
                        متناقض (هم تیک، هم بازهٔ سال) ذخیره نشود. */
                     $yf = null; $yt = null;
                 } else {
@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute([$yf, $yt, $pid]);
             }
 
-            /* سه تیکِ «بدونِ نیاز به برند/مدل/سال» — جدا و محافظت‌شده مثل
+            /* سه تیک «بدون نیاز به برند/مدل/سال» — جدا و محافظت‌شده مثل
                weight/سال، تا پیش از اجرای مهاجرت خطا ندهد. */
             if ($univOn) {
                 $pdo->prepare("UPDATE products SET no_brand_required=?, no_model_required=?, no_year_required=? WHERE id=?")
@@ -419,12 +419,12 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
   </div>
 
   <?php if (productUniversalReady()): ?>
-  <?php /* ۲۰۲۶-۰۹-۰۳: خواستهٔ کاربر — بعضی محصولات (لوازمِ عمومی) به هیچ
-          برند/مدل/سالِ خاصی مقید نیستند. با هرکدام از این سه تیک، همان
-          فیلترِ متناظر در فروشگاه/دسته‌بندیِ قطعات این محصول را همیشه
+  <?php /* ۲۰۲۶-۰۹-۰۳: خواستهٔ کاربر — بعضی محصولات (لوازم عمومی) به هیچ
+          برند/مدل/سال خاصی مقید نیستند. با هرکدام از این سه تیک، همان
+          فیلتر متناظر در فروشگاه/دسته‌بندی قطعات این محصول را همیشه
           نشان می‌دهد، صرف‌نظر از برند/مدل/سالی که مشتری انتخاب کرده. */ ?>
   <div id="univBox" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1rem;margin-bottom:1rem;">
-    <h3 style="font-size:0.9rem;color:var(--red-primary);margin-bottom:0.5rem;"><?= icon('globe', 'ic-sm') ?> محصولِ عمومی (بدونِ نیاز به برند/مدل/سالِ خودرو)</h3>
+    <h3 style="font-size:0.9rem;color:var(--red-primary);margin-bottom:0.5rem;"><?= icon('globe', 'ic-sm') ?> محصول عمومی (بدون نیاز به برند/مدل/سال خودرو)</h3>
     <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.75rem;line-height:1.8;">
       برای کالاهایی که برای همهٔ خودروها مناسب‌اند — با هر تیک، همان بخش (برند/مدل/سال) دیگر برای این محصول لازم نیست و در هر جست‌وجو/فیلتری نشان داده می‌شود.
     </div>
@@ -433,20 +433,20 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
         <input type="checkbox" name="no_brand_required" id="no_brand_required" value="1"
                <?= !empty($product['no_brand_required']) || !empty($_POST['no_brand_required']) ? 'checked' : '' ?>
                style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-        بدونِ نیاز به برندِ خودرو
+        بدون نیاز به برند خودرو
       </label>
       <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;">
         <input type="checkbox" name="no_model_required" id="no_model_required" value="1"
                <?= !empty($product['no_model_required']) || !empty($_POST['no_model_required']) ? 'checked' : '' ?>
                style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-        بدونِ نیاز به مدلِ خودرو
+        بدون نیاز به مدل خودرو
       </label>
       <?php if (productYearReady() && productYearEnabled()): ?>
       <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;">
         <input type="checkbox" name="no_year_required" id="no_year_required" value="1"
                <?= !empty($product['no_year_required']) || !empty($_POST['no_year_required']) ? 'checked' : '' ?>
                style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
-        بدونِ نیاز به سالِ تولید
+        بدون نیاز به سال تولید
       </label>
       <?php endif; ?>
     </div>
@@ -913,10 +913,10 @@ function addVariant() {
     c.appendChild(row);
 }
 
-/* خواستهٔ کاربر: «توی قسمتِ اضافه‌کردنِ محصول هم مدل‌های خودرو رو نیازی
+/* خواستهٔ کاربر: «توی قسمت اضافه‌کردن محصول هم مدل‌های خودرو رو نیازی
    نباشه انتخاب کنم وقتی اون تیک‌ها رو زده باشم» — این‌جا فقط ظاهری کم‌رنگ
    می‌شود (نه غیرفعال) چون سرور از قبل هیچ‌کدام را الزامی نمی‌کند؛ هدف فقط
-   نشان‌دادنِ واضح این است که دیگر لازم نیست. */
+   نشان‌دادن واضح این است که دیگر لازم نیست. */
 (function(){
     var noBrand = document.getElementById('no_brand_required');
     var noModel = document.getElementById('no_model_required');
