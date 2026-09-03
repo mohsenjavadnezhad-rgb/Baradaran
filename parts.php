@@ -93,6 +93,10 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
        آن یکی را بی‌دلیل پاک می‌کرد. */
     $yearQs  = $year  ? '&year=' . (int)$year   : '';
     $modelQs = $modelId ? '&model=' . (int)$modelId : '';
+    /* لنگرِ مقصدِ چیپِ مدل: اگر سال هم فعال است، اول برو رویِ کادرِ سال
+       (خواستهٔ کاربر: «بعد از کلیک، بره روی سال تولید اگه فعال بود، بعد
+       بره روی محصول») — یعنی مرحلهٔ بعدیِ منطقی، نه رد شدن از رویش. */
+    $modelAnchor = $yearOptions ? '#pby-year-box' : '#parts-products';
     ?>
     <div class="pby-box">
         <?php if (!$selectedBrand): ?>
@@ -123,18 +127,17 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     اختیاری است، دقیقاً هم‌قاعدهٔ سال: چیپِ «همهٔ مدل‌ها» همیشه
                     اول است، هم برای انتخابِ صریح هم برایِ برگشتن از یک مدلِ
                     انتخاب‌شده. سال (اگر انتخاب شده) در همهٔ لینک‌ها حفظ می‌شود. */ ?>
-            <?php /* لنگرِ #parts-products (خواستهٔ کاربر: «وقتی روی مدل کلیک
-                    می‌کنم صفحه اتومات بیاد پایین روی محصولات») — چون این
-                    یک لینکِ ساده است (نه جاوااسکریپت)، ریلودِ صفحه با فرگمنتِ
-                    #parts-products خودش مرورگر را به همان بخش می‌برد؛ بدون
-                    جاوااسکریپت هم کار می‌کند. */ ?>
+            <?php /* لنگرِ کلیکِ مدل (خواستهٔ کاربر: «بره روی سال تولید اگه فعال
+                    بود، بعد بره روی محصول») — $modelAnchor بالاتر تعیین شده:
+                    اگر چیپ‌هایِ سال هم هستند مقصد کادرِ سال است، وگرنه مستقیم
+                    خودِ محصولات. لینکِ ساده است، بدون جاوااسکریپت هم کار می‌کند. */ ?>
             <?php if ($subModels): ?>
             <div class="pby-models">
                 <div class="pby-modelslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
                 <div class="pby-yearchips">
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?>#parts-products" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
                     <?php foreach ($subModels as $sm): ?>
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?>#parts-products" class="pby-yearchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-yearchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -146,7 +149,7 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     هم کامل کار می‌کند. چیپ «همه سال‌ها» همیشه اول است، هم برای
                     انتخاب صریح و هم برای برگشتن از یک سال انتخاب‌شده. */ ?>
             <?php if ($yearOptions): ?>
-            <div class="pby-years">
+            <div class="pby-years" id="pby-year-box">
                 <div class="pby-yearslabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</div>
                 <div class="pby-yearchips">
                     <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $modelQs ?>" class="pby-yearchip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>

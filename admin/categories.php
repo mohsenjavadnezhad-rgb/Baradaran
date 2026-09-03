@@ -29,8 +29,38 @@ function saveBrandLogoUpload($editId) {
     if ($_FILES['logo']['size'] > 1024 * 1024) return; // ۱ مگابایت کافی است، لوگو کوچک است
     $dir = __DIR__ . '/../uploads/brands/';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $newName = 'brand' . (int)$editId . '_' . time() . '.' . $ext;
-    if (move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $newName)) {
+
+    /* هر فرمتی که آپلود شود (خواستهٔ کاربر: «خودت مرتبش کن») — به‌جز SVG
+       (وکتور است، پردازشِ تصویرِ خام رویش معنا ندارد) — به یک PNGِ شفاف
+       و trim‌شده تبدیل می‌شود؛ نمایشِ سایت فقط رویِ پس‌زمینهٔ شفاف درست کار
+       می‌کند. اگر پردازش شکست بخورد (Imagick نبود، یا فایل غیرمنتظره)،
+       خودِ فایلِ خام ذخیره می‌شود — بهتر از هیچ لوگو. */
+    $finalExt = $ext;
+    $saved = false;
+    if ($ext !== 'svg' && extension_loaded('imagick')) {
+        $normTmp = tempnam(sys_get_temp_dir(), 'logo');
+        if (normalizeBrandLogo($_FILES['logo']['tmp_name'], $normTmp)) {
+            $newName = 'brand' . (int)$editId . '_' . time() . '.png';
+            $saved = @rename($normTmp, $dir . $newName);
+            if (!$saved) { $saved = @copy($normTmp, $dir . $newName); @unlink($normTmp); }
+            if ($saved) $finalExt = 'png';
+        } else {
+            @unlink($normTmp);
+        }
+    }
+
+    if (!$saved) {
+        $newName = 'brand' . (int)$editId . '_' . time() . '.' . $ext;
+        $saved = move_uploaded_file($_FILES['logo']['tmp_name'], $dir . $newName);
+    }
+
+    if ($saved) {
+        /* tempnam()+rename() (مسیرِ نرمال‌سازی بالا) فایل را 0600 می‌سازد —
+           فقطِ خودِ PHP می‌خواندش، nginx برایِ سرو کردنِ مستقیمِ فایل به آن
+           دسترسی ندارد و 403 می‌دهد (باگی که واقعاً پیش آمد، همین‌جا رفع
+           شد). move_uploaded_file() معمولاً 0644 می‌دهد، اما chmod این‌جا
+           هم بی‌ضرر است. */
+        @chmod($dir . $newName, 0644);
         $old = $pdo->prepare("SELECT logo FROM categories WHERE id = ?");
         $old->execute([$editId]);
         $oldFile = $old->fetchColumn();

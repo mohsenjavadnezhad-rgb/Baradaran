@@ -620,6 +620,57 @@ function categoryLogoReady() {
     return $GLOBALS['__catlogo_ready'] = dbHasColumn('categories', 'logo');
 }
 
+/* ۲۰۲۶-۰۹-۰۳: لوگوی خام آپلودی را به یک PNGِ شفافِ تمیز تبدیل می‌کند —
+   خواستهٔ کاربر: «هر لوگویی که وارد میکنم خودت مرتبش کن و با فرمت درست
+   نشونش بده». نمایشِ سایت (filter: brightness(0) invert(1) روی .pby-brand-logo/
+   .mm-brand-icon، پس‌زمینه‌های تیره) فقط وقتی درست دیده می‌شود که خودِ
+   تصویر پس‌زمینهٔ شفاف داشته باشد؛ خیلی از لوگوهایِ آپلودی (JPG همیشه،
+   PNG/WebP هم گاهی) پس‌زمینهٔ سفید/توپر دارند و بدونِ این تبدیل، فیلترِ
+   سفیدکننده کلِ تصویر را یک بلوکِ سفید نشان می‌داد.
+   الگوریتم: رنگِ هر گوشه را می‌گیرد و از همان چهار گوشه flood-fill شفاف
+   می‌کند (fuzz=~18% تا فشردگیِ JPEG/نویزِ لبه هم پوشش داده شود) — فقط
+   ناحیهٔ بیرونیِ متصل به گوشه‌ها پاک می‌شود، نه هر پیکسلِ هم‌رنگ در کل
+   تصویر، پس رنگ‌هایِ داخلیِ خودِ لوگو دست‌نخورده می‌مانند. رویِ لوگویی که
+   از قبل شفاف است هم بی‌خطر است (پرکردنِ شفاف با شفاف کاری نمی‌کند)، پس
+   عمداً همیشه بدونِ گاردِ «آیا لازم است» اجرا می‌شود — خواندنِ آلفای هر
+   پیکسل از طریقِ Imagick برایِ PNGِ‌هایِ ایندکس‌شده/بدونِ‌کانالِ‌آلفایِ
+   واقعی قابلِ‌اعتماد نبود (چند لوگوی واقعاً توپر اشتباهی «شفاف» تشخیص
+   داده می‌شدند)، پس این گارد برداشته شد. بعد trim می‌کند تا حاشیهٔ اضافه
+   هم برود. برمی‌گرداند: true اگر موفق بود (نتیجه در $destPath نوشته
+   شده)، وگرنه false (آپلودِ خام حفظ می‌شود). */
+function normalizeBrandLogo($srcPath, $destPath) {
+    if (!extension_loaded('imagick') || !is_file($srcPath)) return false;
+    try {
+        $img = new Imagick($srcPath);
+        $img->setImageFormat('png32');
+        if (!$img->getImageAlphaChannel()) {
+            $img->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+        }
+        $w = $img->getImageWidth();
+        $h = $img->getImageHeight();
+        if ($w < 2 || $h < 2) { $img->clear(); return false; }
+
+        $corners = [[0, 0], [$w - 1, 0], [0, $h - 1], [$w - 1, $h - 1]];
+        $fill = new ImagickPixel('transparent');
+        foreach ($corners as $c) {
+            $target = $img->getImagePixelColor($c[0], $c[1]);
+            $img->floodFillPaintImage($fill, 12000, $target, $c[0], $c[1], false);
+        }
+        $img->trimImage(0);
+        $img->setImagePage(0, 0, 0, 0);
+
+        /* گارد: اگر flood-fill کل تصویر را خورد (لوگویی یکدست بدونِ تباین
+           کافی)، نتیجه بی‌معنا می‌شود — همان خامِ آپلودی بهتر از هیچ‌چیز است. */
+        if ($img->getImageWidth() < 2 || $img->getImageHeight() < 2) { $img->clear(); return false; }
+
+        $ok = $img->writeImage($destPath);
+        $img->clear();
+        return (bool)$ok;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
 /* مسیر لوگوی یک برند، نسبت به ریشهٔ سایت (بدون «../» — هر صفحه خودش اضافه
    می‌کند اگر داخل admin/ باشد). اول لوگوی آپلودی از پنل (uploads/brands/…)
    را می‌گیرد؛ اگر نبود، به قرارداد قدیمی سایت برمی‌گردد: یک فایل SVG که
