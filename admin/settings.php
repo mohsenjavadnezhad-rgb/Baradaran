@@ -1363,8 +1363,10 @@ require_once __DIR__ . '/layout-top.php';
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
       مشتری پس از سبد خرید به صفحهٔ <b>بررسی عکس قطعه</b> می‌رود و چند عکس از زوایای مختلف قطعهٔ
       خودش می‌فرستد (یا این مرحله را رد می‌کند). شما در بخش <a href="part-checks.php">بررسی عکس قطعه</a>
-      عکس‌ها را با کالای سبد مقایسه می‌کنید. الزام «تأیید موجودی» جدا و در بخش
-      <a href="settings.php?sec=stockcheck">تأیید موجودی</a> تنظیم می‌شود.
+      فقط <b>مطابقت</b> عکس‌ها را با کالای سبد تأیید/رد می‌کنید. الزام «تأیید موجودی» جدا، در بخش
+      <a href="settings.php?sec=stockcheck">تأیید موجودی</a> تنظیم می‌شود و صف/صفحهٔ داوری مستقل خودش
+      (<code>stock-checks.php</code>) را دارد — یک همکار دیگر می‌تواند فقط همان را ببیند، بدون نیاز به
+      دیدن این عکس‌ها.
     </p>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
@@ -1411,22 +1413,24 @@ require_once __DIR__ . '/layout-top.php';
   <?php endif; ?>
 
   <?php /* ---------- تأیید موجودی ---------- */ ?>
-  <?php if ($sec === 'stockcheck'): $pchkTbl2 = partChecksReady(); ?>
+  <?php if ($sec === 'stockcheck'): $pchkTbl2 = partCheckStockSplitReady(); ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
-    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('package') ?> تأیید موجودی پیش از پرداخت</h3>
+    <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('shield-check') ?> تأیید موجودی پیش از پرداخت</h3>
 
-    <?php if (!partCheckOn()): ?>
-    <div class="flash" style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:var(--text-secondary);margin-bottom:1rem;">
-      <?= icon('info', 'ic-sm') ?> «بررسی عکس قطعه» در بخش <a href="settings.php?sec=pchk" style="color:var(--red-light);">بررسی عکس قطعه</a> خاموش است،
-      پس این گزینه فعلا اثری ندارد — تأیید موجودی زیرمجموعهٔ همان مرحله است.
+    <?php if (!$pchkTbl2): ?>
+    <div class="flash flash-error" style="margin-bottom:1rem;">
+      <?= icon('alert', 'ic-sm') ?> ستون‌های این بخش ساخته نشده‌اند؛ یک‌بار فایل <b>migrate-partcheck-split.php</b> را اجرا کنید.
+      تا آن زمان این گیت در سایت فعال نمی‌شود.
     </div>
     <?php endif; ?>
 
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
-      وقتی همکار در بخش <a href="part-checks.php">بررسی عکس قطعه</a> عکس مشتری را تأیید می‌کند، اگر این گزینه روشن باشد
-      باید موجودی همان کالا را هم همان‌جا تأیید کند — تا آن لحظه مشتری در یک صفحهٔ «در انتظار بررسی موجودی» می‌ماند
-      و کلید «ثبت سفارش و پرداخت» برایش باز نمی‌شود، حتی اگر مرحلهٔ عکس را رد کرده باشد. این گیت کاملا مسدودکننده است
-      و راه فراری ندارد.
+      ۲۰۲۶-۰۹-۰۳: «تأیید موجودی» یک مرحلهٔ کاملا <b>مستقل</b> از «بررسی عکس قطعه» است — چه آن مرحله
+      روشن باشد چه خاموش، این کلید به‌تنهایی تعیین می‌کند مشتری پیش از ثبت سفارش باید منتظر تأیید
+      موجودی بماند یا نه. یک همکار جدا در صفحهٔ <a href="stock-checks.php">تأیید موجودی</a> فقط همین
+      صف را می‌بیند و تأیید می‌کند — بدون نیاز به دیدن عکس یا اثرگذاری روی مطابقت قطعه. تا وقتی تأیید
+      نشده، مشتری معطل می‌ماند و کلید «ثبت سفارش و پرداخت» برایش باز نمی‌شود؛ این گیت کاملا مسدودکننده
+      است و راه فراری ندارد.
     </p>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
@@ -1436,14 +1440,14 @@ require_once __DIR__ . '/layout-top.php';
       <label for="partcheck_require_stock" style="margin:0;cursor:pointer;">تأیید موجودی برای ادامه الزامی باشد</label>
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
-      با برداشتن تیک، فقط تأیید مطابقت عکس کافی است و «در انتظار بررسی موجودی» دیگر مشتری را معطل نمی‌کند —
-      یعنی می‌توانید صفحهٔ بررسی عکس را نگه دارید ولی فقط الزام موجودی را بردارید.
+      با برداشتن تیک، این گیت کلا خاموش می‌شود — نه در checkout.php (وقتی بررسی عکس هم خاموش است) و نه در
+      «بررسی عکس قطعه» (وقتی آن روشن است)، دیگر منتظر تأیید موجودی نمی‌ماند.
     </div>
 
     <?php if ($pchkTbl2): ?>
     <div style="font-size:0.8rem;color:var(--text-secondary);padding:0.7rem 0.9rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
-      <?= icon('clock', 'ic-sm') ?> در انتظار بررسی: <b><?= (int)partCheckPendingCount() ?></b> درخواست —
-      <a href="part-checks.php" style="color:var(--red-light);">رفتن به صفحهٔ بررسی</a>
+      <?= icon('clock', 'ic-sm') ?> در انتظار بررسی: <b><?= (int)stockCheckPendingCount() ?></b> درخواست —
+      <a href="stock-checks.php" style="color:var(--red-light);">رفتن به صفحهٔ تأیید موجودی</a>
     </div>
     <?php endif; ?>
   </div>
