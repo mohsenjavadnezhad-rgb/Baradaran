@@ -69,6 +69,12 @@ function saveBrandLogoUpload($editId) {
     }
 }
 
+/* خواستهٔ کاربر: «به‌روزرسانی برند و مدلی که انجام میدم و ذخیره میکنم باز
+   دسته‌بندی رو میبنده، اونو نبند تا خودم ببندمش» — بعد از ذخیره (بدونِ
+   ریدایرکت، همین درخواست دوباره رندر می‌شود)، برندِ مربوط به همان ردیفی
+   که ویرایش/اضافه شد باید باز بماند: اگر خودِ یک برند ذخیره شده همان
+   برند، اگر یک مدل ذخیره شده برندِ مادرش. */
+$savedBrandId = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
     $name = trim($_POST['name'] ?? '');
     $parentId = $_POST['parent_id'] !== '' ? (int)$_POST['parent_id'] : null;
@@ -81,11 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
             $stmt->execute([$name, $slug, $parentId, $editId]);
             $msg = 'دسته‌بندی به‌روزرسانی شد.';
             if ($parentId === null && categoryLogoReady()) saveBrandLogoUpload($editId);
+            $savedBrandId = $parentId === null ? $editId : $parentId;
         } else {
             $stmt = $pdo->prepare("INSERT INTO categories (name, slug, parent_id) VALUES (?, ?, ?)");
             $stmt->execute([$name, $slug, $parentId]);
+            $newId = (int)$pdo->lastInsertId();
             $msg = 'دسته‌بندی اضافه شد.';
-            if ($parentId === null && categoryLogoReady()) saveBrandLogoUpload((int)$pdo->lastInsertId());
+            if ($parentId === null && categoryLogoReady()) saveBrandLogoUpload($newId);
+            $savedBrandId = $parentId === null ? $newId : $parentId;
         }
     }
 }
@@ -164,6 +173,17 @@ if (isset($_GET['edit'])) {
 }
 $newModelParent = 0;
 if (!$editCat && isset($_GET['new_model'])) $newModelParent = (int)$_GET['new_model'];
+
+/* برندی که همین الان روی صفحه در حالِ ویرایش/افزودن است، باز بماند —
+   از ذخیرهٔ همین درخواست ($savedBrandId)، یا از فرمِ باز (ویرایشِ یک
+   مدل/برند، یا افزودنِ مدلِ تازه به یک برند). */
+$keepOpenBrandId = $savedBrandId;
+if (!$keepOpenBrandId && $editCat) {
+    $keepOpenBrandId = $editCat['parent_id'] !== null ? (int)$editCat['parent_id'] : (int)$editCat['id'];
+}
+if (!$keepOpenBrandId && $newModelParent) {
+    $keepOpenBrandId = $newModelParent;
+}
 
 require_once __DIR__ . '/layout-top.php';
 ?>
@@ -257,12 +277,14 @@ require_once __DIR__ . '/layout-top.php';
     <div class="dg-box">
         <div class="dg-box-hd"><h3>برندها (<?= count($tree) ?>)</h3></div>
         <div class="dg-box-bd" style="padding:0;">
-            <?php /* ۲۰۲۶-۰۹-۰۳: همه بسته شروع می‌شوند (خواستهٔ کاربر: «به‌صورت
+            <?php /* ۲۰۲۶-۰۹-۰۳: پیش‌فرض همه بسته‌اند (خواستهٔ کاربر: «به‌صورت
                     پیش‌فرض منوهاشو بسته نگه دار تا خودم باز کنم») — قبلاً
-                    برندهایِ ≤۸ مدل خودکار باز بودند. */ ?>
+                    برندهایِ ≤۸ مدل خودکار باز بودند. تنها استثنا: برندی که
+                    همین الان در حالِ ویرایش/افزودن است باز می‌ماند (خواستهٔ
+                    بعدیِ کاربر: «ذخیره که می‌کنم دوباره می‌بندتش، نبند»). */ ?>
             <?php foreach ($tree as $t): $bid = 'catbr-' . (int)$t['row']['id']; ?>
             <div class="pset-row">
-                <input type="checkbox" id="<?= $bid ?>" class="pset-toggle" hidden>
+                <input type="checkbox" id="<?= $bid ?>" class="pset-toggle" hidden <?= $keepOpenBrandId && (int)$t['row']['id'] === (int)$keepOpenBrandId ? 'checked' : '' ?>>
                 <div class="pset-sum-wrap">
                     <label for="<?= $bid ?>" class="pset-sum">
                         <span class="pset-name">
