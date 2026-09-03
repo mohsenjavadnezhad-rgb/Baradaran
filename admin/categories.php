@@ -153,7 +153,14 @@ require_once __DIR__ . '/layout-top.php';
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
     <h2 style="font-size:1rem;color:var(--text-primary);"><?= icon('layers', 'ic-sm') ?> برندها و مدل‌ها</h2>
-    <a href="categories-report.php" target="_blank" class="btn btn-secondary btn-sm"><?= icon('printer', 'ic-sm') ?> چاپ / خروجی اکسل</a>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <?php /* ۲۰۲۶-۰۹-۰۳: فرم از قبل «برند جدید» را پشتیبانی می‌کرد (برند
+                مادر خالی = برندِ تازه) اما هیچ دکمه‌ای به آن اشاره نمی‌کرد —
+                فقط با بازکردنِ categories.php بدونِ هیچ کوئری‌ای دیده می‌شد.
+                همان «+ مدل» کنارِ هر برند، این‌جا برایِ خودِ برند. */ ?>
+        <a href="categories.php" class="btn btn-primary btn-sm"><?= icon('plus', 'ic-sm') ?> برند جدید</a>
+        <a href="categories-report.php" target="_blank" class="btn btn-secondary btn-sm"><?= icon('printer', 'ic-sm') ?> چاپ / خروجی اکسل</a>
+    </div>
 </div>
 
 <?php $benMode = brandEnMode(); ?>

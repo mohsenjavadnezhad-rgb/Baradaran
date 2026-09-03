@@ -131,13 +131,19 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     بود، بعد بره روی محصول») — $modelAnchor بالاتر تعیین شده:
                     اگر چیپ‌هایِ سال هم هستند مقصد کادرِ سال است، وگرنه مستقیم
                     خودِ محصولات. لینکِ ساده است، بدون جاوااسکریپت هم کار می‌کند. */ ?>
+            <?php /* خواستهٔ کاربر: «کلید همه مدل‌ها … متفاوت باشه و بالاتر از
+                    بقیه توی کادر خودش باشه» + «مدل کلید هم بیضی نباشه» —
+                    «همهٔ مدل‌ها» از ردیفِ چیپ‌ها بیرون آمد (ردیفِ مجزایِ
+                    خودش، بالای بقیه)، و چیپ‌هایِ خودِ مدل‌ها کلاسِ جداگانه
+                    گرفتند (‎.pby-modelchip‎، مستطیلِ گردگوشه — نه بیضیِ
+                    ‎.pby-yearchip‎ که سال هنوز همان است). */ ?>
             <?php if ($subModels): ?>
             <div class="pby-models">
                 <div class="pby-modelslabel"><?= icon('cog', 'ic-sm') ?> مدل خودرو</div>
-                <div class="pby-yearchips">
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-yearchip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
+                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-reset-chip <?= $modelId === 0 ? 'is-on' : '' ?>">همهٔ مدل‌ها</a>
+                <div class="pby-modelchips">
                     <?php foreach ($subModels as $sm): ?>
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-yearchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&model=<?= (int)$sm['id'] ?><?= $yearQs ?><?= $modelAnchor ?>" class="pby-modelchip <?= $modelId === (int)$sm['id'] ? 'is-on' : '' ?>"><?= h($sm['name']) ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -151,8 +157,8 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
             <?php if ($yearOptions): ?>
             <div class="pby-years" id="pby-year-box">
                 <div class="pby-yearslabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</div>
+                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $modelQs ?>" class="pby-reset-chip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>
                 <div class="pby-yearchips">
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $modelQs ?>" class="pby-yearchip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>
                     <?php foreach ($yearOptions as $y): ?>
                     <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&year=<?= $y ?><?= $modelQs ?>" class="pby-yearchip <?= $year === $y ? 'is-on' : '' ?>"><?= $y ?></a>
                     <?php endforeach; ?>

@@ -618,8 +618,37 @@ a.mm-part-head:hover { color: var(--red-hover); }
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     background: var(--bg-primary);
+    /* هدرِ سایت position:sticky است؛ بدونِ این، پرشِ لنگر مقصد را درست
+       زیرِ هدر می‌گذاشت و عملاً محتوایِ کادر پشتِ هدر پنهان می‌شد — همان
+       چیزی که «میپره روی محصول» به‌نظر می‌رسید (کادرِ سال آن‌قدر کوتاه
+       بود که کاملاً زیرِ هدر گم می‌شد). */
+    scroll-margin-top: 110px;
 }
 .pby-modelslabel, .pby-yearslabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
+
+/* «همهٔ مدل‌ها»/«همه سال‌ها» — خواستهٔ کاربر: «متفاوت باشه و بالاتر از
+   بقیه توی کادر خودش باشه»؛ یک ردیفِ مجزا، پیش از چیپ‌های تک‌تکِ مدل/سال،
+   با ظاهرِ متفاوت (خط‌چین/خاکستری، نه توپرِ هم‌رنگِ بقیه) تا واضح باشد این
+   یک «پاک‌کن/بازگشت» است، نه یک گزینهٔ هم‌ردیفِ بقیه. */
+.pby-reset-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.pby-reset-chip:hover { border-color: var(--red-primary); color: var(--text-primary); }
+.pby-reset-chip.is-on { background: var(--red-primary); border-color: var(--red-primary); border-style: solid; color: #fff; }
+
 /* چیپ‌های بزرگ سال به‌جای نوار کشویی (خواستهٔ کاربر) — هر سال یک دکمهٔ
    گرد کلیک‌پذیر مستقل، هم‌شکل با کاشی برند بالا ولی جمع‌وجورتر چون تعدادشان
    بیشتر است. لینک سادهاند، پس بدون جاوااسکریپت هم کار می‌کنند. */
@@ -641,10 +670,33 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 .pby-yearchip:hover { border-color: var(--red-primary); transform: translateY(-2px); }
 .pby-yearchip.is-on { background: var(--red-primary); border-color: var(--red-primary); color: #fff; }
+
+/* چیپ‌های مدل — خواستهٔ کاربر: «مدل کلید هم بیضی نباشه» — دقیقاً همان
+   چیپِ سال، فقط گوشه‌های گردِ معمولی (مستطیل) به‌جایِ بیضی/کپسولی، تا
+   بصری هم از چیپ سال جدا باشد. */
+.pby-modelchips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pby-modelchip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s, color 0.15s;
+}
+.pby-modelchip:hover { border-color: var(--red-primary); transform: translateY(-2px); }
+.pby-modelchip.is-on { background: var(--red-primary); border-color: var(--red-primary); color: #fff; }
+
 @media (max-width: 640px) {
     .pby-brands { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     .pby-brand-tile { height: 90px; }
-    .pby-yearchip { min-width: 56px; padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+    .pby-yearchip, .pby-modelchip { min-width: 56px; padding: 0.5rem 0.8rem; font-size: 0.85rem; }
 }
 
 .parts-section-title {
@@ -653,6 +705,10 @@ a.mm-part-head:hover { color: var(--red-hover); }
     margin: 1.25rem 0 0.75rem;
     color: var(--text-secondary);
 }
+
+/* لنگرِ نهاییِ کلیکِ مدل/سال (وقتی سال فعال نیست) — همان دلیلِ
+   scroll-margin-top رویِ .pby-models/.pby-years بالاتر: هدر sticky است. */
+#parts-products { scroll-margin-top: 110px; }
 
 
 .flash {
@@ -4067,7 +4123,12 @@ input::-webkit-inner-spin-button {
     justify-content: center;
     gap: 0.3rem;
     padding-top: 0.45rem;
+    /* کفِ ارتفاعِ ثابت (پدینگ + قدِ خودِ نقطه) تا اسلاتِ تک‌آفره (بدونِ
+       نقطه، is-empty) دقیقاً همان فضایِ اسلاتِ چندآفره را اشغال کند —
+       وگرنه رویِ موبایل (بدونِ کشیدگیِ هم‌ردیفِ گرید) کوتاه‌تر می‌ماند. */
+    min-height: calc(0.45rem + 4px);
 }
+.promo-dots.is-empty { visibility: hidden; }
 .promo-dot {
     position: relative;
     width: 22px;

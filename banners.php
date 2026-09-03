@@ -204,15 +204,22 @@ function renderOfferSlider($offers, $seconds) {
         $out .= renderOfferBanner($o, $i === 0);
     }
     $n = count($offers);
+    /* ۲۰۲۶-۰۹-۰۳: .promo-dots همیشه رندر می‌شود، حتی وقتی فقط یک آفر
+       است (پیش‌تر فقط با n>1 رندر می‌شد) — خواستهٔ کاربر: «اونایی که
+       دوتایی هستن با اونی که یکی هستش ارتفاعشون متفاوته». چون نقطه‌ها
+       زیرِ خودِ کارت‌اند (نه داخلش)، اسلاتی با ≥۲ آفر یک ردیفِ نقطهٔ اضافه
+       داشت که رویِ موبایل (بدونِ کشیدگیِ گریدِ هم‌ردیف) کل اسلایدر را
+       بلندتر از اسلاتِ تک‌آفره می‌کرد. حالا فضایش همیشه رزرو می‌شود؛
+       با یک آفر، خودِ ردیف با is-empty نامرئی می‌ماند نه حذف. */
+    $out .= '<div class="promo-dots' . ($n > 1 ? '' : ' is-empty') . '" role="tablist" aria-label="آفرهای زمان‌دار">';
     if ($n > 1) {
-        $out .= '<div class="promo-dots" role="tablist" aria-label="آفرهای زمان‌دار">';
         for ($i = 0; $i < $n; $i++) {
             $out .= '<button type="button" class="promo-dot' . ($i === 0 ? ' is-active' : '') . '"'
                   . ' data-i="' . $i . '" role="tab" aria-selected="' . ($i === 0 ? 'true' : 'false') . '"'
                   . ' aria-label="آفر ' . ($i + 1) . '"></button>';
         }
-        $out .= '</div>';
     }
+    $out .= '</div>';
     $out .= '</div>';
     return $out;
 }
