@@ -1,8 +1,12 @@
 <?php
 /* صف بررسی «عکس نمونهٔ قطعه» — سمت ادمین.
-   کارشناس عکس‌های مشتری را می‌بیند، با کالای سبد مقایسه می‌کند و در همین‌جا هم
-   «مطابقت قطعه» را تأیید/رد می‌کند و هم «موجودی» را — خواستهٔ مدیر: «بعد ادمین
-   که عکس رو تایید کرد همونجا تایید موجودی رو ببینه».
+   کارشناس عکس‌ها را با کالای سبد مقایسه می‌کند و فقط «مطابقت قطعه» را
+   تأیید/رد می‌کند. ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر): «تأیید موجودی» از اینجا جدا
+   شد — صف/تب/اقدام خودش را در admin/stock-checks.php دارد تا یک همکار
+   دیگر بتواند مستقل همان را ببیند و تأیید کند، بدون نیاز به دیدن عکس‌ها یا
+   اثرگذاری روی مطابقت قطعه (و برعکس). فقط ردیف‌هایی که واقعا عکس/رد-کردن
+   دارند اینجا دیده می‌شوند (photo_required=1)؛ ردیف‌های خالص «فقط موجودی»
+   (وقتی بررسی عکس خاموش است) هرگز اینجا نمی‌آیند.
    POST به الگوی PRG است و پیش از include قالب انجام می‌شود. */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -10,7 +14,8 @@ require_once __DIR__ . '/../includes/functions.php';
 
 if (!isLoggedIn()) { header('Location: login.php'); exit; }
 
-$ready = partChecksReady();
+$ready      = partChecksReady();
+$splitReady = partCheckStockSplitReady();
 $tab   = (string)($_GET['tab'] ?? 'pending');
 if (!in_array($tab, ['pending', 'approved', 'rejected', 'all'], true)) $tab = 'pending';
 
@@ -19,16 +24,14 @@ if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id   = (int)($_POST['pc_id'] ?? 0);
     $act  = (string)($_POST['pc_do'] ?? '');
     $note = mb_substr(trim((string)($_POST['admin_note'] ?? '')), 0, 255);
-    $sOk  = !empty($_POST['stock_ok']) ? 1 : 0;
-    $sNo  = mb_substr(trim((string)($_POST['stock_note'] ?? '')), 0, 160);
     $back = 'part-checks.php?tab=' . urlencode($tab);
 
     if ($id > 0 && in_array($act, ['approve', 'reject'], true)) {
         try {
             $pdo->prepare("UPDATE part_checks
-                              SET status = ?, admin_note = ?, stock_ok = ?, stock_note = ?, reviewed_at = NOW()
+                              SET status = ?, admin_note = ?, reviewed_at = NOW()
                             WHERE id = ?")
-                ->execute([$act === 'approve' ? 'approved' : 'rejected', $note, $sOk, $sNo, $id]);
+                ->execute([$act === 'approve' ? 'approved' : 'rejected', $note, $id]);
             header('Location: ' . $back . '&msg=' . ($act === 'approve' ? 'ok' : 'no') . '#pc' . $id);
             exit;
         } catch (Throwable $e) {
@@ -51,7 +54,10 @@ if ($ready && $_SERVER['REQUEST_METHOD'] === 'POST') {
 $rows = []; $counts = ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'all' => 0];
 if ($ready) {
     try {
-        foreach ($pdo->query("SELECT status, COUNT(*) n FROM part_checks GROUP BY status") as $r) {
+        $cq = "SELECT status, COUNT(*) n FROM part_checks";
+        if ($splitReady) $cq .= " WHERE photo_required = 1";
+        $cq .= " GROUP BY status";
+        foreach ($pdo->query($cq) as $r) {
             $counts[$r['status']] = (int)$r['n'];
             $counts['all'] += (int)$r['n'];
         }
@@ -60,7 +66,10 @@ if ($ready) {
                   FROM part_checks pc
                   LEFT JOIN products  p  ON p.id  = pc.product_id
                   LEFT JOIN customers cu ON cu.id = pc.customer_id";
-        if ($tab !== 'all') $sql .= " WHERE pc.status = ?";
+        $where = [];
+        if ($splitReady) $where[] = "pc.photo_required = 1";
+        if ($tab !== 'all') $where[] = "pc.status = ?";
+        if ($where) $sql .= " WHERE " . implode(' AND ', $where);
         $sql .= " ORDER BY pc.id DESC LIMIT 200";
         $st = $pdo->prepare($sql);
         $st->execute($tab !== 'all' ? [$tab] : []);
@@ -68,7 +77,7 @@ if ($ready) {
     } catch (Throwable $e) { $rows = []; }
 }
 
-/* عکس‌های همهٔ ردیف‌ها در یک کوئری */
+/* عکس‌های همه ردیف‌ها در یک کوئری */
 $imgMap = [];
 if ($rows) {
     $ids = array_map(fn($r) => (int)$r['id'], $rows);
@@ -88,7 +97,10 @@ require_once __DIR__ . '/layout-top.php';
 ?>
 <div class="admin-header">
     <h2 style="color:var(--text-primary);"><?= icon('camera', 'ic-sm') ?> بررسی عکس نمونهٔ قطعه</h2>
-    <a href="orders.php" class="btn btn-secondary btn-sm">سفارشات</a>
+    <div style="display:flex;gap:0.5rem;">
+        <a href="stock-checks.php" class="btn btn-secondary btn-sm"><?= icon('shield-check', 'ic-sm') ?> تأیید موجودی</a>
+        <a href="orders.php" class="btn btn-secondary btn-sm">سفارشات</a>
+    </div>
 </div>
 
 <?php if (!$ready): ?>
@@ -104,8 +116,10 @@ require_once __DIR__ . '/layout-top.php';
 
 <p style="color:var(--text-muted);font-size:0.83rem;line-height:1.9;margin-bottom:1rem;">
     <?= icon('info', 'ic-sm') ?>
-    عکس‌ها را با کالای سبد خرید مشتری مقایسه کنید. با <b>تأیید</b>، کلید «ثبت سفارش و پرداخت» برای
-    مشتری باز می‌شود؛ تیک <b>موجودی</b> و یادداشت شما هم همان‌جا به او نشان داده می‌شود.
+    عکس‌ها را با کالای سبد خرید مشتری مقایسه کنید و فقط <b>مطابقت قطعه</b> را تأیید/رد کنید.
+    «تأیید موجودی» از این‌جا جدا است — همکار دیگری می‌تواند مستقل، بدون دیدن این عکس‌ها،
+    فقط موجودی را در صفحهٔ <a href="stock-checks.php">تأیید موجودی</a> بررسی کند؛ مشتری وقتی
+    می‌تواند سفارش را ثبت کند که هر دو مرحلهٔ فعال (هرکدام روشن باشد) تأیید شده باشد.
 </p>
 
 <div class="pcadm-tabs">
@@ -139,6 +153,16 @@ require_once __DIR__ . '/layout-top.php';
             <?php endif; ?>
             <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($r['created_at'], true)) ?></span>
         </div>
+
+        <?php if ($splitReady): $ssRow = partCheckStockStatus($r);
+            $ssBadge = ['pending' => 'is-wait', 'approved' => 'is-ok', 'rejected' => 'is-no'][$ssRow] ?? 'is-wait';
+            $ssIcon  = ['pending' => 'clock', 'approved' => 'check-circle', 'rejected' => 'x-circle'][$ssRow] ?? 'clock'; ?>
+        <p class="pchk-sent-line">
+            <?= icon('shield-check', 'ic-sm') ?> وضعیت مستقل <b>موجودی</b>:
+            <span class="pchk-badge <?= $ssBadge ?>"><?= icon($ssIcon, 'ic-sm') ?> <?= h(partCheckStatusLabel($ssRow)) ?></span>
+            — <a href="stock-checks.php?tab=all#sc<?= (int)$r['id'] ?>">در صفحهٔ «تأیید موجودی»</a>
+        </p>
+        <?php endif; ?>
 
         <div class="pcadm-grid">
             <div class="pcadm-f">
@@ -194,16 +218,7 @@ require_once __DIR__ . '/layout-top.php';
         <?php if ($st === 'pending'): ?>
         <form method="POST" action="part-checks.php?tab=<?= h($tab) ?>" class="pcadm-review">
             <input type="hidden" name="pc_id" value="<?= (int)$r['id'] ?>">
-            <div class="pcadm-review-title"><?= icon('shield-check', 'ic-sm') ?> داوری این درخواست</div>
-
-            <div class="pcadm-stock">
-                <label class="pcadm-check">
-                    <input type="checkbox" name="stock_ok" value="1" checked>
-                    <?= icon('package', 'ic-sm') ?> موجودی کالا را تأیید می‌کنم
-                </label>
-                <input type="text" name="stock_note" class="form-control" maxlength="160" style="flex:1 1 12rem;min-width:0;"
-                       placeholder="توضیح موجودی (اختیاری) — مثلا: ۲ عدد موجود، برای شما کنار گذاشته شد">
-            </div>
+            <div class="pcadm-review-title"><?= icon('camera', 'ic-sm') ?> داوری مطابقت قطعه</div>
 
             <div class="pcadm-row">
                 <input type="text" name="admin_note" class="form-control" maxlength="255"
@@ -212,7 +227,7 @@ require_once __DIR__ . '/layout-top.php';
 
             <div class="pcadm-acts">
                 <button type="submit" name="pc_do" value="approve" class="btn btn-success btn-sm">
-                    <?= icon('check-circle', 'ic-sm') ?> تأیید مطابقت و موجودی
+                    <?= icon('check-circle', 'ic-sm') ?> تأیید مطابقت قطعه
                 </button>
                 <button type="submit" name="pc_do" value="reject" class="btn btn-danger btn-sm"
                         onclick="return confirm('این درخواست «تأیید نشد» ثبت شود؟ توضیح شما به مشتری نشان داده می‌شود.');">
@@ -230,15 +245,6 @@ require_once __DIR__ . '/layout-top.php';
                     <span class="pchk-confirm-note">— <?= h(jDate($r['reviewed_at'], true)) ?></span>
                     <?php endif; ?>
                 </div>
-                <?php if ($st === 'approved'): ?>
-                <div class="pchk-confirm-row <?= !empty($r['stock_ok']) ? 'is-ok' : 'is-soft' ?>">
-                    <?= icon(!empty($r['stock_ok']) ? 'package' : 'clock', 'ic-sm') ?>
-                    <b>موجودی:</b> <?= !empty($r['stock_ok']) ? 'تأیید شد' : 'تأیید نشد' ?>
-                    <?php if (trim((string)$r['stock_note']) !== ''): ?>
-                    <span class="pchk-confirm-note">— <?= h((string)$r['stock_note']) ?></span>
-                    <?php endif; ?>
-                </div>
-                <?php endif; ?>
             </div>
             <?php if (trim((string)$r['admin_note']) !== ''): ?>
             <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت شما:</b> <?= nl2br(h((string)$r['admin_note'])) ?></p>
