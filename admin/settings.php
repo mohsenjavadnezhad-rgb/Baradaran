@@ -202,8 +202,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
 
     if ($sec === 'productyear') {
         setSetting('product_year_enabled', isset($_POST['product_year_enabled']) ? '1' : '0');
-        setSetting('parts_brand_step_enabled', isset($_POST['parts_brand_step_enabled']) ? '1' : '0');
-        setSetting('parts_model_step_enabled', isset($_POST['parts_model_step_enabled']) ? '1' : '0');
         $pyMin = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_min'] ?? '')));
         $pyMax = (int)preg_replace('/\D+/', '', faToLatinDigits((string)($_POST['product_year_max'] ?? '')));
         $pyToday = jalaliToday()[0];
@@ -212,6 +210,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
         if ($pyMin > $pyMax) { $pyTmp = $pyMin; $pyMin = $pyMax; $pyMax = $pyTmp; }
         setSetting('product_year_min', (string)$pyMin);
         setSetting('product_year_max', (string)$pyMax);
+    }
+
+    /* ۲۰۲۶-۰۹-۰۳: دسترسیِ مجزا (خواستهٔ کاربر) — قبلاً همین دو کلید داخلِ
+       بخشِ «سال تولید خودرو» ذخیره می‌شدند. */
+    if ($sec === 'partsteps') {
+        setSetting('parts_brand_step_enabled', isset($_POST['parts_brand_step_enabled']) ? '1' : '0');
+        setSetting('parts_model_step_enabled', isset($_POST['parts_model_step_enabled']) ? '1' : '0');
     }
 
     if ($sec === 'shiprate') {
@@ -1440,7 +1445,9 @@ require_once __DIR__ . '/layout-top.php';
   <?php endif; ?>
 
   <?php /* ---------- سال تولید خودرو ---------- */ ?>
-  <?php if ($sec === 'productyear'): $pyRange = productYearRange(); ?>
+  <?php /* ۲۰۲۶-۰۹-۰۳: دسترسیِ مجزا — قبلاً همین کادر داخلِ تبِ «سال تولید
+          خودرو» بود، خواستهٔ کاربر جداکردنش به تبِ مستقلِ خودش بود. */ ?>
+  <?php if ($sec === 'partsteps'): ?>
   <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('layers') ?> مراحلِ برند و مدل در «دسته‌بندیِ قطعات»</h3>
     <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
@@ -1460,11 +1467,15 @@ require_once __DIR__ . '/layout-top.php';
              style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
       <label for="parts_model_step_enabled" style="margin:0;cursor:pointer;">مرحلهٔ «مدل خودرو» نشان داده شود</label>
     </div>
-    <div style="font-size:0.72rem;color:var(--text-muted);margin:0 0 1.25rem;line-height:1.8;">
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:0;line-height:1.8;">
       اگر «مرحلهٔ برند» خاموش باشد، این دسته دیگر اصلاً برند نمی‌خواهد — محصولاتش را همان لحظه که دسته باز می‌شود می‌بینید.
       «مرحلهٔ مدل» مستقل است: فقط چیپ‌های مدل را پنهان می‌کند؛ اگر برند هنوز روشن باشد، بعد از انتخابِ برند مستقیم به سال/محصولات می‌رسید.
     </div>
-    <hr style="border-color:var(--border-color);margin:1.25rem 0;">
+  </div>
+  <?php endif; ?>
+
+  <?php if ($sec === 'productyear'): $pyRange = productYearRange(); ?>
+  <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin-bottom:1.25rem;">
     <h3 style="font-size:0.95rem;color:var(--red-primary);margin-bottom:1rem;"><?= icon('calendar') ?> بازهٔ سال تولید خودرو</h3>
 
     <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
