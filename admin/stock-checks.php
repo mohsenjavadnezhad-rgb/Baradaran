@@ -142,7 +142,7 @@ require_once __DIR__ . '/layout-top.php';
         </div>
 
         <?php if (empty($r['photo_required'])): ?>
-        <p class="pchk-sent-line"><?= icon('info', 'ic-sm') ?> این درخواست <b>فقط برای موجودی</b> ساخته شده — بررسی عکس برایش فعال نیست.</p>
+        <p class="pchk-sent-line"><?= icon('info', 'ic-sm') ?> این درخواست <b>فقط برای موجودی</b> است — یا این مرحله کلا خاموش بوده، یا مشتری «بررسی عکس» را رد کرده؛ در هر دو حالت عکسی نیست و نیازی به بررسی آن در صف «بررسی عکس قطعه» نیست.</p>
         <?php else: ?>
         <p class="pchk-sent-line">
             <?= icon('camera', 'ic-sm') ?> وضعیت مستقل <b>مطابقت قطعه</b>:
