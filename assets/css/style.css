@@ -323,7 +323,7 @@ a:hover {
     /* یکدست، سیاه‌وسفید (خواسته کاربر: «مثل بی‌ام‌و سیاه باشه») — با
        brightness(0) هر لوگویی، صرف‌نظر از رنگ اصلی‌اش، به یک سیلوئت
        سیاه تبدیل می‌شود.
-       ۲۰۲۶-۰۹-۰۳: عمداً سیاه ماند، برخلاف .mm-brand-icon/.pby-brand-logo
+       ۲۰۲۶-۰۹-۰۳: عمدا سیاه ماند، برخلاف .mm-brand-icon/.pby-brand-logo
        که سفید شدند — این یکی داخل .brand-logo-box با پس‌زمینهٔ #fff
        می‌نشیند (چند خط بالاتر)، پس سیاه همان انتخاب درست است؛ سفید کردنش
        باعث می‌شد لوگو روی زمینهٔ سفید محو شود. */
@@ -431,7 +431,7 @@ a:hover {
     object-fit: contain;
     flex-shrink: 0;
     /* ۲۰۲۶-۰۹-۰۳: سفید به‌جای سیاه — این آیکون روی زمینهٔ تیرهٔ .mega-menu
-       (‎var(--bg-secondary)‎, #1F2937) می‌نشیند؛ سیاه خالص روی آن تقریباً
+       (‎var(--bg-secondary)‎, #1F2937) می‌نشیند؛ سیاه خالص روی آن تقریبا
        دیده نمی‌شد. invert(1) بعد brightness(0) هر لوگویی را یکدست سفید
        می‌کند (همان ترفند استاندارد رنگ‌آمیزی تصویر با فیلتر). */
     filter: brightness(0) invert(1);
@@ -514,7 +514,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
 }
 
 /* یک خط، هم‌اندازه با هم — اسم بلند به‌جای دو-خط‌شدن و کجی‌کردن کارت،
-   با «...» بریده می‌شود، پس همهٔ کارت‌ها دقیقا هم‌ارتفاع می‌مانند. */
+   با «...» بریده می‌شود، پس همه کارت‌ها دقیقا هم‌ارتفاع می‌مانند. */
 .parts-cat-tile-name {
     font-size: 0.9rem;
     font-weight: 600;
@@ -590,7 +590,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
     transform: translateY(-3px);
 }
 /* سفید به‌جای سیاه (۲۰۲۶-۰۹-۰۳) — کاشی برند هم پس‌زمینهٔ تیره دارد (var(--bg-card))،
-   سیاه خالص رویش تقریباً محو بود؛ همان دلیل .mm-brand-icon بالا. */
+   سیاه خالص رویش تقریبا محو بود؛ همان دلیل .mm-brand-icon بالا. */
 .pby-brand-logo { width: 46px; height: 46px; object-fit: contain; filter: brightness(0) invert(1); }
 .pby-brand-tile span { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
@@ -619,14 +619,14 @@ a.mm-part-head:hover { color: var(--red-hover); }
     border-radius: var(--radius);
     background: var(--bg-primary);
     /* هدر سایت position:sticky است؛ بدون این، پرش لنگر مقصد را درست
-       زیر هدر می‌گذاشت و عملاً محتوای کادر پشت هدر پنهان می‌شد — همان
+       زیر هدر می‌گذاشت و عملا محتوای کادر پشت هدر پنهان می‌شد — همان
        چیزی که «میپره روی محصول» به‌نظر می‌رسید (کادر سال آن‌قدر کوتاه
-       بود که کاملاً زیر هدر گم می‌شد). */
+       بود که کاملا زیر هدر گم می‌شد). */
     scroll-margin-top: 110px;
 }
 .pby-modelslabel, .pby-yearslabel { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.6rem; }
 
-/* «همهٔ مدل‌ها»/«همه سال‌ها» — خواستهٔ کاربر: «متفاوت باشه و بالاتر از
+/* «همه مدل‌ها»/«همه سال‌ها» — خواستهٔ کاربر: «متفاوت باشه و بالاتر از
    بقیه توی کادر خودش باشه»؛ یک ردیف مجزا، پیش از چیپ‌های تک‌تک مدل/سال،
    با ظاهر متفاوت (خط‌چین/خاکستری، نه توپر هم‌رنگ بقیه) تا واضح باشد این
    یک «پاک‌کن/بازگشت» است، نه یک گزینهٔ هم‌ردیف بقیه. */
@@ -671,7 +671,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
 .pby-yearchip:hover { border-color: var(--red-primary); transform: translateY(-2px); }
 .pby-yearchip.is-on { background: var(--red-primary); border-color: var(--red-primary); color: #fff; }
 
-/* چیپ‌های مدل — خواستهٔ کاربر: «مدل کلید هم بیضی نباشه» — دقیقاً همان
+/* چیپ‌های مدل — خواستهٔ کاربر: «مدل کلید هم بیضی نباشه» — دقیقا همان
    چیپ سال، فقط گوشه‌های گرد معمولی (مستطیل) به‌جای بیضی/کپسولی، تا
    بصری هم از چیپ سال جدا باشد. */
 .pby-modelchips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -1371,7 +1371,7 @@ a.mm-part-head:hover { color: var(--red-hover); }
     visibility: visible;
 }
 
-/* وقتی محو شد: همهٔ تگ‌های ردیف بالا، حتی خود برند فعال/sticky، پنهان
+/* وقتی محو شد: همه تگ‌های ردیف بالا، حتی خود برند فعال/sticky، پنهان
    می‌شوند — تگ فعال دیگر اینجا لازم نیست چون همان اسم، خودش را کنار دکمهٔ
    «همه برندها» به‌صورت #modelsTitle نشان می‌دهد (.brand-tag.active
    .models-title، بالاتر) و نگه‌داشتن هر دو یعنی یک برچسب تکراری روی صفحه.
@@ -2491,7 +2491,7 @@ textarea.form-control {
 
 .rt-help a { color: var(--red-primary); text-decoration: none; }
 
-/* فرم افزودن: همهٔ فیلدها در یک ردیف فشرده */
+/* فرم افزودن: همه فیلدها در یک ردیف فشرده */
 .rt-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -3622,6 +3622,25 @@ input::-webkit-inner-spin-button {
 }
 .checkout-back:hover { color: var(--text-primary); }
 
+/* گیت «تأیید موجودی» زیر «مبلغ قابل پرداخت» در checkout.php — جایگزین
+   ریدایرکت به stock-check.php (خواسته کاربر ۲۰۲۶-۰۹-۰۳). زرد چشمک‌زن تا
+   تأیید، سبز بعد از تأیید — همان بج‌های .pchk-badge که در stock-check.php
+   هم استفاده می‌شوند. */
+.checkout-stockgate {
+    margin-bottom: 1.1rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius);
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    text-align: center;
+}
+.checkout-stockgate.is-ok { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.32); }
+.checkout-stockgate .pchk-badge { justify-content: center; }
+.checkout-stockgate p { margin: 0.5rem 0 0; font-size: 0.82rem; line-height: 1.95; color: var(--text-secondary); }
+/* روش پرداخت در حالت انتظار: خود گزینه‌ها با همان کلاس is-off کم‌رنگ
+   می‌شوند (بدون CSS تازه)؛ این فقط یک تأکید ملایم روی کل جعبه است. */
+.pay-picker.is-locked .pay-picker-title { color: var(--text-muted); }
+
 /* «هزینه‌های باربری» از تنظیمات ادمین — فقط زیر روش باربری و فقط اطلاع‌رسانی */
 .ship-barbari {
     margin-top: 0.5rem;
@@ -4145,7 +4164,7 @@ input::-webkit-inner-spin-button {
     gap: 0.3rem;
     padding-top: 0.45rem;
     /* کف ارتفاع ثابت (پدینگ + قد خود نقطه) تا اسلات تک‌آفره (بدون
-       نقطه، is-empty) دقیقاً همان فضای اسلات چندآفره را اشغال کند —
+       نقطه، is-empty) دقیقا همان فضای اسلات چندآفره را اشغال کند —
        وگرنه روی موبایل (بدون کشیدگی هم‌ردیف گرید) کوتاه‌تر می‌ماند. */
     min-height: calc(0.45rem + 4px);
 }
@@ -4185,8 +4204,8 @@ input::-webkit-inner-spin-button {
     gap: 0.65rem;
     padding: 0.65rem;
     /* ۲۰۲۶-۰۸-۲۹: از ۱۵۸px به ۲۰۸px — کارت آفر فعال (تگ+عنوان+قیمت+شمارش‌معکوس+
-       نوار) طبیعتاً حدود ۲۰۰px جا لازم دارد، اما کارت آفر منقضی (فقط یک خط
-       هشدار به‌جای شمارنده) طبیعتاً کوتاه‌تر می‌ماند. روی دسکتاپ که هر سه‌کارت
+       نوار) طبیعتا حدود ۲۰۰px جا لازم دارد، اما کارت آفر منقضی (فقط یک خط
+       هشدار به‌جای شمارنده) طبیعتا کوتاه‌تر می‌ماند. روی دسکتاپ که هر سه‌کارت
        در یک ردیف گرید کنار هم‌اند align-items:stretch این تفاوت را می‌پوشاند،
        اما روی موبایل (.promo-row با auto-fit تک‌ستونه می‌شود) هر کارت ردیف
        گرید مستقل خودش را می‌گیرد و دیگر با هم کشیده نمی‌شوند — همان‌جا بود که
