@@ -859,7 +859,7 @@ function orderAutoPassStockCheck($orderId) {
     global $pdo;
     if (!trackStockReady()) return;
     $pc = partCheckForOrder((int)$orderId);
-    if (!$pc || (string)($pc['status'] ?? '') !== 'approved' || empty($pc['stock_ok'])) return;
+    if (!$pc || partCheckStockStatus($pc) !== 'approved') return;
     try {
         $pdo->prepare("UPDATE orders SET track_stock_at = NOW() WHERE id = ? AND track_stock_at IS NULL")
             ->execute([(int)$orderId]);
@@ -889,6 +889,25 @@ function timedOffersSoldReady() {
 /* آیا جدول‌های «تأیید عکس نمونهٔ قطعه» ساخته شده‌اند؟ (migrate-partcheck.php) */
 function partChecksReady() {
     return dbHasTable('part_checks') && dbHasTable('part_check_images');
+}
+
+/* آیا ستون‌های «تأیید موجودی، جدا از بررسی عکس» ساخته شده‌اند؟
+   (migrate-partcheck-split.php، ۲۰۲۶-۰۹-۰۳) — از این نقطه به بعد، «مطابقت
+   قطعه» (status) و «موجودی» (stock_status) دو وضعیت کاملا مستقل روی همان
+   ردیف part_checks‌اند، هرکدام با ادمین/صف/تب‌های خودشان، تا دو همکار جدا
+   بتوانند هرکدام را بی‌نیاز از دیگری ببینند و تأیید کنند. */
+function partCheckStockSplitReady() {
+    return partChecksReady() && dbHasColumn('part_checks', 'stock_status');
+}
+
+/* وضعیت «موجودی» یک ردیف part_checks — pending/approved/rejected.
+   اگر مهاجرت split هنوز اجرا نشده (لحظهٔ کوتاه میان دیپلوی کد و اجرای
+   migrate-partcheck-split.php)، از ستون قدیمی stock_ok مشتق می‌شود تا سایت
+   نشکند. */
+function partCheckStockStatus($row) {
+    if (!$row) return 'pending';
+    if (partCheckStockSplitReady()) return (string)($row['stock_status'] ?? 'pending');
+    return !empty($row['stock_ok']) ? 'approved' : 'pending';
 }
 
 /* ===================== تأیید عکس نمونهٔ قطعه =====================
@@ -995,8 +1014,11 @@ function partCheckPassed($cartItems, $customer = null) {
     $cid = (int)($customer['id'] ?? ($_SESSION['customer_id'] ?? 0));
     $row = partCheckCurrent($cid);
     if (!$row) return false;
-    if ($row['status'] !== 'approved') return false;
-    if (partCheckStockRequired() && empty($row['stock_ok'])) return false;
+    /* ۲۰۲۶-۰۹-۰۳: «مطابقت قطعه» و «موجودی» حالا دو وضعیت مستقل‌اند (هرکدام
+       صف/ادمین خودش را دارد) — هرکدام فقط وقتی همان مرحله‌اش فعال است سنجیده
+       می‌شود، نه هردو همیشه با هم. */
+    if (partCheckOn() && (string)$row['status'] !== 'approved') return false;
+    if (stockGateActive() && partCheckStockStatus($row) !== 'approved') return false;
     /* تأیید قطعهٔ دیگری به این سبد منتقل نمی‌شود */
     return ((string)$row['cart_sig'] === $sig) || (string)$row['cart_sig'] === '';
 }
@@ -1018,12 +1040,23 @@ function stockCheckEnsureRow($cartItems, $customer) {
     if ($already) return;
     $firstPid = null;
     foreach ((array)$cartItems as $it) { $firstPid = (int)($it['product']['id'] ?? 0) ?: null; if ($firstPid) break; }
+    $note = '(فقط تأیید موجودی — بررسی عکس برای این سفارش فعال نیست)';
     try {
-        $pdo->prepare("INSERT INTO part_checks
-                (customer_id, product_id, cart_sig, car_info, note, status)
-                VALUES (?,?,?,?,?, 'pending')")
-            ->execute([$cid, $firstPid, $sig, '',
-                       '(فقط تأیید موجودی — بررسی عکس برای این سفارش فعال نیست)']);
+        /* photo_required=0: این ردیف صرفا برای موجودی است و نباید در صف
+           «بررسی عکس قطعه» (admin/part-checks.php) دیده شود — با
+           partCheckStockSplitReady() هم‌زمان مهاجرت شده (migrate-partcheck-split.php).
+           تا وقتی آن ستون نیست، به INSERT سادهٔ قدیمی برمی‌گردیم. */
+        if (partCheckStockSplitReady()) {
+            $pdo->prepare("INSERT INTO part_checks
+                    (customer_id, product_id, cart_sig, car_info, note, status, photo_required)
+                    VALUES (?,?,?,?,?, 'pending', 0)")
+                ->execute([$cid, $firstPid, $sig, '', $note]);
+        } else {
+            $pdo->prepare("INSERT INTO part_checks
+                    (customer_id, product_id, cart_sig, car_info, note, status)
+                    VALUES (?,?,?,?,?, 'pending')")
+                ->execute([$cid, $firstPid, $sig, '', $note]);
+        }
     } catch (Throwable $e) {}
 }
 
@@ -1070,12 +1103,25 @@ function partCheckForOrder($orderId) {
     } catch (Throwable $e) { return null; }
 }
 
-/* تعداد درخواست‌های در انتظار بررسی — نشان کنار منوی ادمین */
+/* تعداد درخواست‌های در انتظار «بررسی عکس» — نشان کنار منوی ادمین. فقط
+   ردیف‌هایی که واقعا در این صف دیده می‌شوند (photo_required=1) شمرده
+   می‌شوند، وگرنه ردیف‌های خالص «فقط موجودی» هم اینجا حساب می‌شدند. */
 function partCheckPendingCount() {
     global $pdo;
     if (!partChecksReady()) return 0;
     try {
-        return (int)$pdo->query("SELECT COUNT(*) FROM part_checks WHERE status = 'pending'")->fetchColumn();
+        $sql = "SELECT COUNT(*) FROM part_checks WHERE status = 'pending'";
+        if (partCheckStockSplitReady()) $sql .= " AND photo_required = 1";
+        return (int)$pdo->query($sql)->fetchColumn();
+    } catch (Throwable $e) { return 0; }
+}
+
+/* همتای partCheckPendingCount() برای صف مستقل «تأیید موجودی». */
+function stockCheckPendingCount() {
+    global $pdo;
+    if (!partCheckStockSplitReady()) return 0;
+    try {
+        return (int)$pdo->query("SELECT COUNT(*) FROM part_checks WHERE stock_status = 'pending'")->fetchColumn();
     } catch (Throwable $e) { return 0; }
 }
 
