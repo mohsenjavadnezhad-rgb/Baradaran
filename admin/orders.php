@@ -123,7 +123,7 @@ $statusLabels = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت سفارشات - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=56">
+    <link rel="stylesheet" href="../assets/css/style.css?v=57">
 </head>
 <body style="background:var(--bg-primary);min-height:100vh;">
     <div class="admin-layout admin-layout--wide">
