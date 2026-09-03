@@ -154,13 +154,17 @@ function renderBrandYearStep($allBrands, $selectedBrand, $brandId, $modelId, $su
                     زیباتر»)؛ هر چیپ خودش یک لینک ساده است، پس بدون جاوااسکریپت
                     هم کامل کار می‌کند. چیپ «همه سال‌ها» همیشه اول است، هم برای
                     انتخاب صریح و هم برای برگشتن از یک سال انتخاب‌شده. */ ?>
+            <?php /* لنگرِ کلیکِ سال: برخلافِ مدل، بعد از سال دیگر جایی جز
+                    محصولات نیست — مستقیم #parts-products (خواستهٔ کاربر:
+                    «روی سال که کلیک می‌کنم باید بره روی محصول»؛ این لینک‌ها
+                    قبلاً اصلاً لنگر نداشتند — جا افتاده بود). */ ?>
             <?php if ($yearOptions): ?>
             <div class="pby-years" id="pby-year-box">
                 <div class="pby-yearslabel"><?= icon('calendar', 'ic-sm') ?> سال تولید</div>
-                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $modelQs ?>" class="pby-reset-chip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>
+                <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?><?= $modelQs ?>#parts-products" class="pby-reset-chip <?= $year === 0 ? 'is-on' : '' ?>">همه سال‌ها</a>
                 <div class="pby-yearchips">
                     <?php foreach ($yearOptions as $y): ?>
-                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&year=<?= $y ?><?= $modelQs ?>" class="pby-yearchip <?= $year === $y ? 'is-on' : '' ?>"><?= $y ?></a>
+                    <a href="parts.php?<?= $baseQs ?>&brand=<?= (int)$brandId ?>&year=<?= $y ?><?= $modelQs ?>#parts-products" class="pby-yearchip <?= $year === $y ? 'is-on' : '' ?>"><?= $y ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
