@@ -38,7 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        گیت «بررسی موجودی» کاملا مسدودکننده باشد). همان‌قدر که آپلود عکس یک
        ردیف part_checks می‌سازد، رد کردن هم یکی می‌سازد — فقط بدون عکس —
        و مشتری به checkout.php می‌رود تا در صف ادمین بماند؛ کارشناس دیگر
-       مطابقت عکس را نمی‌سنجد (چیزی نفرستاده)، فقط موجودی را تأیید می‌کند. */
+       مطابقت عکس را نمی‌سنجد (چیزی نفرستاده)، فقط موجودی را تأیید می‌کند.
+       پیگیری همان روز (خواستهٔ کاربر): چون عکسی نیست، این ردیف اصلا نباید
+       در صف «بررسی عکس قطعه» ادمین دیده شود — photo_required=0، هم‌الگوی
+       stockCheckEnsureRow(). partCheckPassed() هم دیگر منتظر approve این
+       ردیف نمی‌ماند (پایین‌تر در functions.php). */
     if ($act === 'skip') {
         /* اگر همین الان یک درخواست «در انتظار» برای همین سبد هست (چه با عکس،
            چه رد‌شدهٔ قبلی)، ردیف تازه نساز — وگرنه هر کلیک «رد کردن» یک ردیف
@@ -47,12 +51,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $already = $cur && (string)$cur['status'] === 'pending'
                  && ((string)$cur['cart_sig'] === $sigNow || (string)$cur['cart_sig'] === '');
         if (!$already) {
+            $skipNote = '(مشتری مرحلهٔ بررسی عکس را رد کرد؛ عکسی ارسال نشده — فقط موجودی را بررسی کنید)';
             try {
-                $pdo->prepare("INSERT INTO part_checks
-                        (customer_id, product_id, cart_sig, car_info, note, status)
-                        VALUES (?,?,?,?,?, 'pending')")
-                    ->execute([(int)$c['id'], (int)array_key_first($cartPids) ?: null, $sigNow, '',
-                               '(مشتری مرحلهٔ بررسی عکس را رد کرد؛ عکسی ارسال نشده — فقط موجودی را بررسی کنید)']);
+                if (partCheckStockSplitReady()) {
+                    $pdo->prepare("INSERT INTO part_checks
+                            (customer_id, product_id, cart_sig, car_info, note, status, photo_required)
+                            VALUES (?,?,?,?,?, 'pending', 0)")
+                        ->execute([(int)$c['id'], (int)array_key_first($cartPids) ?: null, $sigNow, '', $skipNote]);
+                } else {
+                    $pdo->prepare("INSERT INTO part_checks
+                            (customer_id, product_id, cart_sig, car_info, note, status)
+                            VALUES (?,?,?,?,?, 'pending')")
+                        ->execute([(int)$c['id'], (int)array_key_first($cartPids) ?: null, $sigNow, '', $skipNote]);
+                }
             } catch (Throwable $e) {}
         }
         redirect('checkout.php');
@@ -99,8 +110,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         && ((string)$curRow['cart_sig'] === $sigNow || (string)$curRow['cart_sig'] === '');
                 if ($reuse) {
                     $cid = (int)$curRow['id'];
-                    $pdo->prepare("UPDATE part_checks SET product_id=?, cart_sig=?, car_info=?, note=? WHERE id=?")
-                        ->execute([$pid ?: null, $sigNow, mb_substr($car, 0, 160), $note, $cid]);
+                    /* اگر این همان ردیفی است که قبلا با «رد کردن» ساخته شده بود
+                       (photo_required=0)، حالا واقعا عکس دارد — باید دوباره ۱
+                       شود تا در صف «بررسی عکس قطعه» ادمین دیده شود. */
+                    if (partCheckStockSplitReady()) {
+                        $pdo->prepare("UPDATE part_checks SET product_id=?, cart_sig=?, car_info=?, note=?, photo_required=1 WHERE id=?")
+                            ->execute([$pid ?: null, $sigNow, mb_substr($car, 0, 160), $note, $cid]);
+                    } else {
+                        $pdo->prepare("UPDATE part_checks SET product_id=?, cart_sig=?, car_info=?, note=? WHERE id=?")
+                            ->execute([$pid ?: null, $sigNow, mb_substr($car, 0, 160), $note, $cid]);
+                    }
                     foreach (partCheckImages($cid) as $oi) {
                         $op = __DIR__ . '/uploads/partchecks/' . basename((string)$oi['image']);
                         if (is_file($op)) @unlink($op);
