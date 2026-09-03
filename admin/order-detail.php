@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
@@ -109,7 +109,7 @@ if ($trackOn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['track_sav
 /* ---- کدام مرحله‌ها را مشتری همین سفارش می‌بیند؟ ----
    تصمیم از روی روش ارسال خود سفارش گرفته می‌شود (orderDeliveryMode()):
    سفارش پستی/باربری دو مرحلهٔ پیک را نمی‌بیند و سفارش پیک درون‌شهری مرحلهٔ
-   «تحویل به پست» را. همهٔ مرحله‌ها سر جای خودشان در همین فهرست تیک می‌مانند —
+   «تحویل به پست» را. همه مرحله‌ها سر جای خودشان در همین فهرست تیک می‌مانند —
    فیلتر فقط برای چشم مشتری است. */
 $trackVisible  = $trackOn ? orderTrackStepsVisible($order) : [];
 $trackMode     = $trackOn ? orderDeliveryMode($order) : '';
@@ -294,9 +294,15 @@ if ($pchk && !empty($pchk['product_id'])) {
                 <a href="part-checks.php?tab=<?= h($pcSt) ?>#pc<?= (int)$pchk['id'] ?>" class="btn btn-secondary btn-sm">
                     <?= icon('external', 'ic-sm') ?> در صفحهٔ بررسی عکس قطعه
                 </a>
+                <a href="stock-checks.php?tab=all#sc<?= (int)$pchk['id'] ?>" class="btn btn-secondary btn-sm">
+                    <?= icon('shield-check', 'ic-sm') ?> در صفحهٔ تأیید موجودی
+                </a>
                 <span class="pchk-when"><?= icon('calendar', 'ic-sm') ?> <?= h(jDate($pchk['created_at'], true)) ?></span>
             </div>
 
+            <?php /* ۲۰۲۶-۰۹-۰۳: مطابقت قطعه و موجودی حالا دو وضعیت کاملا مستقل‌اند
+                    (هرکدام صف/همکار خودش را دارد) — هردو همیشه نشان داده می‌شوند،
+                    نه فقط وقتی مطابقت approved شده. */ ?>
             <div class="pchk-confirm">
                 <div class="pchk-confirm-row <?= $pcSt === 'approved' ? 'is-ok' : ($pcSt === 'rejected' ? '' : 'is-soft') ?>">
                     <?= icon($pcSt === 'approved' ? 'check-circle' : ($pcSt === 'rejected' ? 'x-circle' : 'clock'), 'ic-sm') ?>
@@ -305,15 +311,17 @@ if ($pchk && !empty($pchk['product_id'])) {
                     <span class="pchk-confirm-note">— بررسی در <?= h(jDate($pchk['reviewed_at'], true)) ?></span>
                     <?php endif; ?>
                 </div>
-                <?php if ($pcSt === 'approved'): ?>
-                <div class="pchk-confirm-row <?= !empty($pchk['stock_ok']) ? 'is-ok' : 'is-soft' ?>">
-                    <?= icon(!empty($pchk['stock_ok']) ? 'package' : 'clock', 'ic-sm') ?>
-                    <b>موجودی:</b> <?= !empty($pchk['stock_ok']) ? 'تأیید شد' : 'تأیید نشد' ?>
+                <?php $pcSs = partCheckStockStatus($pchk); ?>
+                <div class="pchk-confirm-row <?= $pcSs === 'approved' ? 'is-ok' : ($pcSs === 'rejected' ? '' : 'is-soft') ?>">
+                    <?= icon($pcSs === 'approved' ? 'check-circle' : ($pcSs === 'rejected' ? 'x-circle' : 'clock'), 'ic-sm') ?>
+                    <b>موجودی:</b> <?= h(partCheckStatusLabel($pcSs)) ?>
+                    <?php if (!empty($pchk['stock_reviewed_at'])): ?>
+                    <span class="pchk-confirm-note">— بررسی در <?= h(jDate($pchk['stock_reviewed_at'], true)) ?></span>
+                    <?php endif; ?>
                     <?php if (trim((string)$pchk['stock_note']) !== ''): ?>
                     <span class="pchk-confirm-note">— <?= h((string)$pchk['stock_note']) ?></span>
                     <?php endif; ?>
                 </div>
-                <?php endif; ?>
             </div>
 
             <?php if ($pchkProd): ?>
@@ -331,7 +339,10 @@ if ($pchk && !empty($pchk['product_id'])) {
             <p class="pchk-sent-line"><?= icon('clipboard-list', 'ic-sm') ?> <b>توضیح مشتری:</b> <?= nl2br(h((string)$pchk['note'])) ?></p>
             <?php endif; ?>
             <?php if (trim((string)$pchk['admin_note']) !== ''): ?>
-            <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت کارشناس:</b> <?= nl2br(h((string)$pchk['admin_note'])) ?></p>
+            <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت مطابقت قطعه:</b> <?= nl2br(h((string)$pchk['admin_note'])) ?></p>
+            <?php endif; ?>
+            <?php if (trim((string)($pchk['stock_admin_note'] ?? '')) !== ''): ?>
+            <p class="pchk-adminnote"><?= icon('message', 'ic-sm') ?> <b>یادداشت موجودی:</b> <?= nl2br(h((string)$pchk['stock_admin_note'])) ?></p>
             <?php endif; ?>
 
             <?php if ($pchkImgs): ?>
