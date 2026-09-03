@@ -27,7 +27,8 @@ $ordersCount = getOrdersCount();
 $productsCount = getProductsCount();
 $pendingCount = getPendingOrdersCount();
 $reviewPending = pendingReviewsCount();
-$pchkPending = partCheckPendingCount();
+$pchkPending  = partCheckPendingCount();
+$stockPending = stockCheckPendingCount();
 ?><!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -151,6 +152,7 @@ $pchkPending = partCheckPendingCount();
 <?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage) ?>
 <?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending) ?>
 <?= adminMenuLink('part-checks.php', 'camera', 'بررسی عکس قطعه', $currentPage, $pchkPending) ?>
+<?= adminMenuLink('stock-checks.php', 'shield-check', 'تأیید موجودی', $currentPage, $stockPending) ?>
 <?php
 /* تنظیمات سایت: والد کشویی با چهار زیرشاخهٔ مجزا (هرکدام صفحهٔ خودش را دارد) */
 $asSecs   = settingsSections();
