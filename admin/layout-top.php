@@ -162,7 +162,35 @@ $partnerPending = partnerPendingCount();
 <?= adminMenuLink('part-categories.php', 'cog', 'دسته‌بندی قطعات', $currentPage) ?>
 <?= adminMenuLink('banners.php', 'image', 'بنرها', $currentPage) ?>
 <?= adminMenuLink('menus.php', 'menu', 'منوهای سایت', $currentPage) ?>
-<?= adminMenuLink('orders.php', 'clipboard-list', 'سفارشات', $currentPage, $pendingCount, 'orders') ?>
+<?php
+/* سفارشات: والد کشویی با چهار زیرشاخه (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳: «نه توی
+   مدیریت سفارشات، کنار منوی ادمین جدا کن ... روی سفارشات که کلیک میکنم
+   نوار کشویی زیرش باز بشه») — هم‌الگوی «تنظیمات سایت» زیر همین بخش. خود
+   دسته‌بندی (همکار/مشتری/بدون ثبت‌نام) در admin/orders.php با ?ctype=X
+   انجام می‌شود؛ اینجا فقط چهار لینک به همان صفحه‌اند. */
+$ordersOnPage = ($currentPage === 'orders.php');
+$ordersCtypeCur = $ordersOnPage ? (string)($_GET['ctype'] ?? '') : '';
+if (!in_array($ordersCtypeCur, ['partner', 'retail', 'guest'], true)) $ordersCtypeCur = '';
+$ordersSubs = [
+    ''        => ['label' => 'همه سفارشات',        'icon' => 'clipboard-list'],
+    'partner' => ['label' => 'سفارشات همکاران',      'icon' => 'briefcase'],
+    'retail'  => ['label' => 'سفارشات مشتریان',      'icon' => 'bag'],
+    'guest'   => ['label' => 'سفارشات بدون ثبت‌نام', 'icon' => 'user'],
+];
+?>
+<details class="am-group" <?= $ordersOnPage ? 'open' : '' ?>>
+<summary class="am-link am-parent<?= $ordersOnPage ? ' is-cur' : '' ?>">
+<span class="am-icon"><?= icon('clipboard-list') ?></span><span>سفارشات</span>
+<span style="flex:1"></span>
+<span class="am-badge<?= (int)$pendingCount > 0 ? '' : ' am-badge-hidden' ?>" data-badge="orders"><?= (int)$pendingCount ?></span>
+<span class="am-caret"><?= icon('chevron-down') ?></span>
+</summary>
+<div class="am-sub">
+<?php foreach ($ordersSubs as $ok => $od): ?>
+<a href="orders.php<?= $ok !== '' ? '?ctype=' . $ok : '' ?>" class="am-link am-sublink<?= ($ordersOnPage && $ordersCtypeCur === $ok) ? ' active' : '' ?>"><span class="am-icon"><?= icon($od['icon']) ?></span><span><?= h($od['label']) ?></span></a>
+<?php endforeach; ?>
+</div>
+</details>
 <?= adminMenuLink('customers.php', 'users', 'مشتریان و همکاران', $currentPage, $partnerPending, 'partners') ?>
 <?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage) ?>
 <?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending, 'reviews') ?>
