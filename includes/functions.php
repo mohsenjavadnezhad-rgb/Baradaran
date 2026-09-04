@@ -234,6 +234,55 @@ function guestCheckoutEnabled() {
     return getSettingRaw('allow_guest_checkout', '0') === '1';
 }
 
+/* آیا «ثبت سفارش بدون موبایل» روشن است؟ (پنل مدیریت ← تنظیمات ← ثبت سفارش/ورود)
+   ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر) — سخت‌گیرتر از guestCheckoutEnabled(): آن یکی
+   باز هم یک شمارهٔ موبایل واقعی می‌خواهد (فقط کد تأیید را برمی‌دارد)، این یکی
+   حتی همان یک قدم را هم حذف می‌کند — مشتری واردنشده مستقیم وارد مراحل بررسی
+   عکس/ثبت سفارش می‌شود (part-check.php/checkout.php، بدون هیچ صفحهٔ میانی).
+   شمارهٔ تماس واقعی (برای هماهنگی ارسال) به‌جای صفحهٔ ورود، همان‌جا در خود
+   فرم ثبت سفارش گرفته می‌شود — رجوع کنید به ensureAnonymousCustomer() و
+   checkout.php. با روشن‌بودن هردو کلید، این یکی برتری دارد (کم‌اصطکاک‌تر است). */
+function checkoutNoMobileEnabled() {
+    return getSettingRaw('allow_checkout_no_mobile', '0') === '1';
+}
+
+/* اگر مشتری وارد نشده و checkoutNoMobileEnabled() روشن است، یک حساب «مهمان»
+   بی‌صدا می‌سازد و واردش می‌کند — بدون هیچ فرم/صفحه‌ای. شمارهٔ موبایلش یک
+   پیش‌شماره‌ی جانشین (نه با قاعدهٔ ۰۹xxxxxxxxx، پس isValidMobile() همیشه رویش
+   false برمی‌گرداند و جای دیگری با آن اشتباه گرفته نمی‌شود) صرفا برای برآوردن
+   قید NOT NULL UNIQUE ستون mobile است؛ این مشتری هیچ‌وقت با همین شماره دوباره
+   وارد نمی‌شود (شماره‌ای که خودش نمی‌داند) — هر بازدید یعنی یک «مهمان» تازه.
+   شمارهٔ تماس واقعی مشتری برای همین سفارش، جدا در ستون orders.customer_mobile
+   ذخیره می‌شود (رجوع کنید به checkout.php) — پس ادمین باز هم شمارهٔ درست را
+   برای هر سفارش می‌بیند، فقط حساب زیرینش گمنام می‌ماند.
+   اگر از قبل وارد شده (چه با موبایل واقعی چه مهمان قبلی همین نشست)، همان
+   حساب برمی‌گردد — دوباره چیزی ساخته نمی‌شود. */
+function ensureAnonymousCustomer() {
+    if (isCustomerLoggedIn()) return currentCustomer();
+    if (!checkoutNoMobileEnabled()) return null;
+    global $pdo;
+    for ($i = 0; $i < 5; $i++) {
+        $placeholder = '00' . str_pad((string)mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        try {
+            try {
+                $pdo->prepare("INSERT INTO customers (mobile, customer_type, partner_status) VALUES (?, 'retail', 'none')")
+                    ->execute([$placeholder]);
+            } catch (Throwable $e) {
+                // ستون‌های همکار هنوز ساخته نشده‌اند (dbsetup3 اجرا نشده) → ثبت‌نام ساده
+                $pdo->prepare("INSERT INTO customers (mobile) VALUES (?)")->execute([$placeholder]);
+            }
+            $id = $pdo->lastInsertId();
+            $st = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+            $st->execute([$id]);
+            $c = $st->fetch();
+            if ($c) { loginCustomer($c); return $c; }
+        } catch (Throwable $e) {
+            continue; // برخورد بسیار بعید یکتایی روی پیش‌شماره — یک بار دیگر تلاش کن
+        }
+    }
+    return null;
+}
+
 function customerProfileComplete($c) {
     if (!$c) return false;
     return trim($c['full_name'] ?? '') !== ''
