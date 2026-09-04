@@ -2428,6 +2428,22 @@ function partnerPendingCount() {
     } catch (Throwable $e) { return 0; }
 }
 
+/* تعداد فاکتورهای بی‌تسویهٔ همکاران (نشان کنار «تسویهٔ همکاران») — دقیقا
+   همان کوئری اصلی admin/partner-settlements.php، یک‌جا نگه داشته شده تا
+   نشان منو و خود صفحه هیچ‌وقت با هم اختلاف نداشته باشند. */
+function partnerSettlementsPendingCount() {
+    global $pdo;
+    if (!function_exists('paymentReady') || !paymentReady() || !dbHasColumn('customers', 'customer_type')) return 0;
+    try {
+        return (int)$pdo->query("
+            SELECT COUNT(*) FROM orders o
+            JOIN customers c ON c.id = o.customer_id
+            WHERE c.customer_type = 'partner' AND o.status <> 'cancelled'
+              AND o.payment_status IN ('unpaid', 'pending', 'failed')
+        ")->fetchColumn();
+    } catch (Throwable $e) { return 0; }
+}
+
 /* لایهٔ درگاه پرداخت — در انتها لود می‌شود چون از h()/icon()/getSetting()/httpPostJson() استفاده می‌کند.
    این تنها نقطهٔ اتصال است؛ هم سایت و هم پنل ادمین از همین‌جا به توابع payment* دسترسی دارند. */
 require_once __DIR__ . '/payment.php';
