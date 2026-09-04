@@ -303,7 +303,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
 .gal-admin{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.7rem;}
 .gal-item{width:112px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-secondary);overflow:hidden;}
 .gal-item .gal-img{width:100%;height:82px;background:var(--bg-input);display:block;}
-.gal-item .gal-img img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;}
+.gal-item .gal-img img{width:100%;height:100%;object-fit:cover;display:block;}
 .gal-tools{display:flex;align-items:center;gap:0.15rem;padding:0.25rem;}
 .gal-num{font-size:0.68rem;color:var(--text-muted);min-width:1.1rem;text-align:center;}
 .gal-tools .btn{padding:0.12rem 0.3rem;font-size:0.66rem;line-height:1.5;}
