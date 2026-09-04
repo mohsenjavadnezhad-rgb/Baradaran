@@ -508,16 +508,21 @@ require_once __DIR__ . '/layout-top.php';
                                 <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
                                 <a href="invoice.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm" target="_blank"><?= icon('printer', 'ic-sm') ?></a>
                                 <?php /* چهار کلید سریع «تسویه شد» (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳: «توی همون سطر
-                                        هر شماره سفارش ... هر کدوم رو که زدم اون سطر رنگش سبز بشه») — فقط
-                                        آیکون، بدون متن، تا سطر به‌هم نریزد؛ عنوان (title) هرکدام می‌گوید چیست.
+                                        هر شماره سفارش ... هر کدوم رو که زدم اون سطر رنگش سبز بشه»؛ پیگیری
+                                        ۲۰۲۶-۰۹-۰۴ «باز هم بزرگتر و مشخص باشه برای چیه هر آیکون، سطر به‌هم
+                                        نریزه» — دیگر فقط آیکون نیستند: هرکدام یک برچسب کوتاه هم کنار آیکون
+                                        دارند تا بدون نیاز به نگه‌داشتن موس روی دکمه (title) هم معلوم باشد
+                                        چیست. اندازه‌شان بزرگ‌تر شد؛ خود گروه هم `flex-wrap` گرفت تا اگر جا
+                                        کم آمد، دکمه‌ها به سطر بعد همان گروه بروند، نه اینکه از قاب بیرون
+                                        بزنند یا چیز دیگری در سطر جابه‌جا شود.
                                         جاوااسکریپت پایین صفحه با fetch بی‌صدا صدا می‌زند و بدون رفرش، همین
                                         سطر (id="pset-ord-N") را سبز می‌کند؛ بدون جاوااسکریپت هم فرم <noscript>
                                         پایین‌تر همان کار را با PRG معمولی انجام می‌دهد. */ ?>
-                                <span class="pset-settle-group" data-order="<?= (int)$o['id'] ?>" style="display:inline-flex;gap:0.2rem;padding-inline-start:0.3rem;border-inline-start:1px solid var(--border-color);">
-                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="cash" title="پرداخت نقدی انجام شد"><?= icon('package', 'ic-sm') ?></button>
-                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="card" title="کارت به کارت انجام شد"><?= icon('credit-card', 'ic-sm') ?></button>
-                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="cheque" title="چک دریافت شد"><?= icon('receipt', 'ic-sm') ?></button>
-                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="month" title="پرداخت اول ماه انجام شد"><?= icon('calendar', 'ic-sm') ?></button>
+                                <span class="pset-settle-group" data-order="<?= (int)$o['id'] ?>" style="display:inline-flex;flex-wrap:wrap;gap:0.35rem;padding-inline-start:0.5rem;border-inline-start:1px solid var(--border-color);">
+                                    <button type="button" class="btn btn-secondary pset-settle-btn" data-method="cash" title="پرداخت نقدی انجام شد"><?= icon('package', 'ic-sm') ?><span>نقدی</span></button>
+                                    <button type="button" class="btn btn-secondary pset-settle-btn" data-method="card" title="کارت به کارت انجام شد"><?= icon('credit-card', 'ic-sm') ?><span>کارت</span></button>
+                                    <button type="button" class="btn btn-secondary pset-settle-btn" data-method="cheque" title="چک دریافت شد"><?= icon('receipt', 'ic-sm') ?><span>چک</span></button>
+                                    <button type="button" class="btn btn-secondary pset-settle-btn" data-method="month" title="پرداخت اول ماه انجام شد"><?= icon('calendar', 'ic-sm') ?><span>اول ماه</span></button>
                                 </span>
                                 <noscript>
                                 <span style="display:inline-flex;gap:0.2rem;">
@@ -550,13 +555,16 @@ require_once __DIR__ . '/layout-top.php';
 /* سطر تسویه‌شده — خواستهٔ کاربر: «هر کدوم رو که زدم اون سطر رنگش سبز بشه» */
 .pset-order-settled{background:rgba(34,197,94,0.14) !important;transition:background 0.4s ease;}
 .pset-order-settled .pset-settle-btn{display:none;}
-/* بزرگ‌تر کردن چهار کلید سریع تسویه (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴: «خیلی کوچیکه
-   بدون اینکه چیدمانش به‌هم بریزه بزرگ‌تر کن») — گروهشان از قبل هم داخل یک
-   ردیف flex با flex-wrap است، پس بزرگ‌شدن این چند دکمهٔ آیکون‌تنها فقط خودشان
-   را بزرگ می‌کند؛ اگر جا کم بیاورد، همان ردیف خودش می‌شکند، نه اینکه چیز
-   دیگری جابه‌جا شود. */
-.pset-settle-btn{padding:0.55rem 0.7rem;}
-.pset-settle-btn .ic{width:1.2em;height:1.2em;}
+/* چهار کلید سریع تسویه — دو دور بزرگ‌تر شدن (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴: اول
+   «خیلی کوچیکه بدون اینکه چیدمانش به‌هم بریزه بزرگ‌تر کن»، بعد «باز هم
+   بزرگتر و مشخص باشه برای چیه هر آیکون، سطر به‌هم نریزه»). دیگر `btn-sm`
+   نیستند — اندازه/فونت مستقیم اینجا تعریف شده، بزرگ‌تر از دکمهٔ معمولی پنل،
+   چون کنار آیکون حالا یک برچسب کوتاه هم دارند و باید هم آیکون هم متن راحت
+   خوانده شوند. خود گروه (`.pset-settle-group` در HTML) هم `flex-wrap:wrap`
+   گرفته: اگر عرض ستون کم بود، این چهار دکمه به سطر بعد همین گروه می‌روند،
+   نه اینکه از قاب بیرون بزنند یا بقیهٔ ستون عملیات را به‌هم بریزند. */
+.pset-settle-btn{padding:0.6rem 0.95rem;font-size:0.82rem;font-weight:600;gap:0.4rem;}
+.pset-settle-btn .ic{width:1.3em;height:1.3em;}
 </style>
 <script>
 /* چهار کلید سریع تسویهٔ سفارش، توی سطر خود «همکاران بدهکار» — بدون رفرش،
