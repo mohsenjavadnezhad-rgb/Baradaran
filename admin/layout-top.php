@@ -41,6 +41,7 @@ $reviewPending = pendingReviewsCount();
 $pchkPending  = partCheckPendingCount();
 $stockPending = stockCheckPendingCount();
 $partnerPending = partnerPendingCount();
+$settlePending  = partnerSettlementsPendingCount();
 ?><!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -192,7 +193,7 @@ $ordersSubs = [
 </div>
 </details>
 <?= adminMenuLink('customers.php', 'users', 'مشتریان و همکاران', $currentPage, $partnerPending, 'partners') ?>
-<?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage) ?>
+<?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage, $settlePending, 'settlements') ?>
 <?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending, 'reviews') ?>
 <?= adminMenuLink('part-checks.php', 'camera', 'بررسی عکس قطعه', $currentPage, $pchkPending, 'partchecks') ?>
 <?= adminMenuLink('stock-checks.php', 'shield-check', 'تأیید موجودی', $currentPage, $stockPending, 'stockchecks') ?>
