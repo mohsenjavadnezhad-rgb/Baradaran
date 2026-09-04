@@ -550,6 +550,13 @@ require_once __DIR__ . '/layout-top.php';
 /* سطر تسویه‌شده — خواستهٔ کاربر: «هر کدوم رو که زدم اون سطر رنگش سبز بشه» */
 .pset-order-settled{background:rgba(34,197,94,0.14) !important;transition:background 0.4s ease;}
 .pset-order-settled .pset-settle-btn{display:none;}
+/* بزرگ‌تر کردن چهار کلید سریع تسویه (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴: «خیلی کوچیکه
+   بدون اینکه چیدمانش به‌هم بریزه بزرگ‌تر کن») — گروهشان از قبل هم داخل یک
+   ردیف flex با flex-wrap است، پس بزرگ‌شدن این چند دکمهٔ آیکون‌تنها فقط خودشان
+   را بزرگ می‌کند؛ اگر جا کم بیاورد، همان ردیف خودش می‌شکند، نه اینکه چیز
+   دیگری جابه‌جا شود. */
+.pset-settle-btn{padding:0.55rem 0.7rem;}
+.pset-settle-btn .ic{width:1.2em;height:1.2em;}
 </style>
 <script>
 /* چهار کلید سریع تسویهٔ سفارش، توی سطر خود «همکاران بدهکار» — بدون رفرش،
