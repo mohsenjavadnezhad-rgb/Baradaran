@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
@@ -81,19 +81,49 @@ $offset = ($page - 1) * ITEMS_PER_PAGE;
 
 /* فیلتر وضعیت پرداخت */
 $payFilter = (string)($_GET['pay'] ?? '');
-$where = '';
+
+/* ---------- دسته‌بندی سفارش بر اساس نوع مشتری صاحبش (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳) ----------
+   سه دستهٔ مجزا، از روی داده‌های موجود (بدون ستون تازه‌ای روی orders):
+   - همکار: customers.customer_type = 'partner'
+   - بدون ثبت‌نام: حساب «مهمان» (ensureAnonymousCustomer()، تنظیمات ← ثبت سفارش/ورود)
+     که موبایلش پیش‌شمارهٔ جانشین است، نه قاعدهٔ واقعی ۰۹xxxxxxxxx
+   - مشتری: بقیه — چه با کد تأیید وارد شده باشد چه از «خرید بدون ثبت‌نام» فقط-موبایل
+     (guest-checkout.php) آمده باشد؛ هردو حسابی با شمارهٔ موبایل واقعی دارند و از این
+     نقطه به بعد واقعا یک «مشتری» عادی‌اند.
+   سفارشی که مشتری پشتش پیدا نشود (حذف‌شده) هم برای امن‌ماندن در سبد «مشتریان» می‌افتد. */
+$ctypeCase = "CASE WHEN c.customer_type = 'partner' THEN 'partner'
+                   WHEN c.mobile IS NULL OR c.mobile NOT REGEXP '^09[0-9]{9}$' THEN 'guest'
+                   ELSE 'retail' END";
+$ctypeFilter = (string)($_GET['ctype'] ?? '');
+if (!in_array($ctypeFilter, ['partner', 'retail', 'guest'], true)) $ctypeFilter = '';
+
+$ctypeCounts = ['all' => 0, 'partner' => 0, 'retail' => 0, 'guest' => 0];
+try {
+    $ctypeCounts['all'] = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+    foreach ($pdo->query("SELECT $ctypeCase AS ctype, COUNT(*) n FROM orders o LEFT JOIN customers c ON c.id = o.customer_id GROUP BY ctype") as $r) {
+        $ctypeCounts[$r['ctype']] = (int)$r['n'];
+    }
+} catch (Throwable $e) {}
+$ctypeLabels = ['' => 'همه', 'retail' => 'مشتریان', 'partner' => 'همکاران', 'guest' => 'بدون ثبت‌نام'];
+
+$whereParts = [];
 $params = [];
 if ($payOn && in_array($payFilter, ['unpaid', 'pending', 'paid', 'failed', 'refunded'], true)) {
-    $where = " WHERE payment_status = ?";
+    $whereParts[] = "o.payment_status = ?";
     $params[] = $payFilter;
 }
+if ($ctypeFilter !== '') {
+    $whereParts[] = "$ctypeCase = ?";
+    $params[] = $ctypeFilter;
+}
+$where = $whereParts ? (" WHERE " . implode(' AND ', $whereParts)) : '';
 
-$cnt = $pdo->prepare("SELECT COUNT(*) FROM orders" . $where);
+$cnt = $pdo->prepare("SELECT COUNT(*) FROM orders o LEFT JOIN customers c ON c.id = o.customer_id" . $where);
 $cnt->execute($params);
 $total = (int)$cnt->fetchColumn();
 $totalPages = ceil($total / ITEMS_PER_PAGE);
 
-$q = $pdo->prepare("SELECT * FROM orders" . $where . " ORDER BY created_at DESC LIMIT " . ITEMS_PER_PAGE . " OFFSET $offset");
+$q = $pdo->prepare("SELECT o.*, $ctypeCase AS order_ctype FROM orders o LEFT JOIN customers c ON c.id = o.customer_id" . $where . " ORDER BY o.created_at DESC LIMIT " . ITEMS_PER_PAGE . " OFFSET $offset");
 $q->execute($params);
 $orders = $q->fetchAll();
 
@@ -124,6 +154,15 @@ $statusLabels = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت سفارشات - <?= h(SITE_NAME) ?></title>
     <link rel="stylesheet" href="../assets/css/style.css?v=64">
+    <?php /* این صفحه از layout-top.php استفاده نمی‌کند (نمای مستقل قدیمی‌تر)، پس
+            کلاس‌های badge-partner/badge-retail/badge-pending آن‌جا اینجا نیستند —
+            نشان کوچک نوع مشتری (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳) این‌جا خودش تعریف می‌شود. */ ?>
+    <style>
+    .oct-badge{display:inline-block;font-size:0.68rem;font-weight:600;padding:0.1rem 0.45rem;border-radius:999px;white-space:nowrap;margin-right:0.3rem;vertical-align:middle;}
+    .oct-partner{background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.35);}
+    .oct-retail{background:rgba(148,163,184,0.15);color:#CBD5E1;border:1px solid rgba(148,163,184,0.3);}
+    .oct-guest{background:rgba(234,179,8,0.15);color:#FBBF24;border:1px solid rgba(234,179,8,0.35);}
+    </style>
 </head>
 <body style="background:var(--bg-primary);min-height:100vh;">
     <div class="admin-layout admin-layout--wide">
@@ -153,17 +192,31 @@ $statusLabels = [
         <div class="flash flash-success" style="margin-bottom:1rem;"><?= h($chqMsg) ?></div>
         <?php endif; ?>
 
+        <?php /* ---------- تب مستقل: نوع مشتری (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳) ----------
+                سه دستهٔ کاملا مجزا (همکاران/مشتریان/بدون ثبت‌نام) — مستقل از تب
+                پایین (وضعیت پرداخت)؛ هرکدام از تب‌ها می‌تواند جدا یا با هم انتخاب
+                شود، پس هردو طرف لینک‌هایشان فیلتر دیگری را هم نگه می‌دارند. */ ?>
+        <?php $payQs = $payFilter !== '' ? ('pay=' . urlencode($payFilter) . '&') : ''; ?>
+        <div class="cust-tabs" style="margin-bottom:0.6rem;">
+            <?php foreach ($ctypeLabels as $ck => $clbl): $cn = $ck === '' ? $ctypeCounts['all'] : $ctypeCounts[$ck]; ?>
+            <a href="?<?= $payQs ?><?= $ck !== '' ? 'ctype=' . urlencode($ck) : '' ?>" class="cust-tab <?= $ctypeFilter === $ck ? 'active' : '' ?>">
+                <?= h($clbl) ?> <span class="cust-tab-n"><?= $cn ?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+
         <?php if (!$payOn): ?>
         <div class="flash flash-error" style="margin-bottom:1rem;">
             ستون‌های پرداخت ساخته نشده‌اند. فایل <code dir="ltr">migrate-payments.php</code> را یک‌بار در مرورگر باز کنید.
         </div>
         <?php else: ?>
+        <?php $ctypeQs = $ctypeFilter !== '' ? ('ctype=' . urlencode($ctypeFilter) . '&') : ''; ?>
         <div class="cust-tabs" style="margin-bottom:1rem;">
-            <a href="orders.php" class="cust-tab <?= $payFilter === '' ? 'active' : '' ?>">همه <span class="cust-tab-n"><?= $payCounts['all'] ?></span></a>
-            <a href="?pay=paid" class="cust-tab <?= $payFilter === 'paid' ? 'active' : '' ?>">پرداخت‌شده <span class="cust-tab-n"><?= (int)($payCounts['paid'] ?? 0) ?></span></a>
-            <a href="?pay=unpaid" class="cust-tab <?= $payFilter === 'unpaid' ? 'active' : '' ?>">پرداخت‌نشده <span class="cust-tab-n"><?= (int)($payCounts['unpaid'] ?? 0) ?></span></a>
-            <a href="?pay=pending" class="cust-tab <?= $payFilter === 'pending' ? 'active' : '' ?>">در انتظار پرداخت <span class="cust-tab-n"><?= (int)($payCounts['pending'] ?? 0) ?></span></a>
-            <a href="?pay=failed" class="cust-tab <?= $payFilter === 'failed' ? 'active' : '' ?>">ناموفق <span class="cust-tab-n"><?= (int)($payCounts['failed'] ?? 0) ?></span></a>
+            <a href="?<?= $ctypeQs ?>" class="cust-tab <?= $payFilter === '' ? 'active' : '' ?>">همه <span class="cust-tab-n"><?= $payCounts['all'] ?></span></a>
+            <a href="?<?= $ctypeQs ?>pay=paid" class="cust-tab <?= $payFilter === 'paid' ? 'active' : '' ?>">پرداخت‌شده <span class="cust-tab-n"><?= (int)($payCounts['paid'] ?? 0) ?></span></a>
+            <a href="?<?= $ctypeQs ?>pay=unpaid" class="cust-tab <?= $payFilter === 'unpaid' ? 'active' : '' ?>">پرداخت‌نشده <span class="cust-tab-n"><?= (int)($payCounts['unpaid'] ?? 0) ?></span></a>
+            <a href="?<?= $ctypeQs ?>pay=pending" class="cust-tab <?= $payFilter === 'pending' ? 'active' : '' ?>">در انتظار پرداخت <span class="cust-tab-n"><?= (int)($payCounts['pending'] ?? 0) ?></span></a>
+            <a href="?<?= $ctypeQs ?>pay=failed" class="cust-tab <?= $payFilter === 'failed' ? 'active' : '' ?>">ناموفق <span class="cust-tab-n"><?= (int)($payCounts['failed'] ?? 0) ?></span></a>
             <span style="margin-right:auto;color:var(--text-muted);font-size:0.8rem;">جمع دریافتی: <b style="color:#4ADE80;"><?= formatPrice($paidSum) ?></b></span>
         </div>
         <?php endif; ?>
@@ -192,7 +245,13 @@ $statusLabels = [
                 <?php foreach ($orders as $o): ?>
                 <tr>
                     <td class="ot-no" dir="ltr" title="شناسهٔ داخلی: #<?= (int)$o['id'] ?>"><?= h(orderNumber($o)) ?></td>
-                    <td class="ot-cust"><?= h($o['customer_name']) ?></td>
+                    <td class="ot-cust">
+                        <?= h($o['customer_name']) ?>
+                        <?php $octLbl = ['partner' => ['همکار', 'oct-partner'], 'guest' => ['بدون ثبت‌نام', 'oct-guest'], 'retail' => ['مشتری', 'oct-retail']][$o['order_ctype']] ?? null; ?>
+                        <?php if ($octLbl): ?>
+                        <span class="oct-badge <?= $octLbl[1] ?>"><?= $octLbl[0] ?></span>
+                        <?php endif; ?>
+                    </td>
                     <td class="ot-mobile" dir="ltr"><?= h($o['customer_mobile']) ?></td>
                     <td class="ot-amount"><?= formatPrice($o['total_amount']) ?></td>
                     <td class="ot-status">
@@ -269,7 +328,7 @@ $statusLabels = [
 
         <?php if ($totalPages > 1): ?>
         <div class="pagination">
-            <?php $qs = $payFilter !== '' ? ('pay=' . urlencode($payFilter) . '&') : ''; ?>
+            <?php $qs = ($payFilter !== '' ? ('pay=' . urlencode($payFilter) . '&') : '') . ($ctypeFilter !== '' ? ('ctype=' . urlencode($ctypeFilter) . '&') : ''); ?>
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <?php if ($i == $page): ?>
                 <span class="current"><?= $i ?></span>
