@@ -57,7 +57,7 @@ require_once __DIR__ . '/layout-top.php';
 <?php foreach ($products as $p): ?>
 <tr>
   <td><?= $p['id'] ?></td>
-  <td><div style="width:40px;height:40px;background:var(--bg-input);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-muted);overflow:hidden;"><?= $p['image'] ? '<img src="../uploads/products/'.h($p['image']).'" style="width:100%;height:100%;object-fit:contain;object-position:center;">' : icon('cog', 'ic-lg') ?></div></td>
+  <td><div style="width:40px;height:40px;background:var(--bg-input);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-muted);overflow:hidden;"><?= $p['image'] ? '<img src="../uploads/products/'.h($p['image']).'" style="width:100%;height:100%;object-fit:cover;">' : icon('cog', 'ic-lg') ?></div></td>
   <td><a href="product-edit.php?id=<?= $p['id'] ?>" style="color:var(--text-primary);"><?= h($p['name']) ?></a></td>
   <td><code style="font-size:0.75rem;"><?= h($p['technical_number']) ?></code></td>
   <td><?= formatPrice($p['retail_price']) ?></td>
