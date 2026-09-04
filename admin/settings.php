@@ -201,6 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
 
     if ($sec === 'checkout') {
         setSetting('allow_guest_checkout', isset($_POST['allow_guest_checkout']) ? '1' : '0');
+        setSetting('allow_checkout_no_mobile', isset($_POST['allow_checkout_no_mobile']) ? '1' : '0');
     }
 
     if ($sec === 'productyear') {
@@ -1473,6 +1474,28 @@ require_once __DIR__ . '/layout-top.php';
     </div>
     <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1rem;">
       با برداشتن تیک، رفتار قبلی برمی‌گردد: مشتری واردنشده برای ادامه به صفحهٔ ورود هدایت می‌شود.
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border-color);margin:1.1rem 0;">
+
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
+      <?= icon('info', 'ic-sm') ?>
+      گزینهٔ زیر یک قدم فراتر می‌رود — سخت‌گیرتر از بالا: مشتری واردنشده حتی همان شمارهٔ
+      موبایل را هم در ابتدا نمی‌گذارد؛ کلید «ادامه» مستقیم او را به مراحل بررسی عکس/ثبت
+      آدرس و سفارش می‌برد (بدون هیچ صفحهٔ میانی). شمارهٔ تماس واقعی (برای هماهنگی ارسال)
+      خود آن‌جا، در فرم ثبت سفارش گرفته می‌شود. <b>توجه:</b> حساب زیرین این مشتری گمنام
+      می‌ماند (شماره‌ای که خودش نمی‌داند) — یعنی نمی‌تواند بعدا با همان مشخصات دوباره وارد
+      شود یا سوابق خریدش را ببیند؛ هر سفارش را جدا در پنل سفارش‌ها (با شمارهٔ تماس درستش)
+      می‌بینید. اگر هردو تیک روشن باشند، همین یکی برتری دارد (کم‌اصطکاک‌تر است).
+    </p>
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="allow_checkout_no_mobile" id="allow_checkout_no_mobile" value="1"
+             <?= getSettingRaw('allow_checkout_no_mobile', '0') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="allow_checkout_no_mobile" style="margin:0;cursor:pointer;">ثبت سفارش کاملا بدون گرفتن شمارهٔ موبایل در ورود مجاز باشد</label>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 0;">
+      با برداشتن تیک، این رفتار خاموش می‌شود و طبق تیک بالا (یا رفتار پیش‌فرض) عمل می‌شود.
     </div>
   </div>
   <?php endif; ?>
