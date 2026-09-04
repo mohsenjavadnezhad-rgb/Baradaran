@@ -41,10 +41,17 @@ $baseNext = $pchkOn ? 'part-check.php' : 'checkout.php';
    اجبار ورودی که خود part-check.php/checkout.php می‌گذارند، اول از
    guest-checkout.php رد می‌شود که فقط شمارهٔ موبایل می‌گیرد (بدون کد تأیید)
    و از آن‌جا همان مسیر همیشگی ادامه پیدا می‌کند. مشتری واردشده و حالت
-   خاموش، رفتار قبلی را دارند. */
-$nextHref = (!isCustomerLoggedIn() && guestCheckoutEnabled())
-    ? ('guest-checkout.php?next=' . urlencode($baseNext))
-    : $baseNext;
+   خاموش، رفتار قبلی را دارند.
+   ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر): «ثبت سفارش بدون موبایل» سخت‌گیرتر و
+   کم‌اصطکاک‌تر است — حتی همان یک قدم guest-checkout.php هم برداشته می‌شود؛
+   مشتری مستقیم وارد $baseNext می‌شود (part-check.php/checkout.php خودشان
+   حساب «مهمان» را بی‌صدا می‌سازند، ensureAnonymousCustomer()). با روشن‌بودن
+   هردو کلید، این یکی برتری دارد. */
+$nextHref = (!isCustomerLoggedIn() && checkoutNoMobileEnabled())
+    ? $baseNext
+    : ((!isCustomerLoggedIn() && guestCheckoutEnabled())
+        ? ('guest-checkout.php?next=' . urlencode($baseNext))
+        : $baseNext);
 $nextText = 'ادامه ثبت سفارش';
 ?>
 
