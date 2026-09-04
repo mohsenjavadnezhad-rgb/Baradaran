@@ -531,7 +531,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
              href="product-edit.php?id=<?= $id ?>&gmove=<?= $gid ?>&gdir=fwd#gallery"><?= icon('chevron-right', 'ic-sm') ?></a>
           <a class="btn btn-secondary btn-sm" title="یک پله عقب‌تر"
              href="product-edit.php?id=<?= $id ?>&gmove=<?= $gid ?>&gdir=back#gallery"><?= icon('chevron-left', 'ic-sm') ?></a>
-          <a class="btn btn-danger btn-sm" title="حذف تصویر" onclick="return confirm('این تصویر حذف شود؟')"
+          <a class="btn btn-danger btn-sm" title="حذف تصویر" data-confirm="این تصویر حذف شود؟"
              href="product-edit.php?id=<?= $id ?>&gdel=<?= $gid ?>#gallery"><?= icon('trash', 'ic-sm') ?></a>
         </div>
       </div>
@@ -837,9 +837,17 @@ var variantMakers = <?= json_encode($manufacturers, JSON_UNESCAPED_UNICODE) ?>;
         if (kind === 'clear') {
             var on = [].slice.call(box.querySelectorAll('input[name="categories[]"]:checked'));
             if (!on.length) return;
-            if (on.length > 1 && !confirm('انتخاب ' + on.length + ' مدل حذف شود؟')) return;
-            on.forEach(function (b) { b.checked = false; });
-            fire(on[0]);
+            var doClear = function () {
+                on.forEach(function (b) { b.checked = false; });
+                fire(on[0]);
+            };
+            /* بدون پاپ‌آپ بومی confirm() — کادر مشترک صفحات ادمین
+               (admin/layout-bottom.php، window.adminConfirm). */
+            if (on.length > 1 && window.adminConfirm) {
+                window.adminConfirm('انتخاب ' + on.length + ' مدل حذف شود؟', doClear, { icon: 'trash', label: 'حذف شود' });
+            } else {
+                doClear();
+            }
         }
     }
 
