@@ -224,7 +224,8 @@ require_once __DIR__ . '/layout-top.php';
                     <?= icon('check-circle', 'ic-sm') ?> تأیید مطابقت قطعه
                 </button>
                 <button type="submit" name="pc_do" value="reject" class="btn btn-danger btn-sm"
-                        onclick="return confirm('این درخواست «تأیید نشد» ثبت شود؟ توضیح شما به مشتری نشان داده می‌شود.');">
+                        data-confirm="این درخواست «تأیید نشد» ثبت شود؟ توضیح شما به مشتری نشان داده می‌شود."
+                        data-confirm-icon="alert" data-confirm-label="ثبت شود">
                     <?= icon('x-circle', 'ic-sm') ?> تأیید نشد
                 </button>
             </div>
