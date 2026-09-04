@@ -12,11 +12,22 @@ if (isset($menuAliases[$currentPage])) $currentPage = $menuAliases[$currentPage]
 $adminName = $_SESSION['admin_username'] ?? 'admin';
 
 /* $iconName = نام آیکون از includes/icons.php (نه ایموجی)
-   $badge > 0 → شمارندهٔ قرمز کنار عنوان (مثل «در انتظار تأیید») */
-function adminMenuLink($href, $iconName, $label, $current, $badge = 0) {
+   $badge > 0 → شمارندهٔ قرمز کنار عنوان (مثل «در انتظار تأیید»)
+   $badgeKey → کلید همان شمارنده در admin/ajax-badges.php (خواستهٔ کاربر
+   ۲۰۲۶-۰۹-۰۳: «اون اعداد بدون رفرش کردن اتومات اضافه بشه») — وقتی داده شود،
+   نشان همیشه در DOM می‌ماند (even at 0، فقط با کلاس am-badge-hidden پنهان)
+   تا اسکریپت پایین صفحه بتواند بدون ساختن/حذف‌کردن گره، فقط عدد و پیدایی را
+   زنده به‌روز کند. بدون $badgeKey، همان رفتار قدیمی (نشان فقط با badge>0
+   رندر می‌شود و هیچ‌وقت زنده به‌روز نمی‌شود) دست‌نخورده می‌ماند. */
+function adminMenuLink($href, $iconName, $label, $current, $badge = 0, $badgeKey = '') {
     $active = ($current === $href) ? 'active' : '';
     $ic = icon($iconName);
-    $bg = (int)$badge > 0 ? "<span class='am-badge'>" . (int)$badge . "</span>" : '';
+    if ($badgeKey !== '') {
+        $hiddenCls = (int)$badge > 0 ? '' : ' am-badge-hidden';
+        $bg = "<span class='am-badge$hiddenCls' data-badge='" . h($badgeKey) . "'>" . (int)$badge . "</span>";
+    } else {
+        $bg = (int)$badge > 0 ? "<span class='am-badge'>" . (int)$badge . "</span>" : '';
+    }
     return "<a href='$href' class='am-link $active'><span class='am-icon'>$ic</span><span>$label</span>$bg</a>";
 }
 
@@ -29,6 +40,7 @@ $pendingCount = getPendingOrdersCount();
 $reviewPending = pendingReviewsCount();
 $pchkPending  = partCheckPendingCount();
 $stockPending = stockCheckPendingCount();
+$partnerPending = partnerPendingCount();
 ?><!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -51,6 +63,9 @@ $stockPending = stockCheckPendingCount();
 .am-icon{font-size:1rem;width:20px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;}
 .am-icon>.ic{width:1.15rem;height:1.15rem;vertical-align:0;}
 .am-badge{margin-inline-start:auto;background:var(--red-primary);color:#fff;font-size:0.68rem;font-weight:700;min-width:1.25rem;text-align:center;padding:0.05rem 0.35rem;border-radius:999px;line-height:1.5;}
+.am-badge-hidden{display:none;}
+.am-badge.am-badge-pop{animation:amBadgePop 0.35s ease;}
+@keyframes amBadgePop{0%{transform:scale(1);}35%{transform:scale(1.35);}100%{transform:scale(1);}}
 .am-link.active .am-badge{background:#fff;color:var(--red-primary);}
 .am-link.active .am-icon>.ic{color:#fff;}
 /* «تنظیمات سایت» به‌صورت نوار کشویی: کلیک روی عنوان، زیرشاخه‌ها را باز/بسته می‌کند.
@@ -147,12 +162,12 @@ $stockPending = stockCheckPendingCount();
 <?= adminMenuLink('part-categories.php', 'cog', 'دسته‌بندی قطعات', $currentPage) ?>
 <?= adminMenuLink('banners.php', 'image', 'بنرها', $currentPage) ?>
 <?= adminMenuLink('menus.php', 'menu', 'منوهای سایت', $currentPage) ?>
-<?= adminMenuLink('orders.php', 'clipboard-list', 'سفارشات', $currentPage) ?>
-<?= adminMenuLink('customers.php', 'users', 'مشتریان و همکاران', $currentPage) ?>
+<?= adminMenuLink('orders.php', 'clipboard-list', 'سفارشات', $currentPage, $pendingCount, 'orders') ?>
+<?= adminMenuLink('customers.php', 'users', 'مشتریان و همکاران', $currentPage, $partnerPending, 'partners') ?>
 <?= adminMenuLink('partner-settlements.php', 'scale', 'تسویهٔ همکاران', $currentPage) ?>
-<?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending) ?>
-<?= adminMenuLink('part-checks.php', 'camera', 'بررسی عکس قطعه', $currentPage, $pchkPending) ?>
-<?= adminMenuLink('stock-checks.php', 'shield-check', 'تأیید موجودی', $currentPage, $stockPending) ?>
+<?= adminMenuLink('reviews.php', 'message', 'نظرات و پرسش‌ها', $currentPage, $reviewPending, 'reviews') ?>
+<?= adminMenuLink('part-checks.php', 'camera', 'بررسی عکس قطعه', $currentPage, $pchkPending, 'partchecks') ?>
+<?= adminMenuLink('stock-checks.php', 'shield-check', 'تأیید موجودی', $currentPage, $stockPending, 'stockchecks') ?>
 <?php
 /* تنظیمات سایت: والد کشویی با چهار زیرشاخهٔ مجزا (هرکدام صفحهٔ خودش را دارد) */
 $asSecs   = settingsSections();
@@ -172,6 +187,43 @@ $asCurSec = settingsSectionKey($_GET['sec'] ?? '');
 </nav>
 <div class="as-footer"><span>کاربر: <?= h($adminName) ?></span><a href="../shop.php" target="_blank">مشاهده فروشگاه &#8598;</a></div>
 </aside>
+<script>
+/* شمارنده‌های منوی کناری بدون رفرش صفحه زنده می‌شوند — خواستهٔ کاربر
+   ۲۰۲۶-۰۹-۰۳: «هرکاری برای تأیید یا انجام است باید جلوی اون بخش با عدد
+   مشخص باشه ... اون اعداد بدون رفرش کردن اتومات اضافه بشه». هر ۲۰ ثانیه
+   admin/ajax-badges.php را می‌خواند و فقط عدد/پیدایی نشان‌هایی که
+   data-badge دارند به‌روز می‌شود (همان نشان‌های همیشه-در-DOM که
+   adminMenuLink() با badgeKey ساخته)؛ بقیهٔ صفحه دست‌نخورده می‌ماند. اگر
+   عددی از قبلی بیشتر شود، یک چشمک کوتاه (am-badge-pop) توجه ادمین را جلب
+   می‌کند. */
+(function () {
+    var els = document.querySelectorAll('.am-badge[data-badge]');
+    if (!els.length) return;
+    function tick() {
+        fetch('ajax-badges.php', { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data) return;
+                els.forEach(function (el) {
+                    var key = el.getAttribute('data-badge');
+                    if (!(key in data)) return;
+                    var n = parseInt(data[key], 10) || 0;
+                    var prev = parseInt(el.textContent, 10) || 0;
+                    if (n === prev) return;
+                    el.textContent = n;
+                    el.classList.toggle('am-badge-hidden', n <= 0);
+                    if (n > prev) {
+                        el.classList.remove('am-badge-pop');
+                        void el.offsetWidth; // ری‌استارت انیمیشن
+                        el.classList.add('am-badge-pop');
+                    }
+                });
+            })
+            .catch(function () {}); // شبکه/نشست قطع — ساکت رد شو، دفعهٔ بعد دوباره
+    }
+    setInterval(tick, 20000);
+})();
+</script>
 <main class="admin-main">
 <div class="admin-topbar">
 <div class="at-title"><?= h(SITE_NAME) ?> / پنل مدیریت</div>
