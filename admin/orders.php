@@ -293,14 +293,14 @@ $statusLabels = [
                         <a href="order-detail.php?id=<?= $o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
                         <a href="invoice.php?id=<?= $o['id'] ?>" class="btn btn-secondary btn-sm" target="_blank" title="مشاهده و چاپ فاکتور این سفارش"><?= icon('receipt', 'ic-sm') ?> فاکتور</a>
                         <?php if ($c2cOn && paymentC2cAwaiting($o)): ?>
-                        <form method="POST" onsubmit="return confirm('واریز سفارش #<?= (int)$o['id'] ?> تأیید شود؟ پیش از تأیید، واریز را در حساب بانکی بررسی کنید.');">
+                        <form method="POST">
                             <input type="hidden" name="c2c_verify_id" value="<?= (int)$o['id'] ?>">
-                            <button type="submit" class="btn btn-primary btn-sm">تأیید واریز</button>
+                            <button type="submit" class="btn btn-primary btn-sm" data-confirm="واریز سفارش #<?= (int)$o['id'] ?> تأیید شود؟ پیش از تأیید، واریز را در حساب بانکی بررسی کنید." data-confirm-icon="check" data-confirm-label="تأیید شود" data-confirm-tone="primary">تأیید واریز</button>
                         </form>
                         <?php elseif ($chqOn && paymentChequeAwaiting($o) && empty($o['cheque_received_at'])): ?>
-                        <form method="POST" onsubmit="return confirm('دریافت چک سفارش #<?= (int)$o['id'] ?> ثبت شود؟');">
+                        <form method="POST">
                             <input type="hidden" name="cheque_receive_id" value="<?= (int)$o['id'] ?>">
-                            <button type="submit" class="btn btn-primary btn-sm">دریافت چک</button>
+                            <button type="submit" class="btn btn-primary btn-sm" data-confirm="دریافت چک سفارش #<?= (int)$o['id'] ?> ثبت شود؟" data-confirm-icon="check" data-confirm-label="ثبت شود" data-confirm-tone="primary">دریافت چک</button>
                         </form>
                         <?php elseif ($payOn && ($o['payment_status'] ?? '') !== 'paid'
                                    && !in_array((string)($o['payment_method'] ?? ''), ['cheque', 'partner_month'], true)): ?>
@@ -310,10 +310,10 @@ $statusLabels = [
                                 خواستهٔ کاربر: خرید همکار نباید منتظر این تأیید اضافه بماند و باید
                                 جلو برود؛ اگر روزی واقعا لازم شد، «تغییر دستی وضعیت پرداخت» در
                                 admin/order-detail.php هنوز در دسترس است. */ ?>
-                        <form method="POST" onsubmit="return confirm('سفارش #<?= (int)$o['id'] ?> به‌عنوان پرداخت‌شده ثبت شود؟');">
+                        <form method="POST">
                             <input type="hidden" name="pay_order_id" value="<?= (int)$o['id'] ?>">
                             <input type="hidden" name="pay_new_status" value="paid">
-                            <button type="submit" class="btn btn-primary btn-sm">پرداخت شد</button>
+                            <button type="submit" class="btn btn-primary btn-sm" data-confirm="سفارش #<?= (int)$o['id'] ?> به‌عنوان پرداخت‌شده ثبت شود؟" data-confirm-icon="check" data-confirm-label="ثبت شود" data-confirm-tone="primary">پرداخت شد</button>
                         </form>
                         <?php endif; ?>
                         </div>
