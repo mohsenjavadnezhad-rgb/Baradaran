@@ -401,9 +401,9 @@ require_once __DIR__ . '/layout-top.php';
                             <td style="white-space:nowrap;">
                                 <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
                                 <?php if ($showReceiveBtn): ?>
-                                <form method="POST" action="partner-settlements.php?pm=cheque#tsviyeh" style="display:inline;" onsubmit="return confirm('دریافت این چک ثبت شود؟');">
+                                <form method="POST" action="partner-settlements.php?pm=cheque#tsviyeh" style="display:inline;">
                                     <input type="hidden" name="pset_cheque_receive" value="<?= (int)$o['id'] ?>">
-                                    <button type="submit" class="btn btn-primary btn-sm"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت</button>
+                                    <button type="submit" class="btn btn-primary btn-sm" data-confirm="دریافت این چک ثبت شود؟" data-confirm-icon="check" data-confirm-label="ثبت شود" data-confirm-tone="primary"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت</button>
                                 </form>
                                 <?php endif; ?>
                             </td>
@@ -573,31 +573,33 @@ require_once __DIR__ . '/layout-top.php';
             btn.addEventListener('click', function () {
                 var method = btn.getAttribute('data-method');
                 var label = LABELS[method] || method;
-                if (!confirm(label + ' — این سفارش تسویه‌شده ثبت شود؟')) return;
-                grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = true; });
-                var fd = new FormData();
-                fd.append('pset_settle_id', orderId);
-                fd.append('pset_settle_method', method);
-                fd.append('pset_ajax', '1');
-                fetch('partner-settlements.php', { method: 'POST', body: fd, credentials: 'same-origin' })
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        if (data && data.ok) {
-                            var row = document.getElementById('pset-ord-' + orderId);
-                            if (row) row.classList.add('pset-order-settled');
-                            var done = document.createElement('span');
-                            done.className = 'pset-settle-done';
-                            done.innerHTML = CHECK_ICON + ' تسویه شد (' + label + ')';
-                            grp.parentNode.appendChild(done);
-                        } else {
-                            alert('ثبت انجام نشد. دوباره تلاش کنید.');
+                var doSettle = function () {
+                    grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = true; });
+                    var fd = new FormData();
+                    fd.append('pset_settle_id', orderId);
+                    fd.append('pset_settle_method', method);
+                    fd.append('pset_ajax', '1');
+                    fetch('partner-settlements.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (data && data.ok) {
+                                var row = document.getElementById('pset-ord-' + orderId);
+                                if (row) row.classList.add('pset-order-settled');
+                                var done = document.createElement('span');
+                                done.className = 'pset-settle-done';
+                                done.innerHTML = CHECK_ICON + ' تسویه شد (' + label + ')';
+                                grp.parentNode.appendChild(done);
+                            } else {
+                                window.adminToast('ثبت انجام نشد. دوباره تلاش کنید.', false);
+                                grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
+                            }
+                        })
+                        .catch(function () {
+                            window.adminToast('ارتباط برقرار نشد. دوباره تلاش کنید.', false);
                             grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
-                        }
-                    })
-                    .catch(function () {
-                        alert('ارتباط برقرار نشد. دوباره تلاش کنید.');
-                        grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
-                    });
+                        });
+                };
+                window.adminConfirm(label + ' — این سفارش تسویه‌شده ثبت شود؟', doSettle, { icon: 'check', label: 'ثبت شود', tone: 'primary' });
             });
         });
     });
