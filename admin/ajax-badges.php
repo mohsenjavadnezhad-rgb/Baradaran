@@ -18,4 +18,5 @@ echo json_encode([
     'reviews'     => (int)pendingReviewsCount(),
     'partchecks'  => (int)partCheckPendingCount(),
     'stockchecks' => (int)stockCheckPendingCount(),
+    'settlements' => (int)partnerSettlementsPendingCount(),
 ], JSON_UNESCAPED_UNICODE);
