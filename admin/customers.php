@@ -166,7 +166,13 @@ require_once __DIR__ . '/layout-top.php';
           <span class="badge-retail">مشتری</span>
         <?php endif; ?>
       </td>
-      <td dir="ltr" style="text-align:right;"><?= h($c['mobile']) ?></td>
+      <td dir="ltr" style="text-align:right;">
+        <?php if (isValidMobile((string)$c['mobile'])): ?>
+        <?= h($c['mobile']) ?>
+        <?php else: ?>
+        <span style="color:var(--text-muted);" title="حساب مهمان — بدون شمارهٔ موبایل واقعی؛ شمارهٔ تماس واقعی هر سفارش را در همان سفارش ببینید.">مهمان</span>
+        <?php endif; ?>
+      </td>
       <td>
         <a href="customer-detail.php?id=<?= (int)$c['id'] ?>" style="color:var(--red-light);"><?= h($c['full_name'] ?: '—') ?></a>
         <?php if (trim((string)$c['partner_company']) !== ''): ?>
