@@ -1152,7 +1152,7 @@ require_once __DIR__ . '/layout-top.php';
               <?= icon(!empty($md['is_active']) ? 'x' : 'check', 'ic-sm') ?>
             </a>
             <a href="settings.php?sec=ship&amp;mdel=<?= urlencode($mk) ?>" class="btn btn-sm btn-danger"
-               onclick="return confirm('این روش ارسال و نرخ‌نامه‌اش حذف شود؟');"
+               data-confirm="این روش ارسال و نرخ‌نامه‌اش حذف شود؟"
                title="حذف روش «<?= h($md['label']) ?>»">
               <?= icon('trash', 'ic-sm') ?>
             </a>
@@ -1298,7 +1298,7 @@ require_once __DIR__ . '/layout-top.php';
             </td>
             <td class="rt-c">
               <a href="settings.php?sec=shiprate&amp;rdel=<?= $rid ?>" class="rt-del"
-                 onclick="return confirm('نرخ این شهر حذف شود؟');" title="حذف نرخ «<?= h((string)$rr['city']) ?>»">
+                 data-confirm="نرخ این شهر حذف شود؟" title="حذف نرخ «<?= h((string)$rr['city']) ?>»">
                 <?= icon('trash', 'ic-sm') ?>
               </a>
             </td>
