@@ -134,7 +134,13 @@ require_once __DIR__ . '/layout-top.php';
     <div class="dg-box-hd"><span class="dg-hd-t"><?= icon('user') ?>مشخصات</span></div>
     <div class="dg-box-bd">
       <table class="admin-table cust-info">
-        <tr><th>موبایل</th><td dir="ltr" style="text-align:right;"><?= h($c['mobile']) ?></td></tr>
+        <tr><th>موبایل</th><td dir="ltr" style="text-align:right;">
+          <?php if (isValidMobile((string)$c['mobile'])): ?>
+          <?= h($c['mobile']) ?>
+          <?php else: ?>
+          <span style="color:var(--text-muted);" dir="rtl">حساب مهمان — بدون شمارهٔ موبایل واقعی؛ شمارهٔ تماس واقعی هر سفارش را در همان سفارش ببینید.</span>
+          <?php endif; ?>
+        </td></tr>
         <tr><th>نام</th><td><?= h($c['full_name'] ?: '—') ?></td></tr>
         <?php if ($hasPartnerCols): ?>
         <tr><th>فروشگاه / تعمیرگاه</th><td><?= h(($c['partner_company'] ?? '') !== '' ? $c['partner_company'] : '—') ?></td></tr>
