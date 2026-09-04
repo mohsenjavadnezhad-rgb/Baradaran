@@ -481,7 +481,7 @@ require_once __DIR__ . '/layout-top.php';
                             $oj = gregorianToJalali(date('Y', strtotime($o['created_at'])), date('n', strtotime($o['created_at'])), date('j', strtotime($o['created_at'])));
                             $sameMonth = ($pmToday && $oj[0] === $pmToday[0] && $oj[1] === $pmToday[1]);
                         ?>
-                        <td>
+                        <td id="pset-status-<?= (int)$o['id'] ?>">
                             <?php if ($sameMonth): ?>
                             <span style="color:var(--text-secondary);font-size:0.78rem;"><?= (int)$pmDaysLeft ?> روز تا پایان ماه</span>
                             <?php else: ?>
@@ -489,8 +489,8 @@ require_once __DIR__ . '/layout-top.php';
                             <?php endif; ?>
                         </td>
                         <?php else: ?>
-                        <td>
-                            <?= paymentStatusBadgeFor($ps, $pm) ?>
+                        <td id="pset-status-<?= (int)$o['id'] ?>">
+                            <?= paymentStatusBadgeForOrder($o) ?>
                             <?php if ($pm === 'cheque' && function_exists('paymentChequeReady') && paymentChequeReady()): ?>
                                 <?php if (!empty($o['cheque_received_at'])): ?>
                                 <div style="color:#4ADE80;font-size:0.7rem;margin-top:2px;"><?= icon('check-circle', 'ic-sm') ?> چک دریافت شد</div>
@@ -550,7 +550,6 @@ require_once __DIR__ . '/layout-top.php';
 /* سطر تسویه‌شده — خواستهٔ کاربر: «هر کدوم رو که زدم اون سطر رنگش سبز بشه» */
 .pset-order-settled{background:rgba(34,197,94,0.14) !important;transition:background 0.4s ease;}
 .pset-order-settled .pset-settle-btn{display:none;}
-.pset-settle-done{display:inline-flex;align-items:center;gap:0.25rem;color:#4ADE80;font-size:0.78rem;white-space:nowrap;}
 </style>
 <script>
 /* چهار کلید سریع تسویهٔ سفارش، توی سطر خود «همکاران بدهکار» — بدون رفرش،
@@ -563,6 +562,17 @@ require_once __DIR__ . '/layout-top.php';
     var LABELS = {
         cash: 'پرداخت نقدی', card: 'کارت به کارت',
         cheque: 'چک', month: 'پرداخت اول ماه'
+    };
+    /* متن نهایی که در ستون «وضعیت» همان سطر جای برچسب/مهلت قبلی را می‌گیرد —
+       خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴: «وقتی سبز میشه دیگه نباید در انتظار دریافت
+       چک/پرداخت اول ماه/در انتظار پرداخت‌نشده رو نشون بده ... توی وضعیت
+       همون سطر بنویسه چک دریافت شد/پرداخت اول ماه انجام شد/پرداخت نقدی
+       انجام شد». همین عبارت‌ها، سمت PHP هم توسط paymentSettleDoneLabel()
+       تولید می‌شوند (includes/payment.php) — اینجا فقط نسخهٔ جاوااسکریپتی‌اش
+       است تا بدون رفرش هم فورا همین را نشان بدهد. */
+    var DONE_LABELS = {
+        cash: 'پرداخت نقدی انجام شد', card: 'کارت به کارت انجام شد',
+        cheque: 'چک دریافت شد', month: 'پرداخت اول ماه انجام شد'
     };
     /* آیکون SVG «تیک» — از همان کتابخانهٔ icon() سرور می‌آید، نه ایموجی خام
        (قاعدهٔ سایت)، چون این نشان بعد از fetch در جاوااسکریپت ساخته می‌شود. */
@@ -585,10 +595,10 @@ require_once __DIR__ . '/layout-top.php';
                             if (data && data.ok) {
                                 var row = document.getElementById('pset-ord-' + orderId);
                                 if (row) row.classList.add('pset-order-settled');
-                                var done = document.createElement('span');
-                                done.className = 'pset-settle-done';
-                                done.innerHTML = CHECK_ICON + ' تسویه شد (' + label + ')';
-                                grp.parentNode.appendChild(done);
+                                var statusTd = document.getElementById('pset-status-' + orderId);
+                                if (statusTd) {
+                                    statusTd.innerHTML = '<span class="pay-badge pay-paid">' + CHECK_ICON + ' ' + (DONE_LABELS[method] || label) + '</span>';
+                                }
                             } else {
                                 window.adminToast('ثبت انجام نشد. دوباره تلاش کنید.', false);
                                 grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
