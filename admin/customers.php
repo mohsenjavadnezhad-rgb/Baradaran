@@ -194,10 +194,10 @@ require_once __DIR__ . '/layout-top.php';
             <button type="submit" class="btn btn-primary btn-sm">تأیید همکار</button>
           </form>
           <?php elseif ($c['ctype'] !== 'partner'): ?>
-          <form method="POST" style="display:inline;" onsubmit="return confirm('این حساب به همکار تأییدشده تغییر کند؟');">
+          <form method="POST" style="display:inline;">
             <input type="hidden" name="customer_id" value="<?= (int)$c['id'] ?>">
             <input type="hidden" name="act" value="make_partner">
-            <button type="submit" class="btn btn-secondary btn-sm">تبدیل به همکار</button>
+            <button type="submit" class="btn btn-secondary btn-sm" data-confirm="این حساب به همکار تأییدشده تغییر کند؟" data-confirm-icon="check" data-confirm-label="تأیید شود" data-confirm-tone="primary">تبدیل به همکار</button>
           </form>
           <?php endif; ?>
         <?php endif; ?>
