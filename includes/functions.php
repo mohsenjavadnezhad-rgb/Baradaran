@@ -2407,6 +2407,16 @@ function pendingReviewsCount() {
     } catch (Throwable $e) { return 0; }
 }
 
+/* تعداد درخواست‌های همکاری در انتظار بررسی (نشان کنار «مشتریان و همکاران») —
+   همان شمارشی که تب «در انتظار» صفحهٔ admin/customers.php هم دارد، یک‌جا
+   نگه داشته شده تا نشان منو و خود تب هیچ‌وقت با هم اختلاف نداشته باشند. */
+function partnerPendingCount() {
+    global $pdo;
+    try {
+        return (int)$pdo->query("SELECT COUNT(*) FROM customers WHERE COALESCE(partner_status,'none') = 'pending'")->fetchColumn();
+    } catch (Throwable $e) { return 0; }
+}
+
 /* لایهٔ درگاه پرداخت — در انتها لود می‌شود چون از h()/icon()/getSetting()/httpPostJson() استفاده می‌کند.
    این تنها نقطهٔ اتصال است؛ هم سایت و هم پنل ادمین از همین‌جا به توابع payment* دسترسی دارند. */
 require_once __DIR__ . '/payment.php';
