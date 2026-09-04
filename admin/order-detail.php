@@ -228,6 +228,31 @@ if ($pchk && !empty($pchk['product_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جزئیات سفارش <?= h(orderNumber($order)) ?> - <?= h(SITE_NAME) ?></title>
     <link rel="stylesheet" href="../assets/css/style.css?v=64">
+    <style>
+    /* پاک‌سازی و یکدست‌سازی چیدمان این صفحه (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴:
+       «فونت‌هاش و مرتبش کن که بخش‌هاش خیلی مرتب و خواناتر باشه») — این
+       صفحه، برخلاف بیشتر پنل، از admin/layout-top.php استفاده نمی‌کند
+       (نمای مستقل قدیمی‌تر خودش را دارد)، پس کلاس‌های کارت/شبکهٔ اینجا هم
+       مستقیم همین‌جا تعریف می‌شوند، نه در استایل مشترک سایدباردار. هدف:
+       جایگزین یک‌دست به‌جای ده‌ها استایل درون‌خطی تکراری، بدون تغییر هیچ
+       منطق/فرم/نام فیلدی. */
+    .od-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.35rem 1.5rem;margin-bottom:1.25rem;}
+    .od-card-hd{display:flex;align-items:center;gap:0.5rem;font-size:0.92rem;font-weight:700;color:var(--text-primary);margin:0 0 1.1rem;padding-bottom:0.65rem;border-bottom:2px solid var(--red-primary);}
+    .od-card-hd .ic{width:1.05rem;height:1.05rem;}
+    .od-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+    .od-row{display:flex;gap:0.75rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.85rem;line-height:1.75;}
+    .od-row:last-child{border-bottom:none;padding-bottom:0;}
+    .od-row:first-child{padding-top:0;}
+    .od-row .od-l{flex:0 0 108px;color:var(--text-muted);font-size:0.76rem;padding-top:0.15rem;}
+    .od-row .od-v{flex:1;color:var(--text-secondary);min-width:0;}
+    .od-row .od-v b{color:var(--text-primary);font-weight:600;}
+    .od-sub{margin-top:1.15rem;padding-top:1rem;border-top:1px dashed var(--border-color);}
+    .od-sub-hd{font-size:0.86rem;font-weight:700;color:var(--text-primary);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem;}
+    .od-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.7rem 1.5rem;}
+    .od-stat-grid p{margin:0;font-size:0.83rem;color:var(--text-secondary);}
+    .od-note{font-size:0.72rem;color:var(--text-muted);line-height:1.8;}
+    @media(max-width:860px){.od-grid{grid-template-columns:1fr;}}
+    </style>
 </head>
 <body style="background:var(--bg-primary);min-height:100vh;">
     <div class="admin-layout">
@@ -239,32 +264,26 @@ if ($pchk && !empty($pchk['product_id'])) {
             </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
-            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;">
-                <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;">اطلاعات مشتری</h3>
-                <p style="margin-bottom:0.5rem;"><strong>نام:</strong> <?= h($order['customer_name']) ?></p>
-                <p style="margin-bottom:0.5rem;"><strong>موبایل:</strong> <?= h($order['customer_mobile']) ?></p>
-                <p style="margin-bottom:0.5rem;"><strong>آدرس:</strong> <?= nl2br(h($order['customer_address'])) ?></p>
+        <div class="od-grid" style="margin-bottom:1.25rem;">
+            <div class="od-card" style="margin-bottom:0;">
+                <div class="od-card-hd"><?= icon('user', 'ic-sm') ?> اطلاعات مشتری</div>
+                <div class="od-row"><span class="od-l">نام</span><span class="od-v"><b><?= h($order['customer_name']) ?></b></span></div>
+                <div class="od-row"><span class="od-l">موبایل</span><span class="od-v" dir="ltr" style="text-align:right;"><?= h($order['customer_mobile']) ?></span></div>
+                <div class="od-row"><span class="od-l">آدرس</span><span class="od-v"><?= nl2br(h($order['customer_address'])) ?></span></div>
                 <?php if ($order['notes']): ?>
-                <p><strong>توضیحات:</strong> <?= nl2br(h($order['notes'])) ?></p>
+                <div class="od-row"><span class="od-l">توضیحات</span><span class="od-v"><?= nl2br(h($order['notes'])) ?></span></div>
                 <?php endif; ?>
                 <?php if ($shipMethod !== ''): ?>
-                <p style="margin-bottom:0.5rem;"><strong>روش ارسال:</strong>
-                    <?= icon(shippingIcon($shipMethod), 'ic-sm') ?> <?= h(shippingLabel($shipMethod)) ?>
-                    <span style="color:var(--text-muted);font-size:0.85rem;">(<?= h(shippingCostText($shipCost, $shipMethod)) ?>)</span>
-                </p>
+                <div class="od-row"><span class="od-l">روش ارسال</span><span class="od-v"><?= icon(shippingIcon($shipMethod), 'ic-sm') ?> <?= h(shippingLabel($shipMethod)) ?> <span style="color:var(--text-muted);">(<?= h(shippingCostText($shipCost, $shipMethod)) ?>)</span></span></div>
                 <?php endif; ?>
-                <p style="margin-top:1rem;"><strong>تاریخ ثبت:</strong> <?= date('Y/m/d H:i', strtotime($order['created_at'])) ?></p>
+                <div class="od-row"><span class="od-l">تاریخ ثبت</span><span class="od-v"><?= date('Y/m/d H:i', strtotime($order['created_at'])) ?></span></div>
             </div>
-            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;">
-                <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;">وضعیت سفارش</h3>
-                <p style="margin-bottom:1rem;">
-                    وضعیت فعلی:
-                    <span class="status-badge status-<?= $order['status'] ?>">
-                        <?= $statusLabels[$order['status']] ?>
-                    </span>
-                </p>
-                <form method="POST" action="orders.php">
+            <div class="od-card" style="margin-bottom:0;">
+                <div class="od-card-hd"><?= icon('clipboard-list', 'ic-sm') ?> وضعیت سفارش</div>
+                <div class="od-row"><span class="od-l">وضعیت فعلی</span><span class="od-v">
+                    <span class="status-badge status-<?= $order['status'] ?>"><?= $statusLabels[$order['status']] ?></span>
+                </span></div>
+                <form method="POST" action="orders.php" style="margin-top:1rem;">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
                     <div class="form-group">
                         <label for="new_status">تغییر وضعیت:</label>
@@ -283,8 +302,8 @@ if ($pchk && !empty($pchk['product_id'])) {
 
         <?php /* ---------- عکس نمونهٔ قطعه که مشتری پیش از خرید فرستاده ---------- */ ?>
         <?php if ($pchk): $pcSt = (string)$pchk['status']; ?>
-        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
-            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('camera') ?> عکس نمونهٔ قطعه (ارسال مشتری پیش از خرید)</h3>
+        <div class="od-card">
+            <div class="od-card-hd"><?= icon('camera', 'ic-sm') ?> عکس نمونهٔ قطعه (ارسال مشتری پیش از خرید)</div>
 
             <div class="pchk-panel-head">
                 <span class="pchk-badge <?= ['pending' => 'is-wait', 'approved' => 'is-ok', 'rejected' => 'is-no'][$pcSt] ?? 'is-wait' ?>">
@@ -366,8 +385,8 @@ if ($pchk && !empty($pchk['product_id'])) {
         <?php endif; ?>
 
         <?php if ($shipOn): ?>
-        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
-            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('truck') ?> روش ارسال</h3>
+        <div class="od-card">
+            <div class="od-card-hd"><?= icon('truck', 'ic-sm') ?> روش ارسال</div>
 
             <?php if (isset($_GET['ssaved'])): ?>
             <div class="flash flash-success" style="margin-bottom:1rem;"><?= icon('check-circle', 'ic-sm') ?> روش ارسال ذخیره شد.</div>
@@ -376,22 +395,22 @@ if ($pchk && !empty($pchk['product_id'])) {
             <div class="flash flash-error" style="margin-bottom:1rem;"><?= icon('alert', 'ic-sm') ?> ذخیره نشد: <?= h($shipError) ?></div>
             <?php endif; ?>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+            <div class="od-grid">
                 <div>
-                    <p style="margin-bottom:0.5rem;"><strong>انتخاب مشتری:</strong>
+                    <div class="od-row"><span class="od-l">انتخاب مشتری</span><span class="od-v">
                         <?php if ($shipMethod !== ''): ?>
                         <?= icon(shippingIcon($shipMethod), 'ic-sm') ?> <?= h(shippingLabel($shipMethod)) ?>
                         <?php else: ?>
                         <span style="color:var(--text-muted);">— ثبت نشده</span>
                         <?php endif; ?>
-                    </p>
-                    <p style="margin-bottom:0.5rem;"><strong>هزینهٔ ارسال:</strong> <?= h(shippingCostText($shipCost, $shipMethod)) ?></p>
-                    <p style="margin-bottom:0.5rem;"><strong>جمع کالاها:</strong> <?= formatPrice($goodsTotal) ?></p>
+                    </span></div>
+                    <div class="od-row"><span class="od-l">هزینهٔ ارسال</span><span class="od-v"><?= h(shippingCostText($shipCost, $shipMethod)) ?></span></div>
+                    <div class="od-row"><span class="od-l">جمع کالاها</span><span class="od-v"><?= formatPrice($goodsTotal) ?></span></div>
                     <?php if ($orderTax > 0): ?>
-                    <p style="margin-bottom:0.5rem;"><strong>مالیات:</strong> <?= formatPrice($orderTax) ?></p>
+                    <div class="od-row"><span class="od-l">مالیات</span><span class="od-v"><?= formatPrice($orderTax) ?></span></div>
                     <?php endif; ?>
                     <?php if ($shipMethod !== '' && ($sb = shippingBadge($shipMethod)) !== ''): ?>
-                    <p style="color:#FBBF24;font-size:0.85rem;"><?= icon('alert', 'ic-sm') ?> این روش <?= h($sb) ?> است — آدرس سفارش را بررسی کنید.</p>
+                    <p style="color:#FBBF24;font-size:0.8rem;margin-top:0.6rem;"><?= icon('alert', 'ic-sm') ?> این روش <?= h($sb) ?> است — آدرس سفارش را بررسی کنید.</p>
                     <?php endif; ?>
                 </div>
 
@@ -410,7 +429,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                         <label for="shipping_cost">هزینهٔ ارسال (تومان)</label>
                         <input type="text" name="shipping_cost" id="shipping_cost" class="form-control" dir="ltr"
                                inputmode="numeric" value="<?= (int)$shipCost ?>" <?= $shipLocked ? 'disabled' : '' ?>>
-                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">
+                        <div class="od-note" style="margin-top:0.25rem;">
                             <?php if ($shipLocked): ?>
                             سفارش پرداخت‌شده است؛ مبلغ تغییر نمی‌کند. فقط روش ارسال قابل اصلاح است.
                             <?php else: ?>
@@ -425,8 +444,8 @@ if ($pchk && !empty($pchk['product_id'])) {
         <?php endif; ?>
 
         <?php if ($trackOn): ?>
-        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
-            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('truck') ?> روند ارسال سفارش</h3>
+        <div class="od-card">
+            <div class="od-card-hd"><?= icon('truck', 'ic-sm') ?> روند ارسال سفارش</div>
 
             <?php if (isset($_GET['tsaved'])): ?>
             <div class="flash flash-success" style="margin-bottom:1rem;"><?= icon('check-circle', 'ic-sm') ?> روند ارسال ذخیره شد و برای مشتری قابل مشاهده است.<?php
@@ -439,10 +458,10 @@ if ($pchk && !empty($pchk['product_id'])) {
             <div class="flash flash-error" style="margin-bottom:1rem;"><?= icon('alert', 'ic-sm') ?> ذخیره نشد: <?= h($trackError) ?></div>
             <?php endif; ?>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+            <div class="od-grid">
                 <form method="POST" action="order-detail.php?id=<?= $id ?>">
                     <input type="hidden" name="track_save" value="1">
-                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem;">
+                    <p class="od-note" style="margin-bottom:0.75rem;">
                         هر مرحله را که انجام شد تیک بزنید؛ زمان تیک به‌صورت خودکار ثبت می‌شود.
                         با برداشتن تیک، آن مرحله پاک می‌شود.
                     </p>
@@ -524,7 +543,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                 </form>
 
                 <div>
-                    <h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">پیش‌نمایش آنچه مشتری می‌بیند</h4>
+                    <div class="od-sub-hd" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.75rem;"><?= icon('external', 'ic-sm') ?> پیش‌نمایش آنچه مشتری می‌بیند</div>
                     <?= renderOrderTimeline($order) ?>
                 </div>
             </div>
@@ -554,26 +573,26 @@ if ($pchk && !empty($pchk['product_id'])) {
         <?php endif; ?>
 
         <?php if ($payOn): ?>
-        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
-            <h3 style="margin-bottom:1rem;border-bottom:2px solid var(--red-primary);padding-bottom:0.5rem;"><?= icon('credit-card') ?> پرداخت</h3>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="od-card">
+            <div class="od-card-hd"><?= icon('credit-card', 'ic-sm') ?> پرداخت</div>
+            <div class="od-grid">
                 <div>
-                    <p style="margin-bottom:0.5rem;"><strong>روش پرداخت:</strong> <?= icon(paymentIcon($payMethod), 'ic-sm') ?> <?= h(paymentLabel($payMethod)) ?></p>
-                    <p style="margin-bottom:0.5rem;"><strong>وضعیت پرداخت:</strong> <?= paymentStatusBadgeFor($payStatus, $payMethod) ?></p>
+                    <div class="od-row"><span class="od-l">روش پرداخت</span><span class="od-v"><?= icon(paymentIcon($payMethod), 'ic-sm') ?> <?= h(paymentLabel($payMethod)) ?></span></div>
+                    <div class="od-row"><span class="od-l">وضعیت پرداخت</span><span class="od-v"><?= paymentStatusBadgeForOrder($order) ?></span></div>
                     <?php if ((int)($order['paid_amount'] ?? 0) > 0): ?>
-                    <p style="margin-bottom:0.5rem;"><strong>مبلغ پرداخت‌شده:</strong> <?= formatPrice($order['paid_amount']) ?></p>
+                    <div class="od-row"><span class="od-l">مبلغ پرداخت‌شده</span><span class="od-v"><?= formatPrice($order['paid_amount']) ?></span></div>
                     <?php endif; ?>
                     <?php if (!empty($order['payment_ref'])): ?>
-                    <p style="margin-bottom:0.5rem;"><strong>شمارهٔ پیگیری:</strong> <span dir="ltr"><?= h($order['payment_ref']) ?></span></p>
+                    <div class="od-row"><span class="od-l">شمارهٔ پیگیری</span><span class="od-v" dir="ltr" style="text-align:right;"><?= h($order['payment_ref']) ?></span></div>
                     <?php endif; ?>
                     <?php if (!empty($order['payment_card'])): ?>
-                    <p style="margin-bottom:0.5rem;"><strong>کارت پرداخت‌کننده:</strong> <span dir="ltr"><?= h($order['payment_card']) ?></span></p>
+                    <div class="od-row"><span class="od-l">کارت پرداخت‌کننده</span><span class="od-v" dir="ltr" style="text-align:right;"><?= h($order['payment_card']) ?></span></div>
                     <?php endif; ?>
                     <?php if (!empty($order['paid_at'])): ?>
-                    <p style="margin-bottom:0.5rem;"><strong>زمان پرداخت:</strong> <?= date('Y/m/d H:i', strtotime($order['paid_at'])) ?></p>
+                    <div class="od-row"><span class="od-l">زمان پرداخت</span><span class="od-v"><?= date('Y/m/d H:i', strtotime($order['paid_at'])) ?></span></div>
                     <?php endif; ?>
                     <?php if (!empty($order['payment_note'])): ?>
-                    <p style="color:#FBBF24;font-size:0.85rem;"><?= icon('alert', 'ic-sm') ?> <?= h($order['payment_note']) ?></p>
+                    <p style="color:#FBBF24;font-size:0.8rem;margin-top:0.6rem;"><?= icon('alert', 'ic-sm') ?> <?= h($order['payment_note']) ?></p>
                     <?php endif; ?>
                 </div>
                 <div>
@@ -593,7 +612,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                         </div>
                         <button type="submit" class="btn btn-primary">ثبت وضعیت پرداخت</button>
                     </form>
-                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.5rem;">
+                    <div class="od-note" style="margin-top:0.5rem;">
                         برای پرداخت در محل، پس از دریافت مبلغ اینجا «پرداخت‌شده» را ثبت کنید.
                         <?php if ($c2cOn && $payMethod === 'card'): ?>واریز کارت‌به‌کارت را از کادر پایین تأیید کنید.<?php endif; ?>
                         <?php if ($chqOn && $payMethod === 'cheque'): ?>اطلاعات چک را از کادر پایین ببینید؛ «دریافت چک» با «پرداخت‌شده» فرق دارد.<?php endif; ?>
@@ -605,8 +624,8 @@ if ($pchk && !empty($pchk['product_id'])) {
             <?php if ($c2cOn && $payMethod === 'card'): ?>
             <?php /* اطلاعاتی که مشتری خودش پس از واریز ثبت کرده + دکمهٔ تأیید */ ?>
             <?php $hasC2c = trim((string)($order['c2c_ref'] ?? '')) !== ''; ?>
-            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
-                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> واریز اعلام‌شدهٔ مشتری</h4>
+            <div class="od-sub">
+                <div class="od-sub-hd"><?= icon('receipt', 'ic-sm') ?> واریز اعلام‌شدهٔ مشتری</div>
 
                 <?php if (isset($_GET['c2csaved'])): ?>
                 <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> واریز تأیید شد؛ پرداخت «پرداخت‌شده» و سفارش «تأیید شده» ثبت شد.</div>
@@ -618,7 +637,7 @@ if ($pchk && !empty($pchk['product_id'])) {
                 <?php if (!$hasC2c): ?>
                 <p style="color:var(--text-muted);font-size:0.85rem;"><?= icon('clock', 'ic-sm') ?> مشتری هنوز اطلاعات واریز را ثبت نکرده است.</p>
                 <?php else: ?>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.75rem 1.5rem;">
+                <div class="od-stat-grid">
                     <p style="margin:0;"><strong>شناسهٔ واریز:</strong> <span dir="ltr"><?= h((string)$order['c2c_ref']) ?></span></p>
                     <p style="margin:0;"><strong>مبلغ اعلامی:</strong> <?= formatPrice((int)($order['c2c_amount'] ?? 0)) ?>
                         <?php if ((int)($order['c2c_amount'] ?? 0) !== (int)$order['total_amount']): ?>
@@ -653,15 +672,15 @@ if ($pchk && !empty($pchk['product_id'])) {
                     مستقل از پرشدن این فرم است (سفارش‌های قدیمی‌تر که این ستون‌ها
                     را ندارند هم بدون خطا کار می‌کنند). */ ?>
             <?php $hasChq = trim((string)($order['cheque_number'] ?? '')) !== ''; ?>
-            <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
-                <h4 style="font-size:0.9rem;margin-bottom:0.75rem;"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</h4>
+            <div class="od-sub">
+                <div class="od-sub-hd"><?= icon('receipt', 'ic-sm') ?> پرداخت با چک</div>
 
                 <?php if (isset($_GET['chqsaved'])): ?>
                 <div style="color:var(--green);font-size:0.85rem;margin-bottom:0.75rem;"><?= icon('check-circle', 'ic-sm') ?> دریافت چک ثبت شد.</div>
                 <?php endif; ?>
 
                 <?php if ($hasChq): ?>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.75rem 1.5rem;margin-bottom:0.75rem;">
+                <div class="od-stat-grid" style="margin-bottom:0.75rem;">
                     <p style="margin:0;"><strong>بانک:</strong> <?= h((string)$order['cheque_bank']) ?></p>
                     <p style="margin:0;"><strong>سریال چک:</strong> <span dir="ltr"><?= h((string)$order['cheque_number']) ?></span></p>
                     <p style="margin:0;"><strong>تاریخ چک:</strong> <?= h((string)$order['cheque_date']) ?></p>
@@ -719,49 +738,51 @@ if ($pchk && !empty($pchk['product_id'])) {
         </div>
         <?php endif; ?>
 
-        <h3 style="margin-bottom:1rem;">اقلام سفارش</h3>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>محصول</th>
-                    <th>قیمت واحد</th>
-                    <th>نوع قیمت</th>
-                    <th>تعداد</th>
-                    <th>جمع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($items as $item): ?>
-                <tr>
-                    <td><?= h($item['product_name']) ?></td>
-                    <td><?= formatPrice($item['price']) ?></td>
-                    <td><?= $item['price_type'] === 'wholesale' ? 'کلی' : 'جزئی' ?></td>
-                    <td><?= $item['quantity'] ?></td>
-                    <td><?= formatPrice($item['subtotal']) ?></td>
-                </tr>
-                <?php endforeach; ?>
-                <?php if ($shipOn && $shipCost > 0): ?>
-                <tr>
-                    <td colspan="4" style="text-align:left;color:var(--text-secondary);">جمع کالاها:</td>
-                    <td style="color:var(--text-secondary);"><?= formatPrice($goodsTotal) ?></td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="text-align:left;color:var(--text-secondary);">هزینهٔ ارسال<?= $shipMethod !== '' ? ' (' . h(shippingLabel($shipMethod)) . ')' : '' ?>:</td>
-                    <td style="color:var(--text-secondary);"><?= formatPrice($shipCost) ?></td>
-                </tr>
-                <?php endif; ?>
-                <?php if ($orderTax > 0): ?>
-                <tr>
-                    <td colspan="4" style="text-align:left;color:var(--text-secondary);">مالیات:</td>
-                    <td style="color:var(--text-secondary);"><?= formatPrice($orderTax) ?></td>
-                </tr>
-                <?php endif; ?>
-                <tr>
-                    <td colspan="4" style="text-align:left;font-weight:bold;">مبلغ کل:</td>
-                    <td style="font-weight:bold;color:var(--red-light);"><?= formatPrice($order['total_amount']) ?></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="od-card" style="margin-bottom:0;">
+            <div class="od-card-hd"><?= icon('package', 'ic-sm') ?> اقلام سفارش</div>
+            <table class="admin-table" style="margin:0;">
+                <thead>
+                    <tr>
+                        <th>محصول</th>
+                        <th>قیمت واحد</th>
+                        <th>نوع قیمت</th>
+                        <th>تعداد</th>
+                        <th>جمع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($items as $item): ?>
+                    <tr>
+                        <td><?= h($item['product_name']) ?></td>
+                        <td><?= formatPrice($item['price']) ?></td>
+                        <td><?= $item['price_type'] === 'wholesale' ? 'کلی' : 'جزئی' ?></td>
+                        <td><?= $item['quantity'] ?></td>
+                        <td><?= formatPrice($item['subtotal']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php if ($shipOn && $shipCost > 0): ?>
+                    <tr>
+                        <td colspan="4" style="text-align:left;color:var(--text-secondary);">جمع کالاها:</td>
+                        <td style="color:var(--text-secondary);"><?= formatPrice($goodsTotal) ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align:left;color:var(--text-secondary);">هزینهٔ ارسال<?= $shipMethod !== '' ? ' (' . h(shippingLabel($shipMethod)) . ')' : '' ?>:</td>
+                        <td style="color:var(--text-secondary);"><?= formatPrice($shipCost) ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if ($orderTax > 0): ?>
+                    <tr>
+                        <td colspan="4" style="text-align:left;color:var(--text-secondary);">مالیات:</td>
+                        <td style="color:var(--text-secondary);"><?= formatPrice($orderTax) ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <td colspan="4" style="text-align:left;font-weight:bold;">مبلغ کل:</td>
+                        <td style="font-weight:bold;color:var(--red-light);"><?= formatPrice($order['total_amount']) ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
