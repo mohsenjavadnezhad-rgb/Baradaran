@@ -115,7 +115,18 @@ $barNow  = $barHas && $shipChosen !== '' && shippingIsBarbari($shipChosen);
    و کارت‌به‌کارت هم باز است، چون ممکن است مشتری مشهدی آنلاین پرداخت کند.
    گزینه‌های غیرمجاز در فرم disabled می‌شوند (پس اصلا ارسال نمی‌شوند) و در سرور
    هم دوباره بررسی می‌شود. */
-$payAllowed = shippingAllowedPayKeys($shipChosen, $payKeys);
+$payAllowedByShip = shippingAllowedPayKeys($shipChosen, $payKeys);
+$payAllowed = $payAllowedByShip;
+/* قاعدهٔ تازهٔ ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر): «پرداخت در محل» علاوه‌براین، مستقیم
+   به شهر همین فرم هم گره خورده — نه فقط روش ارسال انتخاب‌شده در سبد. شهر
+   اولیه همان $shipCityIn (پروفایل مشتری یا POST قبلی) است؛ اسکریپت پایین
+   صفحه با تایپ/عوض‌شدن شهر همین قاعده را زنده دوباره می‌سنجد
+   (COD_SHIP_OK/COD_CITY پایین‌تر در همان اسکریپت). */
+$codRequiredCity = shippingCodRequiredCity();
+if (in_array('cod', $payAllowed, true) && !shippingCodCityAllowed($shipCityIn)) {
+    $payAllowed = array_values(array_diff($payAllowed, ['cod']));
+    if (!$payAllowed) $payAllowed = $payKeys; // هیچ‌وقت کاملا قفل نکن — همان قاعدهٔ shippingAllowedPayKeys
+}
 if (!in_array($payDefault, $payAllowed, true)) $payDefault = $payAllowed[0] ?? '';
 
 /* ---------- کارت به کارت: ورودی‌های واریز روی همین صفحه ----------
@@ -256,6 +267,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
        ترکیب نامعتبر ثبت شود (مثلا پرداخت در محل برای ارسال پستی). */
     if ($shipMethod !== '' && !in_array($payMethod, shippingAllowedPayKeys($shipMethod, $payKeys), true)) {
         $errors[] = shippingPayRuleNote($shipMethod) . ' لطفا روش پرداخت را اصلاح کنید.';
+    }
+
+    /* قاعدهٔ تازه: «پرداخت در محل» فقط برای شهر معین (خواستهٔ کاربر). سمت
+       کلاینت هم زنده همین را می‌سنجد، ولی فرم دست‌کاری‌شده باید همین‌جا هم
+       رد شود. */
+    if ($payMethod === 'cod' && !shippingCodCityAllowed($city)) {
+        $errors[] = '«پرداخت در محل» فقط برای شهر ' . $codRequiredCity . ' امکان‌پذیر است؛ لطفا روش پرداخت دیگری انتخاب کنید یا شهر را اصلاح کنید.';
     }
 
     /* روش محدود به یک شهر (پیک مشهد) با شهر همین فرم هم سنجیده می‌شود: شهر
@@ -554,8 +572,8 @@ require_once __DIR__ . '/includes/header.php';
                            غیرفعال باشه») — همان کلاس is-off، بدون CSS تازه. */
                         $pOff = !in_array($pk, $payAllowed, true) || $stockPending;
                     ?>
-                    <label class="pay-opt <?= $payDefault === $pk ? 'is-on' : '' ?> <?= $pOff ? 'is-off' : '' ?>">
-                        <input type="radio" name="payment_method" value="<?= h($pk) ?>"
+                    <label class="pay-opt <?= $payDefault === $pk ? 'is-on' : '' ?> <?= $pOff ? 'is-off' : '' ?>" id="pay-opt-<?= h($pk) ?>">
+                        <input type="radio" name="payment_method" value="<?= h($pk) ?>" id="pay-radio-<?= h($pk) ?>"
                                <?= $payDefault === $pk ? 'checked' : '' ?> <?= $pOff ? 'disabled' : '' ?>>
                         <span class="pay-opt-ic"><?= icon($pd['icon']) ?></span>
                         <span class="pay-opt-body">
@@ -597,7 +615,19 @@ require_once __DIR__ . '/includes/header.php';
                             <?php else: ?>
                             <small>انتقال به درگاه بانکی و پرداخت اینترنتی با کارت‌های شتاب.</small>
                             <?php endif; ?>
-                            <small class="pay-off-note"><?= ($stockPending && in_array($pk, $payAllowed, true)) ? 'در انتظار تأیید موجودی است.' : 'برای روش ارسالی که انتخاب کرده‌اید در دسترس نیست.' ?></small>
+                            <?php
+                            /* دلیل غیرفعال‌بودن — سه حالت: در انتظار موجودی، شهر نامناسب برای
+                               «پرداخت در محل»، یا ناسازگار با روش ارسال. اسکریپت پایین همین متن‌ها
+                               را با تایپ‌شدن شهر زنده عوض می‌کند (COD_MSG_CITY/COD_MSG_SHIP پایین‌تر). */
+                            if ($stockPending && in_array($pk, $payAllowed, true)) {
+                                $offNote = 'در انتظار تأیید موجودی است.';
+                            } elseif ($pk === 'cod' && $codRequiredCity !== '' && !shippingCodCityAllowed($shipCityIn)) {
+                                $offNote = 'فقط برای شهر ' . $codRequiredCity . ' در دسترس است.';
+                            } else {
+                                $offNote = 'برای روش ارسالی که انتخاب کرده‌اید در دسترس نیست.';
+                            }
+                            ?>
+                            <small class="pay-off-note" id="pay-off-note-<?= h($pk) ?>"><?= h($offNote) ?></small>
                         </span>
                     </label>
                     <?php endforeach; ?>
@@ -796,6 +826,15 @@ require_once __DIR__ . '/includes/header.php';
                         ], JSON_UNESCAPED_UNICODE) ?>;
             var SHIP = <?= json_encode($shipJs, JSON_UNESCAPED_UNICODE) ?>;
             var KEY  = <?= json_encode($shipChosen, JSON_UNESCAPED_UNICODE) ?>;
+            /* «پرداخت در محل» فقط برای شهر معین — خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳.
+               COD_SHIP_OK یعنی خود روش ارسال اصلا cod_only است (این با عوض‌شدن
+               شهر تغییر نمی‌کند، چون روش ارسال روی این صفحه ثابت است)؛ COD_CITY
+               شهری است که علاوه‌براین لازم است («» یعنی محدودیت شهری‌ای نیست). */
+            var COD_SHIP_OK   = <?= json_encode(in_array('cod', $payAllowedByShip, true), JSON_UNESCAPED_UNICODE) ?>;
+            var COD_CITY      = <?= json_encode($codRequiredCity, JSON_UNESCAPED_UNICODE) ?>;
+            var STOCK_PENDING = <?= $stockPending ? 'true' : 'false' ?>;
+            var COD_NOTE_SHIP = 'برای روش ارسالی که انتخاب کرده‌اید در دسترس نیست.';
+            var COD_NOTE_CITY = COD_CITY === '' ? '' : ('فقط برای شهر ' + COD_CITY + ' در دسترس است.');
 
             for (var i = 0; i < boxes.length; i++) bind(boxes[i]);
             syncPayBoxes();
@@ -941,6 +980,43 @@ require_once __DIR__ . '/includes/header.php';
                 if (cCell) cCell.textContent = res ? costText(res) : TXT.pick;
                 if (pCell) pCell.textContent = money(pay);
                 if (amtEl && amtEl.getAttribute('data-touched') !== '1') amtEl.value = String(pay);
+                updateCodAvailability();
+            }
+
+            /* «پرداخت در محل» فقط برای شهر معین — خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳: با
+               تایپ/عوض‌شدن شهر (از همان updateTotals() بالا) بی‌درنگ فعال/غیرفعال
+               می‌شود، بدون رفرش یا ارسال فرم. قاعدهٔ سرور دقیقا همین را می‌سنجد
+               (shippingCodCityAllowed در includes/shipping.php)، پس این‌جا فقط
+               نسخهٔ زندهٔ همان تصمیم است. */
+            function updateCodAvailability() {
+                if (STOCK_PENDING) return; // همه گزینه‌ها سرور-رندر قفل‌اند؛ صفحه خودش رفرش می‌شود
+                var opt = document.getElementById('pay-opt-cod');
+                if (!opt) return;
+                var radio = document.getElementById('pay-radio-cod');
+                var note  = document.getElementById('pay-off-note-cod');
+                var cityOk = true;
+                if (COD_CITY !== '') {
+                    var c = normCity(cityEl ? cityEl.value : '');
+                    var l = normCity(COD_CITY);
+                    cityOk = c !== '' && (c === l || c.indexOf(l) !== -1 || l.indexOf(c) !== -1);
+                }
+                var ok = COD_SHIP_OK && cityOk;
+                var wasChecked = !!(radio && radio.checked);
+                opt.classList.toggle('is-off', !ok);
+                if (radio) radio.disabled = !ok;
+                if (note) note.textContent = ok ? '' : (COD_SHIP_OK ? COD_NOTE_CITY : COD_NOTE_SHIP);
+                /* اگر همین گزینه انتخاب شده بود و الان غیرفعال شد، به اولین گزینهٔ
+                   فعال دیگر برو تا فرم قابل ارسال بماند (هم‌الگوی $payAllowed[0]
+                   سرور). */
+                if (!ok && wasChecked) {
+                    var opts = document.querySelectorAll('.pay-opt');
+                    for (var i = 0; i < opts.length; i++) {
+                        var r = opts[i].querySelector('input[type=radio]');
+                        if (r && !r.disabled) { r.checked = true; break; }
+                    }
+                }
+                var box = document.getElementById('pay-picker');
+                if (box) { highlight(box); syncPayBoxes(); }
             }
 
             function money(n) { return n.toLocaleString('en-US') + ' تومان'; }
