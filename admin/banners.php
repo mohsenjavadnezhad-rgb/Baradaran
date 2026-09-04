@@ -27,7 +27,7 @@ $tableExists = false;
 try { $pdo->query("SELECT 1 FROM banners LIMIT 1"); $tableExists = true; } catch (Exception $e) { $tableExists = false; }
 
 /* ===================== آفر زمان‌دار (بنر زیر بنر اصلی) =====================
-   جدا از جدول banners؛ در timed_offers ذخیره می‌شود. صفحهٔ اصلی همهٔ آفرهای
+   جدا از جدول banners؛ در timed_offers ذخیره می‌شود. صفحهٔ اصلی همه آفرهای
    فعال را به‌صورت یک اسلایدر خودچرخان با شمارش معکوس نمایش می‌دهد.
    PRG تا رفرش مرورگر آفر تکراری نسازد. */
 $offersOn  = timedOffersReady();
@@ -355,7 +355,7 @@ require_once __DIR__ . '/layout-top.php';
                     <div style="display:flex;gap:0.25rem;">
                         <a href="?toggle=<?= $s['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"><?= $s['is_active'] ? 'مخفی' : 'نمایش' ?></a>
                         <a href="?edit=<?= $s['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;">ویرایش</a>
-                        <a href="?delete=<?= $s['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" onclick="return confirm('حذف شود؟')">حذف</a>
+                        <a href="?delete=<?= $s['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" data-confirm="حذف شود؟">حذف</a>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -484,7 +484,7 @@ require_once __DIR__ . '/layout-top.php';
                                 <?php endforeach; ?>
                             </select>
                             <small style="display:block;color:var(--text-muted);font-size:0.72rem;margin-top:0.25rem;">
-                                <span id="offerProdCount">همهٔ <?= count($offerProducts) ?> محصول</span>
+                                <span id="offerProdCount">همه <?= count($offerProducts) ?> محصول</span>
                                 — می‌توانید چند کلمه را با فاصله بنویسید (مثلا «استارت 405»)؛ ارقام فارسی و لاتین یکی حساب می‌شوند.
                             </small>
                         </div>
@@ -497,7 +497,7 @@ require_once __DIR__ . '/layout-top.php';
                             <input type="text" name="offer_subtitle" class="form-control" placeholder="مثال: تا پایان موجودی" value="<?= $isEdit ? h((string)$oEdit['subtitle']) : '' ?>">
                         </div>
                         <?php /* قیمت و درصد تخفیف — روی خود محصول ذخیره می‌شوند (بالاتر توضیح
-                                داده شد)، پس روی همهٔ آفرهای همان محصول و هرجای دیگر سایت هم اثر
+                                داده شد)، پس روی همه آفرهای همان محصول و هرجای دیگر سایت هم اثر
                                 می‌گذارند، نه فقط این بنر. با انتخاب محصول دیگر از فهرست بالا،
                                 این دو کادر با قیمت/تخفیف همان محصول به‌روز می‌شوند (offerProdSelect
                                 در پایین صفحه). */ ?>
@@ -617,7 +617,7 @@ require_once __DIR__ . '/layout-top.php';
                             <a href="?osold=<?= (int)$o['id'] ?>" class="btn <?= $isSold ? 'btn-secondary' : 'btn-primary' ?> btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"><?= $isSold ? 'برگشت از فروش' : 'فروخته شد' ?></a>
                             <?php endif; ?>
                             <a href="?otoggle=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;"><?= $o['is_active'] ? 'مخفی' : 'نمایش' ?></a>
-                            <a href="?odelete=<?= (int)$o['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" onclick="return confirm('این آفر حذف شود؟')">حذف</a>
+                            <a href="?odelete=<?= (int)$o['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" data-confirm="این آفر حذف شود؟">حذف</a>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -629,7 +629,7 @@ require_once __DIR__ . '/layout-top.php';
 
 <script>
 /* جست‌وجوی فهرست محصولات آفر (بدون کتابخانه). گزینه‌ها بازسازی می‌شوند
-   چون display:none روی <option> در همهٔ مرورگرها کار نمی‌کند.
+   چون display:none روی <option> در همه مرورگرها کار نمی‌کند.
    نکته‌های مهمی که قبلا اشتباه بود:
    • هیچ سقفی روی تعداد گزینه‌ها نیست. سقف قبلی (۳۰۰) باعث می‌شد با ۵۷۴ محصول،
      به‌محض تایپ‌کردن (و حتی پس از خالی‌کردن کادر) بقیهٔ محصول‌ها بی‌صدا غیب شوند.
@@ -728,7 +728,7 @@ require_once __DIR__ . '/layout-top.php';
 
         if (cnt) {
             cnt.textContent = toks.length === 0
-                ? ('همهٔ ' + TOTAL + ' محصول')
+                ? ('همه ' + TOTAL + ' محصول')
                 : (shown === 0 ? 'هیچ محصولی با این عبارت پیدا نشد' : (shown + ' محصول از ' + TOTAL));
         }
     }
