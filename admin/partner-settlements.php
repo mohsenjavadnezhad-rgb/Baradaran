@@ -47,6 +47,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_cheque_receive']
     exit;
 }
 
+/* چهار کلید سریع «تسویه شد» روی هر سفارش، مستقیم توی همان سطر «همکاران
+   بدهکار» (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳) — نقدی/کارت‌به‌کارت/چک/اول ماه، صرف‌نظر
+   از اینکه هنگام ثبت سفارش کدام روش انتخاب شده بود؛ بدهی همکار معمولا با
+   هر روشی که جور شود تسویه می‌شود. هم‌الگوی paymentMarkPaid() که
+   admin/orders.php برای «پرداخت شد» می‌زند، فقط یادداشتش می‌گوید با کدام
+   روش. اگر با AJAX (fetch) صدا زده شود (pset_ajax=1) یک JSON کوچک برمی‌گرداند
+   تا سطر بی‌نیاز از رفرش سبز شود؛ بدون جاوااسکریپت هم با PRG معمولی کار
+   می‌کند (فرم <noscript> پایین‌تر). */
+$psetSettleLabels = [
+    'cash'   => 'پرداخت نقدی',
+    'card'   => 'کارت به کارت',
+    'cheque' => 'چک',
+    'month'  => 'پرداخت اول ماه',
+];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pset_settle_id'], $_POST['pset_settle_method'])) {
+    $settleId  = (int)$_POST['pset_settle_id'];
+    $settleKey = (string)$_POST['pset_settle_method'];
+    $isAjax    = !empty($_POST['pset_ajax']);
+    $settleOk  = false;
+    if ($settleId > 0 && isset($psetSettleLabels[$settleKey])) {
+        try {
+            $so = $pdo->prepare("SELECT total_amount FROM orders WHERE id = ?");
+            $so->execute([$settleId]);
+            $so = $so->fetch();
+            if ($so) {
+                paymentMarkPaid($settleId, (int)$so['total_amount'], 'دستی-ادمین', '', false);
+                $pdo->prepare("UPDATE orders SET payment_note = ? WHERE id = ?")
+                    ->execute(['تسویهٔ دستی توسط مدیر: ' . $psetSettleLabels[$settleKey], $settleId]);
+                /* اگر روش چک بود و هنوز «دریافت چک» ثبت نشده، همین‌جا هم ثبت شود —
+                   یک کلیک به‌جای دو کلیک؛ روی سفارش‌های غیرچکی اثری ندارد. */
+                if ($settleKey === 'cheque' && function_exists('paymentChequeReceive')) {
+                    paymentChequeReceive($settleId);
+                }
+                paymentLog("ADMIN pset-settle order=$settleId method=$settleKey by=" . ($_SESSION['admin_username'] ?? 'admin'));
+                $settleOk = true;
+            }
+        } catch (Throwable $e) {}
+    }
+    if ($isAjax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => $settleOk]);
+        exit;
+    }
+    $backPm2 = preg_replace('/[^a-z_]/', '', (string)($_POST['pset_back_pm'] ?? 'all'));
+    header('Location: partner-settlements.php?pm=' . ($backPm2 !== '' ? $backPm2 : 'all') . '#tsviyeh');
+    exit;
+}
+
 $groups = [];      // customer_id => ['customer' => row, 'orders' => [...], 'debt' => int]
 $grandDebt = 0;
 $methodTotals = []; // payment_method => ['count'=>n, 'debt'=>n]
@@ -126,7 +174,7 @@ function psetFilterGroups($groups, $pm) {
 $viewGroups = psetFilterGroups($groups, $activePm);
 
 /* ---------- محتوای ویژهٔ «پرداخت اول ماه» ----------
-   شمارش‌معکوس خودکار تا پایان ماه شمسی جاری — همهٔ فاکتورهای همین ماه یک
+   شمارش‌معکوس خودکار تا پایان ماه شمسی جاری — همه فاکتورهای همین ماه یک
    مهلت مشترک دارند. فاکتورهایی که از ماه قبل مانده‌اند «عقب‌افتاده»اند،
    چون مهلت تسویه‌شان (پایان همان ماه) از قبل گذشته است. */
 $pmToday = null; $pmDaysLeft = null; $pmMonthLabel = '';
@@ -210,7 +258,7 @@ require_once __DIR__ . '/layout-top.php';
 <?php if ($methodTotals): ?>
 <div class="cust-tabs" id="tsviyeh">
     <a href="?pm=all#tsviyeh" class="cust-tab <?= $activePm === 'all' ? 'active' : '' ?>">
-        <?= icon('layers', 'ic-sm') ?> همهٔ روش‌ها <span class="cust-tab-n"><?= array_sum(array_column($methodTotals, 'count')) ?></span>
+        <?= icon('layers', 'ic-sm') ?> همه روش‌ها <span class="cust-tab-n"><?= array_sum(array_column($methodTotals, 'count')) ?></span>
     </a>
     <?php foreach ($tabKeys as $pm): $mt = $methodTotals[$pm]; ?>
     <a href="?pm=<?= h($pm) ?>#tsviyeh" class="cust-tab <?= $activePm === $pm ? 'active' : '' ?>">
@@ -425,7 +473,7 @@ require_once __DIR__ . '/layout-top.php';
                         $ps = (string)($o['payment_status'] ?? 'unpaid');
                         $odebt = max(0, (int)$o['total_amount'] - (int)($o['paid_amount'] ?? 0));
                     ?>
-                    <tr>
+                    <tr id="pset-ord-<?= (int)$o['id'] ?>">
                         <td dir="ltr"><?= h(orderNumber($o)) ?></td>
                         <td><?= h(jDate($o['created_at'], true)) ?></td>
                         <td><?= icon(paymentIcon($pm), 'ic-sm') ?> <?= h(paymentLabel($pm)) ?></td>
@@ -455,9 +503,35 @@ require_once __DIR__ . '/layout-top.php';
                         </td>
                         <?php endif; ?>
                         <td><b><?= formatPrice($odebt) ?></b></td>
-                        <td>
-                            <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
-                            <a href="invoice.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm" target="_blank"><?= icon('printer', 'ic-sm') ?></a>
+                        <td class="pset-acts" style="white-space:nowrap;">
+                            <div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap;">
+                                <a href="order-detail.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm">جزئیات</a>
+                                <a href="invoice.php?id=<?= (int)$o['id'] ?>" class="btn btn-secondary btn-sm" target="_blank"><?= icon('printer', 'ic-sm') ?></a>
+                                <?php /* چهار کلید سریع «تسویه شد» (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳: «توی همون سطر
+                                        هر شماره سفارش ... هر کدوم رو که زدم اون سطر رنگش سبز بشه») — فقط
+                                        آیکون، بدون متن، تا سطر به‌هم نریزد؛ عنوان (title) هرکدام می‌گوید چیست.
+                                        جاوااسکریپت پایین صفحه با fetch بی‌صدا صدا می‌زند و بدون رفرش، همین
+                                        سطر (id="pset-ord-N") را سبز می‌کند؛ بدون جاوااسکریپت هم فرم <noscript>
+                                        پایین‌تر همان کار را با PRG معمولی انجام می‌دهد. */ ?>
+                                <span class="pset-settle-group" data-order="<?= (int)$o['id'] ?>" style="display:inline-flex;gap:0.2rem;padding-inline-start:0.3rem;border-inline-start:1px solid var(--border-color);">
+                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="cash" title="پرداخت نقدی انجام شد"><?= icon('package', 'ic-sm') ?></button>
+                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="card" title="کارت به کارت انجام شد"><?= icon('credit-card', 'ic-sm') ?></button>
+                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="cheque" title="چک دریافت شد"><?= icon('receipt', 'ic-sm') ?></button>
+                                    <button type="button" class="btn btn-secondary btn-sm pset-settle-btn" data-method="month" title="پرداخت اول ماه انجام شد"><?= icon('calendar', 'ic-sm') ?></button>
+                                </span>
+                                <noscript>
+                                <span style="display:inline-flex;gap:0.2rem;">
+                                    <?php foreach ($psetSettleLabels as $pmk => $pml): ?>
+                                    <form method="POST" action="partner-settlements.php?pm=<?= h($activePm) ?>#tsviyeh" onsubmit="return confirm('<?= h($pml) ?> — این سفارش تسویه‌شده ثبت شود؟');" style="display:inline;">
+                                        <input type="hidden" name="pset_settle_id" value="<?= (int)$o['id'] ?>">
+                                        <input type="hidden" name="pset_settle_method" value="<?= h($pmk) ?>">
+                                        <input type="hidden" name="pset_back_pm" value="<?= h($activePm) ?>">
+                                        <button type="submit" class="btn btn-secondary btn-sm" title="<?= h($pml) ?>"><?= h(mb_substr($pml, 0, 1)) ?></button>
+                                    </form>
+                                    <?php endforeach; ?>
+                                </span>
+                                </noscript>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -471,5 +545,63 @@ require_once __DIR__ . '/layout-top.php';
 
 <?php endif; ?>
 <?php endif; ?>
+
+<style>
+/* سطر تسویه‌شده — خواستهٔ کاربر: «هر کدوم رو که زدم اون سطر رنگش سبز بشه» */
+.pset-order-settled{background:rgba(34,197,94,0.14) !important;transition:background 0.4s ease;}
+.pset-order-settled .pset-settle-btn{display:none;}
+.pset-settle-done{display:inline-flex;align-items:center;gap:0.25rem;color:#4ADE80;font-size:0.78rem;white-space:nowrap;}
+</style>
+<script>
+/* چهار کلید سریع تسویهٔ سفارش، توی سطر خود «همکاران بدهکار» — بدون رفرش،
+   با fetch؛ موفق که شد فقط همین سطر سبز می‌شود و دکمه‌ها جای خود را به یک
+   نشان «تسویه شد» می‌دهند. خطای شبکه/نشست هم با یک پیام کوتاه گفته می‌شود،
+   نه سکوت. */
+(function () {
+    var groups = document.querySelectorAll('.pset-settle-group');
+    if (!groups.length) return;
+    var LABELS = {
+        cash: 'پرداخت نقدی', card: 'کارت به کارت',
+        cheque: 'چک', month: 'پرداخت اول ماه'
+    };
+    /* آیکون SVG «تیک» — از همان کتابخانهٔ icon() سرور می‌آید، نه ایموجی خام
+       (قاعدهٔ سایت)، چون این نشان بعد از fetch در جاوااسکریپت ساخته می‌شود. */
+    var CHECK_ICON = <?= json_encode(icon('check-circle', 'ic-sm'), JSON_UNESCAPED_UNICODE) ?>;
+    groups.forEach(function (grp) {
+        var orderId = grp.getAttribute('data-order');
+        grp.querySelectorAll('.pset-settle-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var method = btn.getAttribute('data-method');
+                var label = LABELS[method] || method;
+                if (!confirm(label + ' — این سفارش تسویه‌شده ثبت شود؟')) return;
+                grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = true; });
+                var fd = new FormData();
+                fd.append('pset_settle_id', orderId);
+                fd.append('pset_settle_method', method);
+                fd.append('pset_ajax', '1');
+                fetch('partner-settlements.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data && data.ok) {
+                            var row = document.getElementById('pset-ord-' + orderId);
+                            if (row) row.classList.add('pset-order-settled');
+                            var done = document.createElement('span');
+                            done.className = 'pset-settle-done';
+                            done.innerHTML = CHECK_ICON + ' تسویه شد (' + label + ')';
+                            grp.parentNode.appendChild(done);
+                        } else {
+                            alert('ثبت انجام نشد. دوباره تلاش کنید.');
+                            grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
+                        }
+                    })
+                    .catch(function () {
+                        alert('ارتباط برقرار نشد. دوباره تلاش کنید.');
+                        grp.querySelectorAll('.pset-settle-btn').forEach(function (b) { b.disabled = false; });
+                    });
+            });
+        });
+    });
+})();
+</script>
 
 <?php require_once __DIR__ . '/layout-bottom.php'; ?>
