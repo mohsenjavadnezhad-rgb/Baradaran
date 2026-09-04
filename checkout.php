@@ -3,7 +3,15 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/cart-functions.php';
 
-requireCustomerLogin('checkout.php');
+/* ۲۰۲۶-۰۹-۰۳ (خواستهٔ کاربر): «ثبت سفارش بدون موبایل» روشن باشد، مشتری
+   واردنشده اصلا به login.php فرستاده نمی‌شود — یک حساب «مهمان» بی‌صدا ساخته
+   می‌شود (ensureAnonymousCustomer()) و همین‌جا ادامه می‌دهد؛ شمارهٔ تماس
+   واقعی‌اش پایین‌تر در خود فرم گرفته می‌شود. */
+if (checkoutNoMobileEnabled()) {
+    if (!ensureAnonymousCustomer()) { requireCustomerLogin('checkout.php'); }
+} else {
+    requireCustomerLogin('checkout.php');
+}
 
 $cartItems = getCartItems();
 $cartTotal = getCartTotal();
@@ -15,6 +23,11 @@ if (empty($cartItems)) {
 
 $c = currentCustomer();
 $errors = [];
+/* حساب «مهمان» (ensureAnonymousCustomer()) با پیش‌شماره‌ای ساخته می‌شود که
+   قاعدهٔ ۰۹xxxxxxxxx را ندارد، پس isValidMobile() رویش false می‌دهد — همین
+   تشخیص که آیا فیلد موبایل باید قابل‌ویرایش (شمارهٔ تماس واقعی) باشد یا
+   readonly (شمارهٔ واقعی حساب واردشده). */
+$noMobileAccount = !isValidMobile((string)($c['mobile'] ?? ''));
 /* پس از ارسال عکس در part-check.php به اینجا می‌آید (?sent=1) — قبلا این
    تأییدیه در صفحهٔ جداگانهٔ stock-check.php نشان داده می‌شد؛ حالا همین‌جا،
    بالای گیت موجودی. */
@@ -180,7 +193,13 @@ if ($chqIn['date'] === '')   $chqIn['date']   = jDate($c2cNow->format('Y-m-d'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     $name     = trim($_POST['customer_name'] ?? '');
-    $mobile   = $c['mobile']; // شمارهٔ ثابت حساب کاربری
+    /* حساب معمولی: همان شمارهٔ ثابت حساب کاربری. حساب «مهمان» (بدون موبایل):
+       شمارهٔ تماس واقعی همین‌جا در فرم گرفته شده — حساب زیرین گمنام می‌ماند،
+       فقط این سفارش شمارهٔ درست را در ستون customer_mobile نگه می‌دارد. */
+    $mobile   = $noMobileAccount ? normalizeMobile($_POST['contact_mobile'] ?? '') : $c['mobile'];
+    if ($noMobileAccount && !isValidMobile($mobile)) {
+        $errors[] = 'شمارهٔ موبایل برای هماهنگی ارسال سفارش نامعتبر است.';
+    }
     $province = trim($_POST['province'] ?? '');
     /* نام رسمی شهر از فهرست شهرها؛ اگر نخواند همان چیزی که مشتری نوشته
        می‌ماند. یکدست‌شدن نام باعث می‌شود نرخ‌نامه و صفحهٔ سبد خرید بعدی هم
@@ -450,8 +469,15 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="checkout-box-title"><?= icon('user') ?> مشخصات و آدرس تحویل</div>
 
                 <div class="form-group">
+                    <?php if ($noMobileAccount): ?>
+                    <label for="contact_mobile">شماره موبایل (برای هماهنگی ارسال) *</label>
+                    <input type="text" name="contact_mobile" id="contact_mobile" class="form-control" inputmode="numeric"
+                           dir="ltr" placeholder="09xxxxxxxxx" required
+                           value="<?= h($_POST['contact_mobile'] ?? '') ?>">
+                    <?php else: ?>
                     <label>شماره موبایل (حساب شما)</label>
                     <input type="text" class="form-control" value="<?= h($c['mobile']) ?>" dir="ltr" readonly style="opacity:0.7;">
+                    <?php endif; ?>
                 </div>
                 <div class="form-group">
                     <label for="customer_name">نام و نام خانوادگی *</label>
