@@ -16,7 +16,15 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/cart-functions.php';
 
-requireCustomerLogin('part-check.php');
+/* ۲۰۲۶-۰۹-۰۳: هم‌الگوی checkout.php — با «ثبت سفارش بدون موبایل»، مشتری
+   واردنشده اینجا هم به login.php فرستاده نمی‌شود، حساب «مهمان» بی‌صدا
+   می‌سازد و ادامه می‌دهد (شمارهٔ تماس واقعی‌اش را نهایتا checkout.php
+   می‌گیرد، نه اینجا). */
+if (checkoutNoMobileEnabled()) {
+    if (!ensureAnonymousCustomer()) { requireCustomerLogin('part-check.php'); }
+} else {
+    requireCustomerLogin('part-check.php');
+}
 
 $cartItems = getCartItems();
 if (empty($cartItems)) redirect('cart.php');
