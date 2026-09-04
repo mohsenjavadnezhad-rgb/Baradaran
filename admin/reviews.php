@@ -91,7 +91,7 @@ if ($ready) {
         FROM product_reviews r LEFT JOIN products p ON p.id = r.product_id
         WHERE r.status = 'approved' ORDER BY r.id DESC LIMIT 60")->fetchAll();
 
-    /* نخ‌های پرسش‌وپاسخ: پرسش‌های تأییدشده یا در انتظار + همهٔ پاسخ‌هایشان */
+    /* نخ‌های پرسش‌وپاسخ: پرسش‌های تأییدشده یا در انتظار + همه پاسخ‌هایشان */
     $qs = $pdo->query("SELECT q.*, p.name AS product_name
         FROM product_qa q LEFT JOIN products p ON p.id = q.product_id
         WHERE q.parent_id IS NULL AND q.status <> 'rejected' ORDER BY q.id DESC LIMIT 40")->fetchAll();
@@ -167,7 +167,7 @@ require_once __DIR__ . '/layout-top.php';
             <td style="white-space:nowrap;">
                 <a href="reviews.php?t=r&set=approved&id=<?= (int)$r['id'] ?>" class="btn btn-primary btn-sm"><?= icon('check', 'ic-sm') ?> تأیید</a>
                 <a href="reviews.php?t=r&set=rejected&id=<?= (int)$r['id'] ?>" class="btn btn-secondary btn-sm"><?= icon('x', 'ic-sm') ?> رد</a>
-                <a href="reviews.php?t=r&del=<?= (int)$r['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این نظر برای همیشه حذف شود؟')"><?= icon('trash', 'ic-sm') ?></a>
+                <a href="reviews.php?t=r&del=<?= (int)$r['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این نظر برای همیشه حذف شود؟"><?= icon('trash', 'ic-sm') ?></a>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -182,7 +182,7 @@ require_once __DIR__ . '/layout-top.php';
             <td style="white-space:nowrap;">
                 <a href="reviews.php?t=q&set=approved&id=<?= (int)$q['id'] ?>" class="btn btn-primary btn-sm"><?= icon('check', 'ic-sm') ?> تأیید</a>
                 <a href="reviews.php?t=q&set=rejected&id=<?= (int)$q['id'] ?>" class="btn btn-secondary btn-sm"><?= icon('x', 'ic-sm') ?> رد</a>
-                <a href="reviews.php?t=q&del=<?= (int)$q['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این ردیف (و پاسخ‌هایش) حذف شود؟')"><?= icon('trash', 'ic-sm') ?></a>
+                <a href="reviews.php?t=q&del=<?= (int)$q['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این ردیف (و پاسخ‌هایش) حذف شود؟"><?= icon('trash', 'ic-sm') ?></a>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -229,7 +229,7 @@ require_once __DIR__ . '/layout-top.php';
                             <?php else: ?>
                             <a href="reviews.php?t=q&set=pending&id=<?= (int)$a['id'] ?>" class="btn btn-secondary btn-sm">لغو انتشار</a>
                             <?php endif; ?>
-                            <a href="reviews.php?t=q&del=<?= (int)$a['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این پاسخ حذف شود؟')"><?= icon('trash', 'ic-sm') ?></a>
+                            <a href="reviews.php?t=q&del=<?= (int)$a['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این پاسخ حذف شود؟"><?= icon('trash', 'ic-sm') ?></a>
                         </div>
                     </div>
                 </div>
@@ -268,7 +268,7 @@ require_once __DIR__ . '/layout-top.php';
             <td style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;"><?= h(jDate($r['created_at'])) ?></td>
             <td style="white-space:nowrap;">
                 <a href="reviews.php?t=r&set=pending&id=<?= (int)$r['id'] ?>" class="btn btn-secondary btn-sm">لغو انتشار</a>
-                <a href="reviews.php?t=r&del=<?= (int)$r['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('این نظر برای همیشه حذف شود؟')"><?= icon('trash', 'ic-sm') ?></a>
+                <a href="reviews.php?t=r&del=<?= (int)$r['id'] ?>" class="btn btn-danger btn-sm" data-confirm="این نظر برای همیشه حذف شود؟"><?= icon('trash', 'ic-sm') ?></a>
             </td>
         </tr>
         <?php endforeach; ?>
