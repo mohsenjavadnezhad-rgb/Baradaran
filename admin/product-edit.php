@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* محصول عمومی/بدون‌نیاز — خواستهٔ کاربر: بعضی کالاها به هیچ برند/مدل/
        سال خاصی مقید نیستند. سه تیک مستقل، هرکدام همان‌جایی که برند/مدل/
-       سال چک می‌شوند اثر می‌گذارد (getProducts()). سال تولید عمداً ستون
+       سال چک می‌شوند اثر می‌گذارد (getProducts()). سال تولید عمدا ستون
        تازه‌ای نگرفت چون خالی‌گذاشتن year_from/year_to همین حالا هم یعنی
        «برای همه سال‌ها» — فقط هنگام تیک‌خوردن، خود فیلدهای سال هم پاک
        می‌شوند تا حالت متناقض (هم تیک هم بازهٔ سال) پیش نیاید. */
@@ -303,7 +303,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
 .gal-admin{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.7rem;}
 .gal-item{width:112px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-secondary);overflow:hidden;}
 .gal-item .gal-img{width:100%;height:82px;background:var(--bg-input);display:block;}
-.gal-item .gal-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.gal-item .gal-img img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;}
 .gal-tools{display:flex;align-items:center;gap:0.15rem;padding:0.25rem;}
 .gal-num{font-size:0.68rem;color:var(--text-muted);min-width:1.1rem;text-align:center;}
 .gal-tools .btn{padding:0.12rem 0.3rem;font-size:0.66rem;line-height:1.5;}
@@ -426,7 +426,7 @@ if ($error): ?><div class="flash flash-error"><?= h($error) ?></div><?php endif;
   <div id="univBox" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:1rem;margin-bottom:1rem;">
     <h3 style="font-size:0.9rem;color:var(--red-primary);margin-bottom:0.5rem;"><?= icon('globe', 'ic-sm') ?> محصول عمومی (بدون نیاز به برند/مدل/سال خودرو)</h3>
     <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.75rem;line-height:1.8;">
-      برای کالاهایی که برای همهٔ خودروها مناسب‌اند — با هر تیک، همان بخش (برند/مدل/سال) دیگر برای این محصول لازم نیست و در هر جست‌وجو/فیلتری نشان داده می‌شود.
+      برای کالاهایی که برای همه خودروها مناسب‌اند — با هر تیک، همان بخش (برند/مدل/سال) دیگر برای این محصول لازم نیست و در هر جست‌وجو/فیلتری نشان داده می‌شود.
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:1rem;">
       <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;">
