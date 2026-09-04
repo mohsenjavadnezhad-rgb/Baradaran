@@ -57,14 +57,10 @@ foreach ($orders as $o) {
     $buySum += (float)$o['total_amount'];
 }
 
-/* ---- کلید «بروزرسانی» فهرست سفارش‌ها ----
-   با جاوااسکریپت فقط همین ناحیه (#orders-live) دوباره از سرور گرفته و جای‌گذاری
-   می‌شود، پس صفحه دیگر به بالا نمی‌پرد. بدون جاوااسکریپت همان لینک عادی باز
-   می‌شود؛ مقدار r بین ۱ و ۲ عوض می‌شود تا مرورگر کلیک را «همین صفحه + لنگر»
-   نبیند و درخواست تازه بفرستد. GET است، پس فرم مشخصات دوباره POST نمی‌شود
-   (الگوی PRG). */
-$rNext       = (($_GET['r'] ?? '') === '1') ? '2' : '1';
-$rDone       = isset($_GET['r']);
+/* فهرست سفارش‌های در جریان دیگر کلید دستی «بروزرسانی» ندارد (خواستهٔ کاربر
+   ۲۰۲۶-۰۹-۰۴: «وقتی سفارشی رو مرحله به مرحله تیک میزنه ادمین سمت مشتری
+   اتومات رفرش بشه، پس کلید به‌روزرسانی رو بردار») — به‌جایش پایین همین صفحه
+   هر ۲۰ ثانیه به‌صورت خودکار و بی‌صدا #orders-live را از سرور می‌گیرد. */
 $refreshedAt = jDate(date('Y-m-d H:i:s'), true);
 
 $statsHtml = 'تعداد خرید: <b>' . $buyCount . '</b> سفارش &nbsp;|&nbsp; مجموع خرید: <b>'
@@ -162,52 +158,59 @@ require_once __DIR__ . '/includes/header.php';
       <h3 class="account-box-title" style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
         <span>سفارش‌های در جریان (<?= count($openOrders) ?>)</span>
         <span style="display:flex;align-items:center;gap:0.35rem;flex-wrap:wrap;">
-          <?php /* بروزرسانی وضعیت: تازه‌ترین روند ارسالی که مدیر ثبت کرده را می‌آورد. */ ?>
-          <a href="account.php?r=<?= h($rNext) ?>#orders" id="ord-refresh" class="btn btn-secondary btn-sm"
-             title="گرفتن تازه‌ترین وضعیت سفارش‌ها از فروشگاه"><?= icon('refresh', 'ic-sm') ?> بروزرسانی</a>
           <a href="orders-past.php" class="btn btn-secondary btn-sm"
              title="سفارش‌های ارسال‌شده و لغوشده"><?= icon('clock', 'ic-sm') ?> سفارش‌های گذشته (<?= count($pastOrders) ?>)</a>
         </span>
       </h3>
-      <div class="flash flash-success" id="ord-flash" style="margin-bottom:0.75rem;<?= $rDone ? '' : 'display:none;' ?>"><?= icon('check-circle', 'ic-sm') ?> وضعیت سفارش‌ها بروزرسانی شد.</div>
+      <div class="flash flash-success" id="ord-flash" style="margin-bottom:0.75rem;display:none;"><?= icon('check-circle', 'ic-sm') ?> وضعیت یکی از سفارش‌های شما به‌روز شد.</div>
       <div id="orders-live"><?= renderCustomerOrdersLive($openOrders, $statsHtml, $emptyHtml) ?></div>
     </div>
   </div>
 </div>
 
 <script>
-/* بروزرسانی درجای فهرست سفارش‌ها: فقط درون #orders-live از سرور گرفته و عوض
-   می‌شود، پس نه صفحه بارگذاری می‌شود و نه به بالا می‌پرد. اگر مرورگر fetch
-   نداشت یا پاسخ قطعهٔ موردنظر نبود (مثلا نشست منقضی شده)، همان لینک عادی
-   باز می‌شود تا کلید هرگز بی‌کار نماند. */
+/* بروزرسانی خودکار فهرست سفارش‌های در جریان — خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴:
+   «وقتی سفارشی رو مرحله به مرحله تیک میزنه ادمین سمت مشتری اتومات رفرش
+   بشه، پس کلید به‌روزرسانی رو بردار». کلید دستی برداشته شد؛ به‌جایش هر ۲۰
+   ثانیه (هم‌الگوی نشان‌های زندهٔ سایدبار پنل ادمین) همین ناحیه بی‌صدا از
+   سرور گرفته می‌شود — فقط وقتی محتوای واقعی سفارش‌ها (نه خط «آخرین
+   بروزرسانی» که هر بار عوض می‌شود) با نسخهٔ قبلی فرق داشت، هم صفحه
+   جای‌گذاری می‌شود هم یک پیغام کوتاه دیده می‌شود؛ در غیر این صورت کاملا
+   بی‌سروصدا رد می‌شود، بدون هیچ چشمک/پرش روی صفحه. */
 (function () {
-    var btn = document.getElementById('ord-refresh');
     var box = document.getElementById('orders-live');
     var fl  = document.getElementById('ord-flash');
-    if (!btn || !box || !window.fetch) return;
-    var busy = false, timer = null;
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (busy) return;
-        busy = true;
-        var old = btn.innerHTML;
-        btn.innerHTML = 'در حال بروزرسانی…';
-        btn.style.opacity = '0.65';
-        var done = function () { busy = false; btn.innerHTML = old; btn.style.opacity = ''; };
+    if (!box || !window.fetch) return;
+
+    function bodyOf(container) {
+        var b = container.querySelector('.oc-body');
+        return b ? b.innerHTML : container.innerHTML;
+    }
+
+    var lastBody = bodyOf(box);
+    var flashTimer = null;
+
+    function tick() {
         fetch('account.php?frag=orders', { credentials: 'same-origin' })
             .then(function (r) { return r.text(); })
             .then(function (t) {
-                if (t.indexOf('<!--ordersfrag-->') !== 0) { window.location.href = btn.href; return; }
-                box.innerHTML = t.slice(17);
+                if (t.indexOf('<!--ordersfrag-->') !== 0) return; // نشست/خطا — بی‌صدا رد شو، دفعهٔ بعد دوباره
+                var tmp = document.createElement('div');
+                tmp.innerHTML = t.slice(17);
+                var newBody = bodyOf(tmp);
+                if (newBody === lastBody) return; // چیزی برای مشتری عوض نشده
+                box.innerHTML = tmp.innerHTML;
+                lastBody = newBody;
                 if (fl) {
                     fl.style.display = '';
-                    if (timer) clearTimeout(timer);
-                    timer = setTimeout(function () { fl.style.display = 'none'; }, 5000);
+                    if (flashTimer) clearTimeout(flashTimer);
+                    flashTimer = setTimeout(function () { fl.style.display = 'none'; }, 5000);
                 }
-                done();
             })
-            .catch(function () { window.location.href = btn.href; done(); });
-    });
+            .catch(function () {}); // شبکه قطع — بی‌صدا رد شو، دفعهٔ بعد دوباره
+    }
+
+    setInterval(tick, 20000);
 })();
 </script>
 
