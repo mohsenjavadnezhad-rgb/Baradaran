@@ -370,6 +370,40 @@ function paymentStatusBadgeFor($status, $method = '') {
          . h(paymentStatusLabelFor($status, $method)) . '</span>';
 }
 
+/* تسویهٔ سریع همکار در admin/partner-settlements.php صرف‌نظر از روش پرداخت
+   اصلی سفارش (که دست‌نخورده می‌ماند) با یکی از چهار روش (نقدی/کارت‌به‌کارت/
+   چک/اول‌ماه) انجام می‌شود؛ فقط payment_note رد پای این روش را نگه می‌دارد
+   («تسویهٔ دستی توسط مدیر: <روش>»). بدون این تابع، هم خود صفحهٔ تسویه (لحظهٔ
+   سبزشدن سطر) و هم جزئیات سفارش، بعد از تسویه فقط برچسب عمومی «پرداخت‌شده»
+   را نشان می‌دادند — نه اینکه واقعا با کدام روش. خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴:
+   «توی وضعیت همون سطر بنویسه چک دریافت شد / پرداخت اول ماه انجام شد / ...
+   اینارو توی جزئیات سفارشش هم به‌روز کن». */
+function paymentSettleDoneLabel($order) {
+    if ((string)($order['payment_status'] ?? '') !== 'paid') return null;
+    $note = trim((string)($order['payment_note'] ?? ''));
+    $prefix = 'تسویهٔ دستی توسط مدیر: ';
+    if (mb_strpos($note, $prefix) !== 0) return null;
+    $method = trim(mb_substr($note, mb_strlen($prefix)));
+    $map = [
+        'پرداخت نقدی'   => 'پرداخت نقدی انجام شد',
+        'کارت به کارت'  => 'کارت به کارت انجام شد',
+        'چک'            => 'چک دریافت شد',
+        'پرداخت اول ماه' => 'پرداخت اول ماه انجام شد',
+    ];
+    return $map[$method] ?? null;
+}
+
+/* نسخهٔ ردیف‌محور paymentStatusBadgeFor(): همان برچسب معمول، مگر اینکه این
+   سفارش دقیقا با تسویهٔ سریع همکار پرداخت‌شده باشد — آن‌وقت به‌جای «پرداخت‌شده»ی
+   عمومی، جملهٔ مخصوص همان روش را نشان می‌دهد. */
+function paymentStatusBadgeForOrder($order) {
+    $done = paymentSettleDoneLabel($order);
+    if ($done !== null) {
+        return '<span class="pay-badge pay-paid">' . icon('check-circle', 'ic-sm') . ' ' . h($done) . '</span>';
+    }
+    return paymentStatusBadgeFor((string)($order['payment_status'] ?? 'unpaid'), (string)($order['payment_method'] ?? ''));
+}
+
 /* ---------- کارت به کارت: ثبت واریز توسط مشتری و تأیید توسط مدیر ----------
    مشتری چهار چیز را می‌گوید: شناسهٔ واریز، مبلغ، چهار رقم آخر کارت مبدأ و زمان
    واریز. سفارش با وضعیت «در انتظار تأیید واریز» (pending) می‌ماند تا مدیر در
