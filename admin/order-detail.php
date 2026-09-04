@@ -636,10 +636,9 @@ if ($pchk && !empty($pchk['product_id'])) {
                 </div>
 
                 <?php if ($c2cWait): ?>
-                <form method="POST" action="order-detail.php?id=<?= $id ?>" style="margin-top:0.9rem;"
-                      onsubmit="return confirm('واریز این سفارش تأیید شود؟ پرداخت «پرداخت‌شده» و سفارش «تأیید شده» می‌شود.');">
+                <form method="POST" action="order-detail.php?id=<?= $id ?>" style="margin-top:0.9rem;">
                     <input type="hidden" name="c2c_verify" value="1">
-                    <button type="submit" class="btn btn-primary"><?= icon('check-circle', 'ic-sm') ?> تأیید واریز و ثبت پرداخت</button>
+                    <button type="submit" class="btn btn-primary" data-confirm="واریز این سفارش تأیید شود؟ پرداخت «پرداخت‌شده» و سفارش «تأیید شده» می‌شود." data-confirm-icon="check" data-confirm-label="تأیید شود" data-confirm-tone="primary"><?= icon('check-circle', 'ic-sm') ?> تأیید واریز و ثبت پرداخت</button>
                     <span style="color:var(--text-muted);font-size:0.72rem;margin-inline-start:0.5rem;">پیش از تأیید، واریز را در حساب بانکی بررسی کنید.</span>
                 </form>
                 <?php endif; ?>
@@ -688,10 +687,9 @@ if ($pchk && !empty($pchk['product_id'])) {
                 <?php if (!empty($order['cheque_received_at'])): ?>
                 <p style="margin:0;color:var(--green);"><?= icon('check-circle', 'ic-sm') ?> <strong>چک دریافت شد</strong> — <?= date('Y/m/d H:i', strtotime($order['cheque_received_at'])) ?></p>
                 <?php else: ?>
-                <form method="POST" action="order-detail.php?id=<?= $id ?>"
-                      onsubmit="return confirm('دریافت این چک ثبت شود؟ (این کار پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده است.)');">
+                <form method="POST" action="order-detail.php?id=<?= $id ?>">
                     <input type="hidden" name="cheque_receive" value="1">
-                    <button type="submit" class="btn btn-primary"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت چک</button>
+                    <button type="submit" class="btn btn-primary" data-confirm="دریافت این چک ثبت شود؟ (این کار پرداخت را «پرداخت‌شده» نمی‌کند — فقط می‌گوید چک رسیده است.)" data-confirm-icon="check" data-confirm-label="ثبت شود" data-confirm-tone="primary"><?= icon('check-circle', 'ic-sm') ?> ثبت دریافت چک</button>
                     <span style="color:var(--text-muted);font-size:0.72rem;margin-inline-start:0.5rem;">وقتی چک واقعا وصول شد، از فرم «ثبت وضعیت پرداخت» بالا «پرداخت‌شده» را بزنید.</span>
                 </form>
                 <?php endif; ?>
