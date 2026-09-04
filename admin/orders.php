@@ -167,7 +167,12 @@ $statusLabels = [
 <body style="background:var(--bg-primary);min-height:100vh;">
     <div class="admin-layout admin-layout--wide">
         <div class="admin-header">
-            <h2 style="color:var(--text-primary);">مدیریت سفارشات</h2>
+            <h2 style="color:var(--text-primary);">
+                مدیریت سفارشات
+                <?php if ($ctypeFilter !== ''): ?>
+                <span style="color:var(--text-muted);font-size:0.85rem;font-weight:400;">— <?= h($ctypeLabels[$ctypeFilter]) ?></span>
+                <?php endif; ?>
+            </h2>
             <a href="index.php" class="btn btn-secondary btn-sm">بازگشت</a>
         </div>
 
@@ -192,18 +197,14 @@ $statusLabels = [
         <div class="flash flash-success" style="margin-bottom:1rem;"><?= h($chqMsg) ?></div>
         <?php endif; ?>
 
-        <?php /* ---------- تب مستقل: نوع مشتری (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۳) ----------
-                سه دستهٔ کاملا مجزا (همکاران/مشتریان/بدون ثبت‌نام) — مستقل از تب
-                پایین (وضعیت پرداخت)؛ هرکدام از تب‌ها می‌تواند جدا یا با هم انتخاب
-                شود، پس هردو طرف لینک‌هایشان فیلتر دیگری را هم نگه می‌دارند. */ ?>
-        <?php $payQs = $payFilter !== '' ? ('pay=' . urlencode($payFilter) . '&') : ''; ?>
-        <div class="cust-tabs" style="margin-bottom:0.6rem;">
-            <?php foreach ($ctypeLabels as $ck => $clbl): $cn = $ck === '' ? $ctypeCounts['all'] : $ctypeCounts[$ck]; ?>
-            <a href="?<?= $payQs ?><?= $ck !== '' ? 'ctype=' . urlencode($ck) : '' ?>" class="cust-tab <?= $ctypeFilter === $ck ? 'active' : '' ?>">
-                <?= h($clbl) ?> <span class="cust-tab-n"><?= $cn ?></span>
-            </a>
-            <?php endforeach; ?>
-        </div>
+        <?php /* دستهٔ نوع مشتری (همکاران/مشتریان/بدون ثبت‌نام) دیگر اینجا به‌صورت
+                تب دیده نمی‌شود — خواستهٔ کاربر: «توی مدیریت سفارشات نه، شلوغ
+                شده؛ کنار منوی ادمین جدا کن». حالا فقط از سایدبار ادمین
+                (admin/layout-top.php، گروه کشویی «سفارشات») با ?ctype=X می‌آید؛
+                این صفحه همچنان فیلترش را می‌پذیرد و در تب‌های پایین (وضعیت
+                پرداخت) هم نگه می‌دارد، فقط دیگر خودش سوییچر جدایی نشان نمی‌دهد.
+                نشان کوچک رنگی کنار نام هر مشتری در جدول («همکار»/«مشتری»/«بدون
+                ثبت‌نام») هنوز هست تا حتی در نمای «همه» هم دسته مشخص باشد. */ ?>
 
         <?php if (!$payOn): ?>
         <div class="flash flash-error" style="margin-bottom:1rem;">
