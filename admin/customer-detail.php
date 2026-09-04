@@ -97,15 +97,15 @@ require_once __DIR__ . '/layout-top.php';
       </form>
       <?php endif; ?>
       <?php if ($ctype === 'partner' && $pstatus === 'pending'): ?>
-      <form method="POST" style="display:inline;" onsubmit="return confirm('درخواست همکاری رد شود؟');">
+      <form method="POST" style="display:inline;">
         <input type="hidden" name="act" value="reject">
-        <button type="submit" class="btn btn-secondary btn-sm">رد درخواست</button>
+        <button type="submit" class="btn btn-secondary btn-sm" data-confirm="درخواست همکاری رد شود؟" data-confirm-icon="alert" data-confirm-label="رد شود">رد درخواست</button>
       </form>
       <?php endif; ?>
       <?php if ($ctype === 'partner'): ?>
-      <form method="POST" style="display:inline;" onsubmit="return confirm('به مشتری عادی تغییر کند؟');">
+      <form method="POST" style="display:inline;">
         <input type="hidden" name="act" value="make_retail">
-        <button type="submit" class="btn btn-secondary btn-sm">تبدیل به مشتری عادی</button>
+        <button type="submit" class="btn btn-secondary btn-sm" data-confirm="به مشتری عادی تغییر کند؟" data-confirm-icon="check" data-confirm-label="تأیید شود" data-confirm-tone="primary">تبدیل به مشتری عادی</button>
       </form>
       <?php endif; ?>
     <?php endif; ?>
