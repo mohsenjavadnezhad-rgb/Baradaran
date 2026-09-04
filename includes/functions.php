@@ -1538,6 +1538,13 @@ function renderCustomerOrdersLive(array $orders, $statsHtml = '', $emptyHtml = '
     if ($statsHtml !== '') {
         $out .= '<div class="auth-note" style="margin-bottom:0.75rem;">' . $statsHtml . '</div>';
     }
+    /* بدنه (کارت‌های سفارش یا پیام خالی‌بودن) عمدا در یک قاب جدا با کلاس
+       ثابت oc-body پیچیده می‌شود — نه خط آمار/زمان بالا که هر بار عوض
+       می‌شود. account.php برای رفرش خودکار فقط همین قاب را با نسخهٔ قبلی
+       مقایسه می‌کند تا هر ۲۰ ثانیه، صرفا به‌خاطر تغییر «آخرین بروزرسانی»،
+       چیزی روی صفحهٔ مشتری عوض/چشمک نزند — فقط وقتی واقعا یک مرحله تازه
+       تیک خورده باشد. */
+    $out .= '<div class="oc-body">';
     if ($orders) {
         $out .= '<div class="account-orders">';
         foreach ($orders as $o) $out .= renderCustomerOrderCard($o);
@@ -1545,6 +1552,7 @@ function renderCustomerOrdersLive(array $orders, $statsHtml = '', $emptyHtml = '
     } else {
         $out .= $emptyHtml;
     }
+    $out .= '</div>';
     return $out;
 }
 
