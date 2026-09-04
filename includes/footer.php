@@ -1,4 +1,4 @@
-﻿</main>
+</main>
 <?php
 /* مقادیر فوتر از جدول تنظیمات (قابل ویرایش از پنل مدیریت) */
 $fAbout    = getSetting('footer_about', 'فروشگاه اینترنتی لوازم یدکی خودرو - فروش کلی و جزئی');
@@ -12,7 +12,7 @@ $cHours    = getSetting('working_hours', '');
 /* شبکه‌های اجتماعی و پیام‌رسان‌ها (خارجی + داخلی) — ترتیب و نشانه‌ها */
 /* لوگوهای برند به‌صورت SVG درون‌خطی (بدون فایل خارجی). رنگ از currentColor ارث می‌برد
    تا در حالت عادی خاکستری و هنگام hover به رنگ برند دربیاید.
-   همهٔ ۸ لوگو نشان واقعی برند است (نه حرف/ایموجی).
+   همه ۸ لوگو نشان واقعی برند است (نه حرف/ایموجی).
    قاعدهٔ اندازه: viewBox هر SVG برابر «کرانهٔ محتوای خودش» تنظیم شده تا نشان لبه‌به‌لبه
    قاب را پر کند؛ در نتیجه هر ۸ کاشی از نظر چشمی هم‌اندازه دیده می‌شوند.
    نشان‌های تک‌رنگی که در اصل حفرهٔ سفید دارند (بله/گپ/روبیکا) با fill-rule="evenodd"
@@ -113,9 +113,9 @@ $acctLabel = isCustomerLoggedIn() ? 'حساب کاربری' : 'ورود / ثبت
         <p><?= h($fCopy) ?></p>
     </div>
 </footer>
-<script src="assets/js/main.js?v=62"></script>
-<script src="assets/js/cart.js?v=62"></script>
-<script src="assets/js/search.js?v=62"></script>
+<script src="assets/js/main.js?v=63"></script>
+<script src="assets/js/cart.js?v=63"></script>
+<script src="assets/js/search.js?v=63"></script>
 <script>
 /* «انتخاب فایل» سفارشی برای هر input[type=file].form-control که در سمت
    مشتری پیدا شود (همتای این اسکریپت در admin/layout-bottom.php) — رجوع کنید
