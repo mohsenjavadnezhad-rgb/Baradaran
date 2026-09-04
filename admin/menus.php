@@ -189,7 +189,7 @@ require_once __DIR__ . '/layout-top.php';
           <a href="?group=<?= h($group) ?>&toggle=<?= $it['id'] ?>" class="btn btn-sm <?= $it['is_active'] ? 'btn-secondary' : 'btn-primary' ?>" style="padding:0.15rem 0.5rem;font-size:0.7rem;"><?= $it['is_active'] ? 'غیرفعال کردن' : 'فعال کردن' ?></a>
           <a href="?group=<?= h($group) ?>&edit=<?= $it['id'] ?>" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;">ویرایش</a>
           <?php if ($it['item_key'] === null): ?>
-          <a href="?group=<?= h($group) ?>&delete=<?= $it['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" onclick="return confirm('این آیتم منو حذف شود؟');">حذف</a>
+          <a href="?group=<?= h($group) ?>&delete=<?= $it['id'] ?>" class="btn btn-danger btn-sm" style="padding:0.15rem 0.4rem;font-size:0.7rem;" data-confirm="این آیتم منو حذف شود؟">حذف</a>
           <?php endif; ?>
         </div>
       </div>
