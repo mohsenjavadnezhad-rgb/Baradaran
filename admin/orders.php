@@ -256,7 +256,7 @@ $statusLabels = orderStatusLabels();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت سفارشات - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=65">
+    <link rel="stylesheet" href="../assets/css/style.css?v=66">
     <?php /* این صفحه از layout-top.php استفاده نمی‌کند (نمای مستقل قدیمی‌تر)، پس
             کلاس‌های اینجا خودشان تعریف می‌شوند. */ ?>
     <style>

@@ -48,7 +48,7 @@ $settlePending  = partnerSettlementsPendingCount();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>پنل مدیریت - <?= h(SITE_NAME) ?></title>
-<link rel="stylesheet" href="../assets/css/style.css?v=65">
+<link rel="stylesheet" href="../assets/css/style.css?v=66">
 <style>@font-face{font-family:Peyda;src:url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff2') format('woff2'),url('https://cdn.mxit.ir/fonts/Peyda/Peyda.woff') format('woff');}
 .admin-shell{display:flex;min-height:100vh;background:var(--bg-primary);}
 .admin-sidebar{width:240px;background:var(--bg-secondary);border-left:1px solid var(--border-color);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}

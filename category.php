@@ -38,6 +38,18 @@ $products = getProducts($filters);
 ?>
 
 <div class="container">
+    <?php /* خواستهٔ کاربر (۲۰۲۶-۰۹-۰۵): «وقتی مدل خودرو رو انتخاب می‌کنم کلید
+            همه برندها رو هم بذار که بتونم برگردم» — این صفحه (بعد از انتخاب
+            یک مدل خاص) تا اینجا هیچ راهی به فهرست کامل برندهای shop.php
+            نداشت، فقط بین مدل‌های همان برند (subcat-filter پایین‌تر) جابه‌جا
+            می‌شد. همان کلاس بصری دکمهٔ «همه برندها»ی shop.php این‌جا هم
+            استفاده شد تا هم‌شکل باشند. */ ?>
+    <?php if ($brandId): ?>
+    <div style="margin-bottom:1rem;">
+        <a href="shop.php" class="brand-tag brand-tag--back">&#8592; همه برندها</a>
+    </div>
+    <?php endif; ?>
+
     <div class="category-header">
         <h1 class="page-title" style="margin-bottom:0;"><?= h($title) ?></h1>
     </div>
