@@ -288,9 +288,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
         try {
             $pdo->beginTransaction();
 
+            /* «برایتان پروفایل ایجاد شود؟» — فقط برای حساب گمنام (noMobileAccount)
+               و فقط اگر مشتری روی «بله» زده باشد (پاپ‌آپ سمت کلاینت، پایین‌تر
+               همین صفحه). خواستهٔ کاربر: با «بله» حساب واقعا قابل‌ورود شود —
+               یعنی customers.mobile همین شمارهٔ واقعی را بگیرد. اگر از قبل
+               حساب واقعی دیگری با همین شماره بود (این مشتری قبلا هم یک‌بار با
+               موبایل واقعی وارد شده)، به‌جای شکستن یکتایی customers.mobile،
+               همین سفارش را به همان حساب قدیمی وصل می‌کنیم. */
+            $orderCustomerId = (int)$c['id'];
+            $createProfile = $noMobileAccount && ($_POST['create_profile'] ?? '') === '1';
+            if ($createProfile && isValidMobile($mobile)) {
+                $existing = $pdo->prepare("SELECT id FROM customers WHERE mobile = ? AND id != ?");
+                $existing->execute([$mobile, (int)$c['id']]);
+                $existingId = (int)$existing->fetchColumn();
+                if ($existingId > 0) {
+                    $orderCustomerId = $existingId;
+                } else {
+                    $pdo->prepare("UPDATE customers SET mobile = ? WHERE id = ?")->execute([$mobile, (int)$c['id']]);
+                }
+            }
+
             // تکمیل/به‌روزرسانی پروفایل مشتری
             $pdo->prepare("UPDATE customers SET full_name=?, province=?, city=?, address=?, postal_code=? WHERE id=?")
-                ->execute([$name, $province, $city, $address, $postal, (int)$c['id']]);
+                ->execute([$name, $province, $city, $address, $postal, $orderCustomerId]);
 
             $fullAddress = trim(
                 ($province !== '' ? $province . ' - ' : '') .
@@ -309,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             /* ستون‌ها بر اساس مهاجرت‌های اجرا‌شده ساخته می‌شوند تا صفحه روی
                نصب‌های قدیمی‌تر (بدون ستون‌های پرداخت یا ارسال) هم کار کند. */
             $cols = ['customer_id', 'customer_name', 'customer_mobile', 'customer_address', 'total_amount', 'status', 'notes'];
-            $vals = [(int)$c['id'], $name, $mobile, $fullAddress, $payable, 'pending', $notes];
+            $vals = [$orderCustomerId, $name, $mobile, $fullAddress, $payable, 'pending', $notes];
             if (paymentReady()) {
                 $cols[] = 'payment_method';  $vals[] = $payMethod;
                 $cols[] = 'payment_status';  $vals[] = $payStatus;
@@ -360,7 +380,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
 
             /* درخواست بررسی عکس (اگر بود) به همین سفارش گره می‌خورد تا ادمین آن
                را در «جزئیات سفارش» ببیند؛ نشانهٔ «رد کردن مرحله» هم پاک می‌شود. */
-            partCheckAttachToOrder((int)$orderId, (int)$c['id']);
+            partCheckAttachToOrder((int)$orderId, $orderCustomerId);
 
             /* «بررسی موجودی» اولین مرحلهٔ روند ارسال است و تا ثبت نشود هیچ
                پرداختی — حتی درگاه بانکی — باز نمی‌شود (خواستهٔ مدیر). اگر همین
@@ -370,6 +390,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             orderAutoPassStockCheck($orderId);
 
             cartClear();
+
+            /* اگر همین سفارش به یک حساب واقعی از قبل موجود وصل شد (بالاتر،
+               به‌جای شکستن یکتایی customers.mobile)، نشست هم به همان حساب
+               واقعی سوییچ می‌شود — از این به بعد مشتری در واقع همان حساب
+               است، نه حساب گمنامی که با آن وارد شده بود. */
+            if ($orderCustomerId !== (int)$c['id']) {
+                $realCust = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+                $realCust->execute([$orderCustomerId]);
+                $realCust = $realCust->fetch();
+                if ($realCust) loginCustomer($realCust);
+            }
 
             $stockUnlocked = true;
             if (trackStockReady()) {
@@ -410,7 +441,7 @@ require_once __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <form method="POST" class="checkout-form">
+    <form method="POST" class="checkout-form" id="checkoutForm">
         <?php /* data-goods شامل مالیات هم می‌شود (نه فقط جمع کالاها) چون جاوااسکریپت
                 زیر همین صفحه با فرمول «goods + هزینهٔ ارسال» مبلغ قابل‌پرداخت را
                 زنده حساب می‌کند و مالیات با تغییر شهر/روش ارسال عوض نمی‌شود؛
@@ -1306,5 +1337,55 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </form>
 </div>
+
+<?php /* «برایتان پروفایل ایجاد شود؟» — فقط برای مشتری واردنشدهٔ کاملا گمنام
+        (noMobileAccount)، لحظهٔ کلیک «ثبت سفارش». خواستهٔ کاربر: «به‌محض
+        اینکه کلید ثبت سفارش رو میزنه یک پیام بیاد ... کلید خیر و بله رو
+        داشته باشه». همان کامپوننت بصری کادر تأیید ادمین (.confirm-overlay/
+        .confirm-box در style.css) این‌جا هم استفاده می‌شود چون سراسری است؛
+        فقط جاوااسکریپت ساختش این‌جا جدا نوشته شده (سمت مشتری، بدون وابستگی
+        به admin/layout-bottom.php). بدون جاوااسکریپت، فرم عادی ارسال می‌شود
+        و create_profile اصلا فرستاده نمی‌شود — یعنی پیش‌فرض امن «خیر» است. */ ?>
+<?php if ($noMobileAccount): ?>
+<script>
+(function () {
+    var form = document.getElementById('checkoutForm');
+    if (!form) return;
+    var ICON = <?= json_encode(icon('user-check', 'ic-sm'), JSON_UNESCAPED_UNICODE) ?>;
+    var asked = false;
+
+    form.addEventListener('submit', function (e) {
+        if (asked) return; // بعد از انتخاب کاربر، ارسال واقعی بدون مزاحمت دوباره انجام شود
+        e.preventDefault();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML =
+            '<div class="confirm-box" role="alertdialog" aria-modal="true">' +
+                '<div class="confirm-icon">' + ICON + '</div>' +
+                '<div class="confirm-msg">مایلید همین حالا برای شما یک پروفایل (حساب کاربری) ساخته شود؟ با این کار، بار بعد می‌توانید با همین شمارهٔ موبایل وارد شوید و سفارش‌هایتان را ببینید.</div>' +
+                '<div class="confirm-actions">' +
+                    '<button type="button" class="btn btn-secondary btn-sm" data-act="no">خیر</button>' +
+                    '<button type="button" class="btn btn-primary btn-sm" data-act="yes">بله</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        function proceed(create) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'create_profile';
+            inp.value = create ? '1' : '0';
+            form.appendChild(inp);
+            overlay.parentNode.removeChild(overlay);
+            asked = true;
+            form.requestSubmit ? form.requestSubmit() : form.submit();
+        }
+        overlay.querySelector('[data-act="yes"]').addEventListener('click', function () { proceed(true); });
+        overlay.querySelector('[data-act="no"]').addEventListener('click', function () { proceed(false); });
+    });
+})();
+</script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
