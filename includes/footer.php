@@ -113,9 +113,9 @@ $acctLabel = isCustomerLoggedIn() ? 'حساب کاربری' : 'ورود / ثبت
         <p><?= h($fCopy) ?></p>
     </div>
 </footer>
-<script src="assets/js/main.js?v=64"></script>
-<script src="assets/js/cart.js?v=64"></script>
-<script src="assets/js/search.js?v=64"></script>
+<script src="assets/js/main.js?v=65"></script>
+<script src="assets/js/cart.js?v=65"></script>
+<script src="assets/js/search.js?v=65"></script>
 <script>
 /* «انتخاب فایل» سفارشی برای هر input[type=file].form-control که در سمت
    مشتری پیدا شود (همتای این اسکریپت در admin/layout-bottom.php) — رجوع کنید

@@ -227,7 +227,7 @@ if ($pchk && !empty($pchk['product_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جزئیات سفارش <?= h(orderNumber($order)) ?> - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=64">
+    <link rel="stylesheet" href="../assets/css/style.css?v=65">
     <style>
     /* پاک‌سازی و یکدست‌سازی چیدمان این صفحه (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۴:
        «فونت‌هاش و مرتبش کن که بخش‌هاش خیلی مرتب و خواناتر باشه») — این

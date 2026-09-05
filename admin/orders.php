@@ -256,7 +256,7 @@ $statusLabels = orderStatusLabels();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت سفارشات - <?= h(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=64">
+    <link rel="stylesheet" href="../assets/css/style.css?v=65">
     <?php /* این صفحه از layout-top.php استفاده نمی‌کند (نمای مستقل قدیمی‌تر)، پس
             کلاس‌های اینجا خودشان تعریف می‌شوند. */ ?>
     <style>
@@ -362,9 +362,9 @@ $statusLabels = orderStatusLabels();
                     <?php /* نشان نوع مشتری (همکار/مشتری/بدون‌ثبت‌نام) از خود سطر برداشته شد —
                             خواستهٔ کاربر: چون دیگر نمای «همه سفارشات» نداریم، عنوان بالای صفحه
                             از قبل همین دسته را می‌گوید، تکرارش روی هر سطر زائد است. */ ?>
-                    <td class="ot-cust"><?= h($o['customer_name']) ?></td>
+                    <td class="ot-cust" title="<?= h($o['customer_name']) ?>"><?= h($o['customer_name']) ?></td>
                     <td class="ot-mobile" dir="ltr"><?= h($o['customer_mobile']) ?></td>
-                    <td class="ot-amount"><?= formatPrice($o['total_amount']) ?></td>
+                    <td class="ot-amount" title="<?= h(formatPrice($o['total_amount'])) ?>"><?= formatPrice($o['total_amount']) ?></td>
                     <td class="ot-status">
                         <span class="status-badge status-<?= $o['status'] ?>"><?= $statusLabels[$o['status']] ?></span>
                     </td>

@@ -1371,12 +1371,22 @@ require_once __DIR__ . '/includes/header.php';
             '</div>';
         document.body.appendChild(overlay);
 
-        function proceed(create) {
+        function addHidden(name, value) {
             var inp = document.createElement('input');
             inp.type = 'hidden';
-            inp.name = 'create_profile';
-            inp.value = create ? '1' : '0';
+            inp.name = name;
+            inp.value = value;
             form.appendChild(inp);
+        }
+
+        function proceed(create) {
+            addHidden('create_profile', create ? '1' : '0');
+            /* requestSubmit()/submit() بدون یک submitter مشخص، نام/مقدار خود
+               دکمهٔ «ثبت سفارش» (submit_order) را در دادهٔ فرم نمی‌گذارند —
+               باگ واقعی «با خیر هیچ اتفاقی نمی‌افتد»: سرور isset($_POST['submit_order'])
+               را false می‌دید و کل بخش ثبت سفارش رد می‌شد. همین‌جا صریح
+               اضافه‌اش می‌کنیم تا فرم دقیقا مثل کلیک روی همان دکمه ارسال شود. */
+            addHidden('submit_order', '1');
             overlay.parentNode.removeChild(overlay);
             asked = true;
             form.requestSubmit ? form.requestSubmit() : form.submit();
