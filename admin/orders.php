@@ -268,9 +268,16 @@ $statusLabels = orderStatusLabels();
        بلندتر است؛ ستون شماره پهن‌تر شد تا کامل و بدون سرریز دیده شود. */
     .orders-table .ot-no{width:158px !important;letter-spacing:0.02em;}
     .ord-row.is-paid{background:rgba(34,197,94,0.14) !important;}
-    .ord-actions-row{display:flex;flex-wrap:wrap;gap:0.35rem;}
-    .ord-actions-row .btn{min-width:98px;justify-content:center;text-align:center;}
+    /* شبکهٔ سه‌ستونه (خواستهٔ کاربر: «سه‌تا زیر هم، سه‌تای دیگه هم زیر اون سه‌تای
+       بالایی، دقیقا هم‌تراز») — با ۶ کلید، خودکار دو ردیف سه‌تایی می‌سازد و چون
+       هر ستون ۱fr است، «فاکتور» هم دقیقا هم‌عرض سه کلید ردیف بالاست. */
+    .ord-actions-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:0.4rem;}
+    .ord-actions-row .btn{width:100%;min-width:0;justify-content:center;text-align:center;}
     .ord-tgl.is-active{background:var(--red-primary);color:#fff;border-color:var(--red-primary);}
+    /* «فاکتور» یک اقدام متفاوت است (باز کردن/چاپ فاکتور، نه باز/بسته‌کردن یک
+       کادر) — رنگ آبی کم‌رنگ همین را نشان می‌دهد، جدا از خاکستری بقیهٔ کلیدها. */
+    .ord-invoice-btn{background:rgba(59,130,246,0.12) !important;color:#3B82F6 !important;border-color:rgba(59,130,246,0.35) !important;}
+    .ord-invoice-btn:hover{background:rgba(59,130,246,0.2) !important;}
     .ord-panel td{background:rgba(255,255,255,0.02);padding:1rem 1.25rem;border-top:1px dashed var(--border-color);}
     .ord-panel .od-row{display:flex;gap:0.75rem;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.85rem;line-height:1.75;}
     .ord-panel .od-row:last-child{border-bottom:none;}
@@ -402,7 +409,7 @@ $statusLabels = orderStatusLabels();
                             <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-pay-<?= $oid ?>"><?= icon('credit-card', 'ic-sm') ?> پرداخت</button>
                             <?php endif; ?>
                             <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-items-<?= $oid ?>"><?= icon('package', 'ic-sm') ?> اقلام سفارش</button>
-                            <a href="invoice.php?id=<?= $oid ?>" class="btn btn-secondary btn-sm" target="_blank" title="مشاهده و چاپ فاکتور این سفارش"><?= icon('receipt', 'ic-sm') ?> فاکتور</a>
+                            <a href="invoice.php?id=<?= $oid ?>" class="btn btn-secondary btn-sm ord-invoice-btn" target="_blank" title="مشاهده و چاپ فاکتور این سفارش"><?= icon('receipt', 'ic-sm') ?> فاکتور</a>
                         </div>
                     </td>
                 </tr>

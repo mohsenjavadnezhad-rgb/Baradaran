@@ -202,6 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section'])) {
     if ($sec === 'checkout') {
         setSetting('allow_guest_checkout', isset($_POST['allow_guest_checkout']) ? '1' : '0');
         setSetting('allow_checkout_no_mobile', isset($_POST['allow_checkout_no_mobile']) ? '1' : '0');
+        setSetting('login_partner_disabled', isset($_POST['login_partner_disabled']) ? '1' : '0');
+        setSetting('login_retail_disabled', isset($_POST['login_retail_disabled']) ? '1' : '0');
     }
 
     if ($sec === 'productyear') {
@@ -1494,8 +1496,30 @@ require_once __DIR__ . '/layout-top.php';
              style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
       <label for="allow_checkout_no_mobile" style="margin:0;cursor:pointer;">ثبت سفارش کاملا بدون گرفتن شمارهٔ موبایل در ورود مجاز باشد</label>
     </div>
-    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 0;">
+    <div style="font-size:0.72rem;color:var(--text-muted);margin:-0.5rem 0 1.1rem;">
       با برداشتن تیک، این رفتار خاموش می‌شود و طبق تیک بالا (یا رفتار پیش‌فرض) عمل می‌شود.
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border-color);margin:1.1rem 0;">
+
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.95;margin-bottom:1rem;">
+      <?= icon('info', 'ic-sm') ?>
+      صفحهٔ ورود (<code dir="ltr">login.php</code>) دو تب مستقل دارد: «ورود مشتری» و «ورود همکار».
+      با هرکدام از دو تیک زیر، همان تب کلا از صفحهٔ ورود برداشته می‌شود — فقط تب دیگر می‌ماند،
+      بدون هیچ سردرگمی برای بازدیدکننده. اگر هردو را هم‌زمان تیک بزنید (که ورود را کلا می‌بندد)،
+      هردو نادیده گرفته می‌شوند و مثل حالت پیش‌فرض هردو تب نشان داده می‌شود.
+    </p>
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+      <input type="checkbox" name="login_partner_disabled" id="login_partner_disabled" value="1"
+             <?= getSettingRaw('login_partner_disabled', '0') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="login_partner_disabled" style="margin:0;cursor:pointer;">غیرفعال کردن ورود همکار (فقط تب «ورود مشتری» نمایش داده شود)</label>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.6rem;">
+      <input type="checkbox" name="login_retail_disabled" id="login_retail_disabled" value="1"
+             <?= getSettingRaw('login_retail_disabled', '0') === '1' ? 'checked' : '' ?>
+             style="width:1.05rem;height:1.05rem;accent-color:var(--red-primary);">
+      <label for="login_retail_disabled" style="margin:0;cursor:pointer;">غیرفعال کردن ورود مشتری (فقط تب «ورود همکار» نمایش داده شود)</label>
     </div>
   </div>
   <?php endif; ?>

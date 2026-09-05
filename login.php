@@ -15,6 +15,15 @@ if ($return !== '' && ($return[0] === '/' || strpos($return, '://') !== false ||
 function normalizeCtype($v) { return ($v === 'partner') ? 'partner' : 'retail'; }
 $ctype = normalizeCtype($_REQUEST['type'] ?? ($_SESSION['otp_type'] ?? 'retail'));
 
+/* غیرفعال‌کردن یکی از دو تب ورود، از تنظیمات ← ثبت سفارش/ورود.
+   وقتی یکی خاموش است، نوع ورود همیشه همان یکی دیگر است — حتی اگر URL/فرم
+   ?type= دیگری بخواهد (دور زدن با لینک مستقیم هم بی‌اثر می‌ماند). */
+$partnerOff = loginPartnerDisabled();
+$retailOff  = loginRetailDisabled();
+if ($partnerOff) $ctype = 'retail';
+if ($retailOff)  $ctype = 'partner';
+$bothTabsOn = !$partnerOff && !$retailOff;
+
 /* آیا ورود به کد تأیید پیامکی نیاز دارد؟ ادمین از «تنظیمات سایت ← پیامک»
    خاموش/روشن می‌کند. با خاموش‌بودن، مرحلهٔ «کد» کلا حذف می‌شود و ورود
    یک‌مرحله‌ای است؛ پس هر مرحلهٔ نیمه‌کارهٔ قبلی هم از نشست پاک می‌شود تا
@@ -32,6 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['act'] ?? '';
     if ($return === '' && !empty($_SESSION['otp_return'])) $return = $_SESSION['otp_return'];
     if (isset($_POST['ctype'])) $ctype = normalizeCtype($_POST['ctype']);
+    /* حتی اگر فرم دستکاری شده باشد، تب خاموش قابل ورود نیست. */
+    if ($partnerOff) $ctype = 'retail';
+    if ($retailOff)  $ctype = 'partner';
 
     /* پس از ورود موفق: پاک‌کردن آثار مرحلهٔ ورود و رفتن به مقصد */
     $finish = function () use ($return) {
@@ -98,6 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } elseif ($mobilePending !== '') {
     $step = 'code';
     $ctype = normalizeCtype($_SESSION['otp_type'] ?? 'retail');
+    if ($partnerOff) $ctype = 'retail';
+    if ($retailOff)  $ctype = 'partner';
 }
 
 $isPartner = ($ctype === 'partner');
@@ -110,8 +124,11 @@ require_once __DIR__ . '/includes/header.php';
     <h1 class="auth-title"><?= icon('login') ?>ورود / ثبت‌نام</h1>
 
     <?php if ($step === 'mobile'): ?>
-    <p class="auth-sub">نوع حساب خود را انتخاب کنید و با شمارهٔ موبایل وارد شوید. اگر حساب نداشته باشید، بار اول به‌صورت خودکار ساخته می‌شود.<?= $otpOn ? '' : ' در حال حاضر ورود بدون کد تأیید پیامکی انجام می‌شود.' ?></p>
+    <p class="auth-sub"><?= $bothTabsOn ? 'نوع حساب خود را انتخاب کنید و با شمارهٔ موبایل وارد شوید.' : 'با شمارهٔ موبایل وارد شوید.' ?> اگر حساب نداشته باشید، بار اول به‌صورت خودکار ساخته می‌شود.<?= $otpOn ? '' : ' در حال حاضر ورود بدون کد تأیید پیامکی انجام می‌شود.' ?></p>
 
+    <?php /* اگر ادمین یکی از دو نوع ورود را از تنظیمات خاموش کرده، دیگر تبی
+            برای انتخاب نیست — همان یکی مجاز، مستقیم و بدون سردرگمی. */ ?>
+    <?php if ($bothTabsOn): ?>
     <div class="auth-tabs">
       <a class="auth-tab <?= $isPartner ? '' : 'active' ?>" href="login.php?type=retail<?= $retURL ?>">
         <span class="auth-tab-ic"><?= icon('bag') ?></span>
@@ -124,6 +141,7 @@ require_once __DIR__ . '/includes/header.php';
         <span class="auth-tab-sub">فروشگاه‌ها و تعمیرگاه‌ها</span>
       </a>
     </div>
+    <?php endif; ?>
     <?php else: ?>
     <p class="auth-sub">کد تأیید ارسال‌شده را وارد کنید.
       <span class="<?= $isPartner ? 'badge-partner' : 'badge-retail' ?>"><?= $isPartner ? 'ورود همکار' : 'ورود مشتری' ?></span>

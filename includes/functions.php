@@ -397,6 +397,20 @@ function loginOtpRequired() {
     return getSettingRaw('login_otp_required', '1') !== '0';
 }
 
+/* ---------- خاموش‌کردن یکی از دو تب ورود (مشتری/همکار) ----------
+   خواستهٔ کاربر: هرکدام مستقل قابل غیرفعال‌شدن باشد؛ اگر هردو خاموش شوند
+   (تنظیم اشتباه که ورود را کلا می‌بندد)، هردو نادیده گرفته می‌شوند و مثل
+   قبل هردو تب نشان داده می‌شوند — هم‌الگوی «هیچ‌وقت کاملا قفل نکن» در
+   shippingAllowedPayKeys(). */
+function loginPartnerDisabled() {
+    if (getSettingRaw('login_retail_disabled', '0') === '1') return false;
+    return getSettingRaw('login_partner_disabled', '0') === '1';
+}
+function loginRetailDisabled() {
+    if (getSettingRaw('login_partner_disabled', '0') === '1') return false;
+    return getSettingRaw('login_retail_disabled', '0') === '1';
+}
+
 function otpGenerateAndSend($mobile) {
     global $pdo;
     $mobile = normalizeMobile($mobile);
