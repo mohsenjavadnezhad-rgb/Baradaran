@@ -172,8 +172,11 @@ $settlePending  = partnerSettlementsPendingCount();
 $ordersOnPage = ($currentPage === 'orders.php');
 $ordersCtypeCur = $ordersOnPage ? (string)($_GET['ctype'] ?? '') : '';
 if (!in_array($ordersCtypeCur, ['partner', 'retail', 'guest'], true)) $ordersCtypeCur = '';
+/* «همه سفارشات» عمدا از این فهرست برداشته شد (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۵:
+   «سفارشات دسته‌بندی شده دیگه همه سفارشات نیاز نیست ... شلوغ میشه») —
+   هر سفارش در دستهٔ خودش دیده می‌شود، دیگر نمای ترکیبی لازم نیست.
+   admin/orders.php هم با همین منطق، بدون ?ctype معتبر به «مشتریان» می‌رود. */
 $ordersSubs = [
-    ''        => ['label' => 'همه سفارشات',        'icon' => 'clipboard-list'],
     'partner' => ['label' => 'سفارشات همکاران',      'icon' => 'briefcase'],
     'retail'  => ['label' => 'سفارشات مشتریان',      'icon' => 'bag'],
     'guest'   => ['label' => 'سفارشات بدون ثبت‌نام', 'icon' => 'user'],

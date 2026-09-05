@@ -1406,10 +1406,14 @@ function renderOrderTimeline($order, $showEmptyNote = true) {
    کلیدهای خارجی order_items/payments/...)؛ این فقط شکل نمایشی است که
    خواستهٔ کاربر بود: «بر اساس سال ماه روز و شماره یونیک». همه‌جا که قبلا
    «سفارش #<id>» نوشته می‌شد از همین تابع می‌آید تا یک عدد، همه‌جا یکی باشد. */
+/* فرمت شمارهٔ سفارش (خواستهٔ کاربر): شناسهٔ ۵رقمی، خط تیره، تاریخ شمسی
+   ثبت سفارش (۸رقمی، سال‌ماه‌روز) — مثال: 00049-14050622 */
 function orderNumber($order) {
     $ts = !empty($order['created_at']) ? strtotime((string)$order['created_at']) : false;
     if (!$ts) $ts = time();
-    return date('ymd', $ts) . '-' . str_pad((string)(int)($order['id'] ?? 0), 5, '0', STR_PAD_LEFT);
+    $j = gregorianToJalali((int)date('Y', $ts), (int)date('n', $ts), (int)date('j', $ts));
+    $jd = sprintf('%04d%02d%02d', $j[0], $j[1], $j[2]);
+    return str_pad((string)(int)($order['id'] ?? 0), 5, '0', STR_PAD_LEFT) . '-' . $jd;
 }
 
 /* برچسب‌های فارسی ENUM ستون orders.status */
