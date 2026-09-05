@@ -272,7 +272,10 @@ $statusLabels = orderStatusLabels();
        بالایی، دقیقا هم‌تراز») — با ۶ کلید، خودکار دو ردیف سه‌تایی می‌سازد و چون
        هر ستون ۱fr است، «فاکتور» هم دقیقا هم‌عرض سه کلید ردیف بالاست. */
     .ord-actions-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:0.4rem;}
-    .ord-actions-row .btn{width:100%;min-width:0;justify-content:center;text-align:center;}
+    /* خواستهٔ کاربر: «فونتش خیلی درشته، کوچیک‌تر کن که کلید کشیده نشه» —
+       اندازهٔ متن این ۶ کلید مستقل از btn-sm عمومی سایت کوچک‌تر شد (آیکون
+       با em اندازه می‌گیرد، پس خودش هم با همین کوچک‌تر می‌شود). */
+    .ord-actions-row .btn{width:100%;min-width:0;justify-content:center;text-align:center;font-size:0.68rem;padding:0.32rem 0.4rem;gap:0.3rem;white-space:nowrap;}
     .ord-tgl.is-active{background:var(--red-primary);color:#fff;border-color:var(--red-primary);}
     /* «فاکتور» یک اقدام متفاوت است (باز کردن/چاپ فاکتور، نه باز/بسته‌کردن یک
        کادر) — رنگ آبی کم‌رنگ همین را نشان می‌دهد، جدا از خاکستری بقیهٔ کلیدها. */
