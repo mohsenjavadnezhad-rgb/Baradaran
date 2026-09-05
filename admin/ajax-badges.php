@@ -11,12 +11,17 @@ require_once __DIR__ . '/../includes/functions.php';
 
 if (!isLoggedIn()) { http_response_code(403); exit; }
 
+$ordersByCtype = getPendingOrdersCountByCtype();
+
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
-    'orders'      => (int)getPendingOrdersCount(),
-    'partners'    => (int)partnerPendingCount(),
-    'reviews'     => (int)pendingReviewsCount(),
-    'partchecks'  => (int)partCheckPendingCount(),
-    'stockchecks' => (int)stockCheckPendingCount(),
-    'settlements' => (int)partnerSettlementsPendingCount(),
+    'orders'         => (int)getPendingOrdersCount(),
+    'orders-partner' => (int)($ordersByCtype['partner'] ?? 0),
+    'orders-retail'  => (int)($ordersByCtype['retail'] ?? 0),
+    'orders-guest'   => (int)($ordersByCtype['guest'] ?? 0),
+    'partners'       => (int)partnerPendingCount(),
+    'reviews'        => (int)pendingReviewsCount(),
+    'partchecks'     => (int)partCheckPendingCount(),
+    'stockchecks'    => (int)stockCheckPendingCount(),
+    'settlements'    => (int)partnerSettlementsPendingCount(),
 ], JSON_UNESCAPED_UNICODE);

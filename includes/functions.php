@@ -1798,6 +1798,23 @@ function getPendingOrdersCount() {
     return $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'")->fetchColumn();
 }
 
+/* شمارندهٔ «در انتظار پیگیری»، جدا برای هر سه دستهٔ سفارش (خواستهٔ کاربر
+   ۲۰۲۶-۰۹-۰۵: «توی هر بخشی که سفارشات نیاز به پیگیری داره ... عدد پیگیری
+   همون بخش مشخص باشه») — همان قاعدهٔ دسته‌بندی admin/orders.php
+   ($ctypeCase)، این‌جا یک‌جا نگه داشته می‌شود تا هردو یک تصمیم بگیرند. */
+function getPendingOrdersCountByCtype() {
+    global $pdo;
+    $out = ['partner' => 0, 'retail' => 0, 'guest' => 0];
+    $ctypeCase = "CASE WHEN c.customer_type = 'partner' THEN 'partner'
+                       WHEN c.mobile IS NULL OR c.mobile NOT REGEXP '^09[0-9]{9}$' THEN 'guest'
+                       ELSE 'retail' END";
+    try {
+        $rows = $pdo->query("SELECT $ctypeCase AS ctype, COUNT(*) n FROM orders o LEFT JOIN customers c ON c.id = o.customer_id WHERE o.status = 'pending' GROUP BY ctype");
+        foreach ($rows as $r) { $out[$r['ctype']] = (int)$r['n']; }
+    } catch (Throwable $e) {}
+    return $out;
+}
+
 function isLoggedIn() {
     return isset($_SESSION['admin_id']);
 }

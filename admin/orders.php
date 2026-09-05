@@ -400,7 +400,7 @@ $statusLabels = orderStatusLabels();
                         <?php endif; ?>
                     </td>
                     <?php endif; ?>
-                    <td class="ot-date" dir="ltr"><?= date('Y/m/d H:i', strtotime($o['created_at'])) ?></td>
+                    <td class="ot-date" dir="ltr"><?= h(jDate($o['created_at'], true)) ?></td>
                     <td class="ot-actions">
                         <div class="ord-actions-row">
                             <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-info-<?= $oid ?>"><?= icon('info', 'ic-sm') ?> اطلاعات</button>

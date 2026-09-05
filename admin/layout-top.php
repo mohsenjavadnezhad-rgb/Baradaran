@@ -181,6 +181,10 @@ $ordersSubs = [
     'retail'  => ['label' => 'سفارشات مشتریان',      'icon' => 'bag'],
     'guest'   => ['label' => 'سفارشات بدون ثبت‌نام', 'icon' => 'user'],
 ];
+/* عدد پیگیری هر دسته جدا (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۵) — هرکدام
+   data-badge مستقل خودش را دارد (orders-partner/orders-retail/orders-guest)
+   تا چرخهٔ زندهٔ ۲۰ثانیه‌ای admin/ajax-badges.php هم مستقل به‌روزشان کند. */
+$ordersCtypeCounts = getPendingOrdersCountByCtype();
 ?>
 <details class="am-group" <?= $ordersOnPage ? 'open' : '' ?>>
 <summary class="am-link am-parent<?= $ordersOnPage ? ' is-cur' : '' ?>">
@@ -190,8 +194,12 @@ $ordersSubs = [
 <span class="am-caret"><?= icon('chevron-down') ?></span>
 </summary>
 <div class="am-sub">
-<?php foreach ($ordersSubs as $ok => $od): ?>
-<a href="orders.php<?= $ok !== '' ? '?ctype=' . $ok : '' ?>" class="am-link am-sublink<?= ($ordersOnPage && $ordersCtypeCur === $ok) ? ' active' : '' ?>"><span class="am-icon"><?= icon($od['icon']) ?></span><span><?= h($od['label']) ?></span></a>
+<?php foreach ($ordersSubs as $ok => $od): $ocN = (int)($ordersCtypeCounts[$ok] ?? 0); ?>
+<a href="orders.php?ctype=<?= $ok ?>" class="am-link am-sublink<?= ($ordersOnPage && $ordersCtypeCur === $ok) ? ' active' : '' ?>">
+<span class="am-icon"><?= icon($od['icon']) ?></span><span><?= h($od['label']) ?></span>
+<span style="flex:1"></span>
+<span class="am-badge<?= $ocN > 0 ? '' : ' am-badge-hidden' ?>" data-badge="orders-<?= $ok ?>"><?= $ocN ?></span>
+</a>
 <?php endforeach; ?>
 </div>
 </details>
