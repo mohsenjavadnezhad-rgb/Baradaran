@@ -258,20 +258,18 @@ $statusLabels = orderStatusLabels();
     <title>مدیریت سفارشات - <?= h(SITE_NAME) ?></title>
     <link rel="stylesheet" href="../assets/css/style.css?v=64">
     <?php /* این صفحه از layout-top.php استفاده نمی‌کند (نمای مستقل قدیمی‌تر)، پس
-            کلاس‌های badge-partner/badge-retail/badge-pending آن‌جا اینجا نیستند —
-            نشان کوچک نوع مشتری این‌جا خودش تعریف می‌شود. */ ?>
+            کلاس‌های اینجا خودشان تعریف می‌شوند. */ ?>
     <style>
-    .oct-badge{display:inline-block;font-size:0.68rem;font-weight:600;padding:0.1rem 0.45rem;border-radius:999px;white-space:nowrap;margin-right:0.3rem;vertical-align:middle;}
-    .oct-partner{background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.35);}
-    .oct-retail{background:rgba(148,163,184,0.15);color:#CBD5E1;border:1px solid rgba(148,163,184,0.3);}
-    .oct-guest{background:rgba(234,179,8,0.15);color:#FBBF24;border:1px solid rgba(234,179,8,0.35);}
-
-    /* ---------- ردیف‌های بازشو (خواستهٔ کاربر ۲۰۲۶-۰۹-۰۵) ----------
+    /* ---------- ردیف‌های بازشو ----------
        هر سفارش چند کلید کوچک روی سطرش دارد؛ هر کلید یک ردیف زیرش را
        باز/بسته می‌کند. سفارشی که پرداختش «پرداخت‌شده» باشد، کل سطرش سبز
-       می‌شود — دقیقا همان رنگ سطر تسویه‌شدهٔ admin/partner-settlements.php. */
+       می‌شود — دقیقا همان رنگ سطر تسویه‌شدهٔ admin/partner-settlements.php.
+       شمارهٔ سفارش تازه (۱۴ کاراکتر: ۵رقمی-تاریخ‌شمسی۸رقمی) از فرمت قبلی
+       بلندتر است؛ ستون شماره پهن‌تر شد تا کامل و بدون سرریز دیده شود. */
+    .orders-table .ot-no{width:158px !important;letter-spacing:0.02em;}
     .ord-row.is-paid{background:rgba(34,197,94,0.14) !important;}
     .ord-actions-row{display:flex;flex-wrap:wrap;gap:0.35rem;}
+    .ord-actions-row .btn{min-width:98px;justify-content:center;text-align:center;}
     .ord-tgl.is-active{background:var(--red-primary);color:#fff;border-color:var(--red-primary);}
     .ord-panel td{background:rgba(255,255,255,0.02);padding:1rem 1.25rem;border-top:1px dashed var(--border-color);}
     .ord-panel .od-row{display:flex;gap:0.75rem;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.85rem;line-height:1.75;}
@@ -351,13 +349,10 @@ $statusLabels = orderStatusLabels();
                 <?php foreach ($orders as $o): $oid = (int)$o['id']; ?>
                 <tr id="ord-row-<?= $oid ?>" class="ord-row<?= ($payOn && ($o['payment_status'] ?? '') === 'paid') ? ' is-paid' : '' ?>">
                     <td class="ot-no" dir="ltr" title="شناسهٔ داخلی: #<?= $oid ?>"><?= h(orderNumber($o)) ?></td>
-                    <td class="ot-cust">
-                        <?= h($o['customer_name']) ?>
-                        <?php $octLbl = ['partner' => ['همکار', 'oct-partner'], 'guest' => ['بدون ثبت‌نام', 'oct-guest'], 'retail' => ['مشتری', 'oct-retail']][$o['order_ctype']] ?? null; ?>
-                        <?php if ($octLbl): ?>
-                        <span class="oct-badge <?= $octLbl[1] ?>"><?= $octLbl[0] ?></span>
-                        <?php endif; ?>
-                    </td>
+                    <?php /* نشان نوع مشتری (همکار/مشتری/بدون‌ثبت‌نام) از خود سطر برداشته شد —
+                            خواستهٔ کاربر: چون دیگر نمای «همه سفارشات» نداریم، عنوان بالای صفحه
+                            از قبل همین دسته را می‌گوید، تکرارش روی هر سطر زائد است. */ ?>
+                    <td class="ot-cust"><?= h($o['customer_name']) ?></td>
                     <td class="ot-mobile" dir="ltr"><?= h($o['customer_mobile']) ?></td>
                     <td class="ot-amount"><?= formatPrice($o['total_amount']) ?></td>
                     <td class="ot-status">
@@ -398,22 +393,22 @@ $statusLabels = orderStatusLabels();
                     <td class="ot-date" dir="ltr"><?= date('Y/m/d H:i', strtotime($o['created_at'])) ?></td>
                     <td class="ot-actions">
                         <div class="ord-actions-row">
-                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-target="ord-p-info-<?= $oid ?>"><?= icon('info', 'ic-sm') ?> اطلاعات</button>
-                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-target="ord-p-status-<?= $oid ?>"><?= icon('clipboard-list', 'ic-sm') ?> وضعیت سفارش</button>
+                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-info-<?= $oid ?>"><?= icon('info', 'ic-sm') ?> اطلاعات</button>
+                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-status-<?= $oid ?>"><?= icon('clipboard-list', 'ic-sm') ?> وضعیت سفارش</button>
                             <?php if ($trackOn): ?>
-                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-target="ord-p-track-<?= $oid ?>"><?= icon('truck', 'ic-sm') ?> روند ارسال</button>
+                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-track-<?= $oid ?>"><?= icon('truck', 'ic-sm') ?> روند ارسال</button>
                             <?php endif; ?>
                             <?php if ($payOn): ?>
-                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-target="ord-p-pay-<?= $oid ?>"><?= icon('credit-card', 'ic-sm') ?> پرداخت</button>
+                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-pay-<?= $oid ?>"><?= icon('credit-card', 'ic-sm') ?> پرداخت</button>
                             <?php endif; ?>
-                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-target="ord-p-items-<?= $oid ?>"><?= icon('package', 'ic-sm') ?> اقلام سفارش</button>
+                            <button type="button" class="btn btn-secondary btn-sm ord-tgl" data-row="<?= $oid ?>" data-target="ord-p-items-<?= $oid ?>"><?= icon('package', 'ic-sm') ?> اقلام سفارش</button>
                             <a href="invoice.php?id=<?= $oid ?>" class="btn btn-secondary btn-sm" target="_blank" title="مشاهده و چاپ فاکتور این سفارش"><?= icon('receipt', 'ic-sm') ?> فاکتور</a>
                         </div>
                     </td>
                 </tr>
 
                 <?php /* ---------- کادر «اطلاعات» ---------- */ ?>
-                <tr class="ord-panel" id="ord-p-info-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'info') ? '' : 'hidden' ?>>
+                <tr class="ord-panel" data-row="<?= $oid ?>" id="ord-p-info-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'info') ? '' : 'hidden' ?>>
                 <td colspan="<?= $colspan ?>">
                     <div class="od-row"><span class="od-l">نام</span><span class="od-v"><b><?= h($o['customer_name']) ?></b></span></div>
                     <div class="od-row"><span class="od-l">موبایل</span><span class="od-v" dir="ltr" style="text-align:right;"><?= h($o['customer_mobile']) ?></span></div>
@@ -434,7 +429,7 @@ $statusLabels = orderStatusLabels();
                 </tr>
 
                 <?php /* ---------- کادر «وضعیت سفارش» ---------- */ ?>
-                <tr class="ord-panel" id="ord-p-status-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'status') ? '' : 'hidden' ?>>
+                <tr class="ord-panel" data-row="<?= $oid ?>" id="ord-p-status-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'status') ? '' : 'hidden' ?>>
                 <td colspan="<?= $colspan ?>">
                     <form method="POST" style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
                         <input type="hidden" name="order_id" value="<?= $oid ?>">
@@ -453,7 +448,7 @@ $statusLabels = orderStatusLabels();
                 <?php if ($trackOn):
                     $trackVisible = orderTrackStepsVisible($o);
                 ?>
-                <tr class="ord-panel" id="ord-p-track-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'track') ? '' : 'hidden' ?>>
+                <tr class="ord-panel" data-row="<?= $oid ?>" id="ord-p-track-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'track') ? '' : 'hidden' ?>>
                 <td colspan="<?= $colspan ?>">
                     <div class="od-grid">
                         <form method="POST">
@@ -518,7 +513,7 @@ $statusLabels = orderStatusLabels();
                     $payMethod = (string)($o['payment_method'] ?? 'cod');
                     $payStatus = (string)($o['payment_status'] ?? 'unpaid');
                 ?>
-                <tr class="ord-panel" id="ord-p-pay-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'pay') ? '' : 'hidden' ?>>
+                <tr class="ord-panel" data-row="<?= $oid ?>" id="ord-p-pay-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'pay') ? '' : 'hidden' ?>>
                 <td colspan="<?= $colspan ?>">
                     <div class="od-grid">
                         <div>
@@ -571,10 +566,6 @@ $statusLabels = orderStatusLabels();
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>شمارهٔ پیگیری / رسید (اختیاری)</label>
-                                    <input type="text" name="pay_ref" class="form-control" dir="ltr" value="<?= h($o['payment_ref'] ?? '') ?>">
-                                </div>
                                 <button type="submit" class="btn btn-primary btn-sm">ثبت وضعیت پرداخت</button>
                             </form>
                         </div>
@@ -584,7 +575,7 @@ $statusLabels = orderStatusLabels();
                 <?php endif; ?>
 
                 <?php /* ---------- کادر «اقلام سفارش» ---------- */ ?>
-                <tr class="ord-panel" id="ord-p-items-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'items') ? '' : 'hidden' ?>>
+                <tr class="ord-panel" data-row="<?= $oid ?>" id="ord-p-items-<?= $oid ?>" <?= ($openRow === $oid && $openPanel === 'items') ? '' : 'hidden' ?>>
                 <td colspan="<?= $colspan ?>">
                     <table class="admin-table" style="margin:0;">
                         <thead><tr><th>محصول</th><th>قیمت واحد</th><th>نوع قیمت</th><th>تعداد</th><th>جمع</th></tr></thead>
@@ -598,12 +589,14 @@ $statusLabels = orderStatusLabels();
                                 <td><?= formatPrice($item['subtotal']) ?></td>
                             </tr>
                             <?php endforeach; ?>
-                            <tr>
-                                <td colspan="4" style="text-align:left;font-weight:bold;">مبلغ کل:</td>
-                                <td style="font-weight:bold;color:var(--red-light);"><?= formatPrice($o['total_amount']) ?></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <?php /* مبلغ کل، به‌جای یک سطر جدول جدا، همین‌جا در انتهای کادر —
+                            خواستهٔ کاربر: «سطر کمتر بشه». */ ?>
+                    <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.6rem;font-weight:bold;">
+                        <span>مبلغ کل:</span>
+                        <span style="color:var(--red-light);"><?= formatPrice($o['total_amount']) ?></span>
+                    </div>
                 </td>
                 </tr>
                 <?php endforeach; ?>
@@ -633,12 +626,25 @@ $statusLabels = orderStatusLabels();
             می‌کند (کادر باز‌شده از سرور، باز رندر شده است). */ ?>
     <script>
     (function () {
+        /* هر ردیف یک کادر باز دارد، نه بیشتر — خواستهٔ کاربر: «روی هر کلیدی
+           که کلیک می‌کنم، کلید قبل از کلیک را ببند». کلیک روی همان کلید
+           باز، فقط می‌بندد (بدون باز کردن دوباره). */
         document.querySelectorAll('.ord-tgl').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var t = document.getElementById(btn.getAttribute('data-target'));
                 if (!t) return;
-                t.hidden = !t.hidden;
-                btn.classList.toggle('is-active', !t.hidden);
+                var row = btn.getAttribute('data-row');
+                var wasOpen = !t.hidden;
+                document.querySelectorAll('.ord-panel[data-row="' + row + '"]').forEach(function (p) {
+                    p.hidden = true;
+                });
+                document.querySelectorAll('.ord-tgl[data-row="' + row + '"]').forEach(function (b) {
+                    b.classList.remove('is-active');
+                });
+                if (!wasOpen) {
+                    t.hidden = false;
+                    btn.classList.add('is-active');
+                }
             });
         });
         document.querySelectorAll('.ord-panel').forEach(function (p) {
